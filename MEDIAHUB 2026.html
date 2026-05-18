@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="google" content="notranslate">
+    <title>MEDIA HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #000000; --text-color: #ffffff; --card-bg: #0d1117; --border-color: rgba(255,255,255,0.1);
+            --input-bg: #000000; --text-muted: #6b7280; --table-hover: rgba(255,255,255,0.05); --control-bg: rgba(0,0,0,0.3);
+            --poster-bg: #080808; --active-tab-bg: rgba(255,255,255,0.05); --active-tab-border: #ffffff; --active-tab-text: #ffffff;
+            --card-shadow: none; --modal-shadow: none; --app-font-size: 14px;
+            --t-ha: center; --t-va: middle; --t-wr: normal;
+        }
+
+        body.light-theme {
+            --bg-color: #f0f2f5; --text-color: #111827; --card-bg: #ffffff; --border-color: rgba(0,0,0,0.08);
+            --input-bg: #f3f4f6; --text-muted: #4b5563; --table-hover: rgba(0,0,0,0.02); --control-bg: rgba(0,0,0,0.03);
+            --poster-bg: #eaeaea; --active-tab-bg: rgba(0,0,0,0.03); --active-tab-border: #111827; --active-tab-text: #111827;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.05); --modal-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; transition: background-color 0.3s ease, color 0.3s ease; }
+        .main-wrapper { width: 100%; max-width: 1280px; padding: 24px; box-sizing: border-box; }
+        .loading-bar { position: sticky; top: 0; width: 100%; height: 5px; background: #111; z-index: 1000; display: none; }
+        .progress { height: 100%; background: #00ff88; transition: width 0.3s; box-shadow: 0 0 10px #00ff88; }
+        
+        .theme-card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: var(--card-shadow); transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s; }
+        .theme-input { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        .theme-text { color: var(--text-color); } .theme-text-muted { color: var(--text-muted); }
+        .theme-modal { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: var(--modal-shadow); transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s; }
+        
+        #b-rows { font-size: var(--app-font-size); }
+        .name-cell { font-size: calc(var(--app-font-size) + 6px) !important; font-weight: 900; min-width: 250px; }
+        #main-nav button { font-size: calc(var(--app-font-size) - 2px); }
+        #h-row th { font-size: calc(var(--app-font-size) - 4px); }
+
+        .imdb-link { background: #f5c518; color: #000 !important; padding: 5px 10px; border-radius: 4px; font-weight: 900; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; letter-spacing: -0.5px; transition: transform 0.1s; }
+        .imdb-link:hover { transform: scale(1.05); filter: brightness(1.1); }
+        
+        .poster-container { width: 55px; height: 80px; position: relative; border: 1px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; background: var(--poster-bg); transition: border-color 0.3s, background-color 0.3s; }
+        .poster-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease; cursor: zoom-in; position: relative; z-index: 10; border-radius: 4px; transform-origin: left center; }
+        .poster-img:hover, .poster-img:active { transform: scale(2); z-index: 9999; box-shadow: 10px 0 30px rgba(0,0,0,0.9); outline: 2px solid #00ff88; border-radius: 6px; }
+        
+        .grade-next { color: #00ff88 !important; font-weight: 900; } .grade-drop { color: #ff4444 !important; font-weight: 900; }
+        
+        td, th { border: 1px solid var(--border-color); text-align: var(--t-ha); vertical-align: var(--t-va); white-space: var(--t-wr); padding: 10px; transition: border-color 0.3s; }
+        tr:hover { background-color: var(--table-hover) !important; }
+        .active-tab { border-bottom: 3px solid var(--active-tab-border); color: var(--active-tab-text); background: var(--active-tab-bg); }
+        .control-col { min-width: 120px; background: var(--control-bg); transition: background-color 0.3s; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loading-bar"><div id="bar" class="progress"></div></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[3000] flex flex-col gap-3 pointer-events-none"></div>
+    
+    <div class="main-wrapper">
+        <header class="theme-card relative flex items-center justify-between mb-8 p-4 md:p-6 rounded-2xl">
+            <div class="flex items-center z-10"><button onclick="openModal('settings')" title="Settings" class="theme-text w-12 h-12 flex items-center justify-center border border-gray-500/30 rounded-full hover:bg-gray-500/10 text-xl shadow-sm transition-all"><i class="fas fa-cog"></i></button></div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none"><h1 class="theme-text text-2xl md:text-3xl font-black italic uppercase tracking-tighter pointer-events-auto">MEDIA HUB</h1></div>
+            <div class="flex items-center gap-2 md:gap-4 z-10">
+                <button onclick="openModal('stats')" class="theme-text border border-gray-500/30 hover:bg-gray-500/10 px-4 py-2.5 md:px-5 md:py-2.5 rounded-full font-bold uppercase text-[10px] md:text-xs shadow-sm transition-all flex items-center gap-2"><i class="fas fa-chart-pie"></i> <span class="hidden md:inline">STATS</span></button>
+                <button onclick="saveCloud()" id="save-btn" class="relative bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 md:px-8 md:py-2.5 rounded-full font-bold uppercase text-[10px] md:text-xs shadow-md transition-all flex items-center gap-2">
+                    <i class="fas fa-cloud-arrow-up"></i> Save Cloud
+                    <span id="unsaved-dot" class="absolute top-1 right-2 h-2 w-2 rounded-full bg-red-500" style="display: none;"></span>
+                </button>
+            </div>
+        </header>
+
+        <nav id="main-nav" class="flex flex-wrap gap-1 md:gap-2 mb-6 border-b border-gray-500/20"></nav>
+
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <div class="relative flex-1 flex">
+                <i class="fas fa-search absolute left-4 top-4 text-gray-500 z-10"></i>
+                <input type="text" id="search" oninput="debounceSearch()" placeholder="SEARCH..." class="theme-card theme-text w-full p-4 pl-12 rounded-l-xl outline-none uppercase font-bold text-xs focus:ring-2 focus:ring-blue-500/50 border-0 border-r border-gray-500/20">
+                <select id="search-col" onchange="debounceSearch()" class="theme-card theme-text p-4 rounded-r-xl outline-none uppercase font-bold text-xs cursor-pointer border-0 w-32 md:w-40 focus:ring-2 focus:ring-blue-500/50 appearance-none"></select>
+            </div>
+            <div class="flex gap-2 justify-end flex-wrap md:flex-nowrap">
+                <button onclick="toggleNext()" id="next-filter" class="theme-text flex-1 md:flex-none px-4 md:px-6 py-4 border border-gray-500/20 rounded-xl font-black text-xs uppercase transition-all">Next Only</button>
+                <button onclick="openModal('add')" title="Add New Item" class="flex-none px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-sm transition-all shadow-lg flex items-center justify-center"><i class="fas fa-plus"></i></button>
+            </div>
+        </div>
+
+        <div class="theme-card rounded-2xl overflow-x-auto shadow-2xl max-h-[70vh]">
+            <table class="w-full border-collapse relative">
+                <thead class="theme-card sticky top-0 z-50 font-black uppercase theme-text-muted border-b border-gray-500/20 shadow-sm"><tr id="h-row"></tr></thead>
+                <tbody id="b-rows" class="font-bold"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="master-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[2000] p-4">
+        <div id="master-modal-box"></div>
+    </div>
+
+    <script>
+        const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[m] || m);
+        const DOM = {}, ALL_COLS = ['POSTER', 'No.', 'NAME', 'GRADE', 'THEME', 'EXTRA', 'IMDB', 'REWATCH', 'NOTE', 'CONTROL'];
+        let COL = {}, searchTimeout = null, tempHiddenTabs = [], tempHiddenCols = [], THEME_MAP = {};
+
+        let STATE = { 
+            url: localStorage.getItem('tk_url') || '', pass: localStorage.getItem('tk_pass') || '', apiKey: localStorage.getItem('tk_api') || '',
+            theme: localStorage.getItem('tk_theme') || 'dark', sheet: 'MOVIES', headers: [], data: [], nextOnly: false, sortCol: null, sortDir: 'asc', 
+            localLibrary: JSON.parse(localStorage.getItem('tk_library')) || {}, filteredData: [],
+            hiddenTabs: JSON.parse(localStorage.getItem('tk_hiddenTabs')) || [], hiddenCols: JSON.parse(localStorage.getItem('tk_hiddenCols')) || [],
+            fontSize: localStorage.getItem('tk_fontSize') || '14', themeColors: localStorage.getItem('tk_themeColors') || '',
+            hAlign: localStorage.getItem('tk_ha') || 'center', vAlign: localStorage.getItem('tk_va') || 'middle', wrap: localStorage.getItem('tk_wr') || 'normal',
+            allTabs: JSON.parse(localStorage.getItem('tk_allTabs')) || ['MOVIES', 'SERIES', 'ANIME', 'ANIME MOVIE', 'CARTOONS'],
+            history: [] 
+        };
+
+        function parseThemeColors() {
+            THEME_MAP = {}; if(!STATE.themeColors) return;
+            STATE.themeColors.split('\n').forEach(line => { const parts = line.trim().split(/\s+/); if(parts.length > 1) THEME_MAP[parts.slice(0, -1).join(' ').toUpperCase()] = parts.pop(); });
+        }
+        parseThemeColors();
+
+        const MODALS = {
+            stats: { t: 'DASHBOARD', i: 'fa-chart-pie text-blue-500', w: 'max-w-2xl', c: () => `<div id="stats-content" class="w-full"></div><button onclick="closeModal()" class="mt-6 text-xs theme-text-muted uppercase font-bold hover:bg-gray-500/10 hover:text-white block mx-auto text-center w-full py-3 border border-gray-500/20 rounded-xl transition-all">CLOSE</button>` },
+            settings: { t: 'SETTINGS', i: 'fa-cog text-blue-500', w: 'max-w-md', c: () => `
+                <div class="flex gap-2 mb-8">
+                    <button onclick="cleanDatabase()" class="flex-1 py-2.5 rounded-xl font-bold text-[9px] md:text-[10px] uppercase border border-gray-500/30 text-yellow-400 flex flex-col md:flex-row items-center justify-center gap-1 hover:bg-gray-500/10 transition-all"><i class="fas fa-broom text-sm"></i> CLEAN</button>
+                    <button onclick="openModal('custom')" class="flex-1 py-2.5 rounded-xl font-bold text-[9px] md:text-[10px] uppercase border border-gray-500/30 text-purple-400 flex flex-col md:flex-row items-center justify-center gap-1 hover:bg-gray-500/10 transition-all"><i class="fas fa-sliders-h text-sm"></i> CUSTOM</button>
+                    <button onclick="window.open('https://gist.githubusercontent.com/SmecherosFERB/a7b8fd79373cfa886ec1282f4bbe7835/raw/ee9bde48078d4dc3745d524b9ec4b4ba46e1636c/HELP.TXT', '_blank')" class="flex-1 py-2.5 rounded-xl font-bold text-[9px] md:text-[10px] uppercase border border-gray-500/30 text-emerald-400 flex flex-col md:flex-row items-center justify-center gap-1 hover:bg-gray-500/10 transition-all"><i class="fas fa-circle-question text-sm"></i> HELP</button>
+                    <button onclick="openModal('local')" class="flex-1 py-2.5 rounded-xl font-bold text-[9px] md:text-[10px] uppercase border border-gray-500/30 text-blue-400 flex flex-col md:flex-row items-center justify-center gap-1 hover:bg-gray-500/10 transition-all"><i class="fas fa-server text-sm"></i> LOCAL</button>
+                </div>
+                <div class="space-y-5 mb-8 text-left">${[{id:'db-url', l:'Google Apps Script URL', t:'text', v:STATE.url}, {id:'db-pass', l:'Cloud Password', t:'password', v:STATE.pass}, {id:'db-api', l:'OMDb API Key', t:'text', v:STATE.apiKey}].map(i => `<div><label class="text-[10px] font-bold text-gray-500 uppercase ml-1 mb-1 block">${i.l}</label><input type="${i.t}" id="${i.id}" value="${i.v}" class="theme-input w-full p-3.5 rounded-xl text-sm font-medium"></div>`).join('')}</div>
+                <div class="flex gap-3 pt-4 border-t border-gray-500/20"><button onclick="closeModal()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold uppercase shadow-md text-xs">CANCEL</button><button onclick="saveDB()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold uppercase shadow-md text-xs">SAVE</button></div>` },
+            custom: { t: 'UI CUSTOMIZATION', i: 'fa-sliders-h text-purple-500', w: 'max-w-lg', b: 'settings', c: () => `<div class="text-left space-y-6"><div><h3 class="text-[11px] font-black text-gray-400 uppercase mb-3"><i class="fas fa-folder-open text-purple-400"></i> Visible Tabs</h3><div id="custom-tabs-container" class="flex flex-wrap gap-2"></div></div><div><h3 class="text-[11px] font-black text-gray-400 uppercase mb-3"><i class="fas fa-columns text-emerald-400"></i> Visible Columns</h3><div id="custom-cols-container" class="flex flex-wrap gap-2"></div></div><div><h3 class="text-[11px] font-black text-gray-400 uppercase mb-3"><i class="fas fa-palette text-pink-400"></i> Theme Colors</h3><textarea id="theme-colors-input" class="theme-input w-full p-3 rounded-xl text-xs font-mono h-24" placeholder="ACTION rgb(200,64,64)"></textarea></div><div class="flex gap-4"><div class="flex-1"><h3 class="text-[11px] font-black text-gray-400 uppercase mb-3"><i class="fas fa-font text-blue-400"></i> Font Size</h3><input type="number" id="font-size-input" value="${STATE.fontSize}" class="theme-input w-full p-3.5 rounded-xl text-xs font-black text-center" min="10" max="24"></div><div class="flex-[2]"><h3 class="text-[11px] font-black text-gray-400 uppercase mb-3"><i class="fas fa-align-left text-blue-400"></i> Align & Wrap</h3><div class="flex gap-2"><select id="sel-ha" class="theme-input flex-1 p-3.5 rounded-xl text-[10px] font-bold uppercase"><option value="left">LEFT</option><option value="center">CENTER</option><option value="right">RIGHT</option></select><select id="sel-va" class="theme-input flex-1 p-3.5 rounded-xl text-[10px] font-bold uppercase"><option value="top">TOP</option><option value="middle">MIDDLE</option><option value="bottom">BOTTOM</option></select><select id="sel-wr" class="theme-input flex-1 p-3.5 rounded-xl text-[10px] font-bold uppercase"><option value="nowrap">NO WRAP</option><option value="normal">WRAP</option></select></div></div></div></div><button onclick="saveCustomSettings()" class="mt-8 w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold uppercase shadow-md text-xs">Apply & Save</button>` },
+            local: { t: 'LOCAL STORAGE', i: 'fa-server text-blue-500', w: 'max-w-sm', b: 'settings', c: () => `<p class="text-[13px] text-gray-500 mb-6 font-medium leading-tight">Manage backups from memory.</p><div class="flex flex-col gap-3 mb-6"><button onclick="document.getElementById('import-input').click()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3.5 rounded-xl font-black uppercase text-[11px] shadow flex items-center justify-center gap-3"><i class="fas fa-file-import text-blue-400 text-base"></i> IMPORT .JSON</button><button onclick="exportFullLibrary()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3.5 rounded-xl font-black uppercase text-[11px] shadow flex items-center justify-center gap-3"><i class="fas fa-file-export text-emerald-400 text-base"></i> EXPORT .JSON</button></div><input type="file" id="import-input" class="hidden" accept=".json" onchange="importFullLibrary(event)"><div class="p-5 bg-red-500/10 border border-red-500/20 rounded-xl text-center"><h3 class="text-red-500 font-bold text-[11px] uppercase mb-3">DANGER ZONE</h3><button onclick="clearAllData()" class="text-red-500 font-bold uppercase text-[11px] py-2 px-5 border border-red-500/40 rounded-lg hover:bg-red-500/20 mx-auto">CLEAR CACHE MEMORY</button></div>` },
+            add: { t: 'Add New Item', i: 'fa-plus text-emerald-500', w: 'max-w-md', c: () => `<input type="text" id="add-name" placeholder="TITLE NAME" class="theme-input w-full p-4 rounded mb-4 text-center uppercase text-xs"><input type="text" id="add-grade" placeholder="1-10 DROP/NEXT" class="theme-input w-full p-4 rounded mb-8 text-center uppercase text-xs"><div class="flex gap-2"><button onclick="submitAdd()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded font-black uppercase text-xs shadow-lg">Add</button><button onclick="closeModal()" class="flex-1 border border-gray-500/20 theme-text py-4 rounded font-black text-xs hover:bg-gray-500/5">Cancel</button></div>` }
+        };
+
+        function commitState(msg = null, reindex = false) {
+            if (reindex) fullReindex();
+            updateLocalLibrary(STATE.sheet, STATE.headers, STATE.data);
+            renderTable();
+            if (msg) showToast(msg, msg.includes("reverted") || msg.includes("restored") ? "info" : "success");
+        }
+
+        function mapColumns() { 
+            COL = {}; if(STATE.headers?.length) STATE.headers.forEach((h, i) => COL[h.toUpperCase().trim()] = i);
+            const searchColDrop = document.getElementById('search-col');
+            if(searchColDrop && STATE.headers?.length) {
+                searchColDrop.innerHTML = STATE.headers.filter(h => h.toUpperCase() !== 'POSTER').map(h => `<option value="${COL[h.toUpperCase().trim()]}">${escapeHTML(h)}</option>`).join('');
+                if(COL.NAME !== undefined) searchColDrop.value = COL.NAME;
+            }
+        }
+        
+        function applyGlobalStyles() { 
+            ['--app-font-size:fontSize:px', '--t-ha:hAlign:', '--t-va:vAlign:', '--t-wr:wrap:'].forEach(p => { const [css, st, suf] = p.split(':'); document.documentElement.style.setProperty(css, STATE[st] + (suf||'')); });
+        }
+        
+        function applyThemeUI() { document.body.classList.toggle('light-theme', STATE.theme === 'light'); const btn = document.getElementById('btn-theme-toggle'); if(btn) btn.innerHTML = `<i class="fas ${STATE.theme==='light'?'fa-sun text-amber-500':'fa-moon text-blue-500'} text-sm"></i> <span class="hidden md:inline">THEME</span>`; }
+        function toggleTheme() { STATE.theme = STATE.theme === 'light' ? 'dark' : 'light'; localStorage.setItem('tk_theme', STATE.theme); applyThemeUI(); showToast(`Switched to ${STATE.theme}`, "info"); }
+        function setUnsavedState(isUnsaved) { const dot = document.getElementById('unsaved-dot'); if (dot) dot.style.display = isUnsaved ? 'flex' : 'none'; }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div'), isLight = STATE.theme === 'light';
+            const colors = { error: { b: 'border-red-500', i: 'fa-triangle-exclamation text-red-500' }, info: { b: 'border-blue-500', i: 'fa-circle-info text-blue-500' }, warning: { b: 'border-yellow-500', i: 'fa-circle-info text-yellow-500' }, success: { b: 'border-[#00ff88]', i: 'fa-check-circle text-[#00ff88]' }};
+            toast.className = `${isLight ? 'bg-white text-gray-900 shadow-xl border-l-4' : 'bg-[#0d1117] text-white shadow-2xl border-l-4 border-white/10'} ${colors[type].b} px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wide flex items-center gap-3 transition-all transform opacity-100`;
+            toast.innerHTML = `<i class="fas ${colors[type].i} text-base"></i><span>${escapeHTML(msg)}</span>`;
+            DOM.toast.appendChild(toast); setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+
+        function openModal(id) {
+            const m = MODALS[id];
+            DOM.modalBox.className = `theme-modal p-8 md:p-10 rounded-2xl w-full ${m.w} text-center overflow-y-auto max-h-[95vh] relative`;
+            DOM.modalBox.innerHTML = `<div class="relative flex justify-center items-center mb-6 border-b border-gray-500/20 pb-4">
+                ${id === 'settings' ? `<button onclick="toggleTheme()" id="btn-theme-toggle" class="absolute left-0 px-3 py-1.5 rounded-lg border border-gray-500/30 text-gray-400 hover:text-white hover:bg-gray-500/10 transition-all text-[10px] font-bold uppercase flex items-center gap-2"></button>` : ''}
+                <h2 class="font-black uppercase theme-text text-xl flex items-center gap-2"><i class="fas ${m.i}"></i> ${m.t}</h2>
+                <button onclick="${m.b ? `openModal('${m.b}')` : 'closeModal()'}" class="absolute right-0 text-gray-500 hover:text-gray-400 text-xl"><i class="fas ${m.b ? 'fa-arrow-left' : 'fa-times'}"></i></button>
+            </div>${m.c()}`;
+            DOM.modal.style.display = 'flex';
+            if(id === 'settings') applyThemeUI();
+            if(id === 'custom') { 
+                tempHiddenTabs = [...STATE.hiddenTabs]; tempHiddenCols = [...STATE.hiddenCols]; renderCustomToggles(); 
+                setTimeout(() => { 
+                    const txt = document.getElementById('theme-colors-input'); if(txt) txt.value = STATE.themeColors; 
+                    if(document.getElementById('sel-ha')) { document.getElementById('sel-ha').value = STATE.hAlign; document.getElementById('sel-va').value = STATE.vAlign; document.getElementById('sel-wr').value = STATE.wrap; }
+                }, 0);
+            }
+            if(id === 'stats') generateStats();
+        }
+        function closeModal() { DOM.modal.style.display = 'none'; DOM.modalBox.innerHTML = ''; }
+
+        function openNoteEditor(r, c) {
+            const val = STATE.data[r][c];
+            DOM.modalBox.className = `theme-modal p-8 md:p-10 rounded-2xl w-full max-w-lg text-center relative`;
+            DOM.modalBox.innerHTML = `
+                <div class="relative flex justify-center items-center mb-6 border-b border-gray-500/20 pb-4">
+                    <h2 class="font-black uppercase theme-text text-xl flex items-center gap-2"><i class="fas fa-book-open text-blue-500"></i> EDIT NOTE</h2>
+                    <button onclick="closeModal()" class="absolute right-0 text-gray-500 hover:text-gray-400 text-xl"><i class="fas fa-times"></i></button>
+                </div>
+                <textarea id="note-editor-text" class="theme-input w-full p-4 rounded-xl text-sm font-medium h-48 resize-none mb-6 outline-none focus:ring-2 focus:ring-blue-500/50">${escapeHTML(val)}</textarea>
+                <div class="flex gap-3">
+                    <button onclick="closeModal()" class="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-bold uppercase shadow-md text-xs transition-colors">CANCEL</button>
+                    <button onclick="saveNote(${r}, ${c})" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold uppercase shadow-md text-xs transition-colors">SAVE NOTE</button>
+                </div>
+            `;
+            DOM.modal.style.display = 'flex';
+            setTimeout(() => document.getElementById('note-editor-text').focus(), 50);
+        }
+
+        function saveNote(r, c) {
+            const newVal = document.getElementById('note-editor-text').value;
+            if (STATE.data[r][c] !== newVal) {
+                STATE.history.push({ t: 'EDIT', r: r, c: c, v: STATE.data[r][c] });
+                STATE.data[r][c] = newVal;
+                commitState("Note updated");
+            }
+            closeModal();
+        }
+
+        function renderCustomToggles() {
+            const tc = document.getElementById('custom-tabs-container'), cc = document.getElementById('custom-cols-container'); if(!tc || !cc) return;
+            tc.innerHTML = STATE.allTabs.map(t => `<button onclick="toggleTempItem('tab', '${t}')" class="px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg border transition-all ${!tempHiddenTabs.includes(t) ? 'bg-purple-600 border-purple-500 text-white shadow-md' : 'bg-transparent border-gray-600/50 text-gray-500'}">${t}</button>`).join('');
+            cc.innerHTML = ALL_COLS.map(c => `<button onclick="toggleTempItem('col', '${c}')" class="px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg border transition-all ${!tempHiddenCols.includes(c) ? 'bg-emerald-600 border-emerald-500 text-white shadow-md' : 'bg-transparent border-gray-600/50 text-gray-500'}">${c}</button>`).join('');
+        }
+        function toggleTempItem(type, val) { type === 'tab' ? (tempHiddenTabs.includes(val) ? tempHiddenTabs = tempHiddenTabs.filter(x => x !== val) : tempHiddenTabs.push(val)) : (tempHiddenCols.includes(val) ? tempHiddenCols = tempHiddenCols.filter(x => x !== val) : tempHiddenCols.push(val)); renderCustomToggles(); }
+        
+        function saveCustomSettings() { 
+            STATE.hiddenTabs = [...tempHiddenTabs]; STATE.hiddenCols = [...tempHiddenCols]; 
+            localStorage.setItem('tk_hiddenTabs', JSON.stringify(STATE.hiddenTabs)); localStorage.setItem('tk_hiddenCols', JSON.stringify(STATE.hiddenCols)); 
+            
+            const txt = document.getElementById('theme-colors-input');
+            if(txt) { STATE.themeColors = txt.value; localStorage.setItem('tk_themeColors', STATE.themeColors); parseThemeColors(); }
+
+            [['font-size-input','fontSize','tk_fontSize'], ['sel-ha','hAlign','tk_ha'], ['sel-va','vAlign','tk_va'], ['sel-wr','wrap','tk_wr']].forEach(([id, sKey, lKey]) => {
+                const el = document.getElementById(id); if(el) { STATE[sKey] = el.value; localStorage.setItem(lKey, STATE[sKey]); }
+            });
+
+            applyGlobalStyles(); renderTabs(); commitState("Saved"); closeModal(); 
+        }
+
+        function renderTabs() {
+            DOM.nav.innerHTML = ''; let first = null;
+            STATE.allTabs.forEach(t => { if(!STATE.hiddenTabs.includes(t)) { if(!first) first = t; DOM.nav.innerHTML += `<button onclick="switchTab('${t}')" id="tab-${t.replace(' ','-')}" class="theme-text-muted px-4 md:px-6 py-3 md:py-4 font-black uppercase transition-all">${t}</button>`; }});
+            const target = document.getElementById(`tab-${STATE.sheet.replace(' ','-')}`); target ? target.classList.add('active-tab') : (first && switchTab(first));
+        }
+
+        function generateStats() {
+            if (!STATE.data?.length) return document.getElementById('stats-content').innerHTML = '<p class="text-sm text-gray-500">No data available.</p>';
+            let nx = 0, dp = 0, rSum = 0, rCnt = 0;
+            STATE.data.forEach(r => { const v = String(r[COL.GRADE] ?? '').toUpperCase().trim(); if(v==='NEXT') nx++; else if(v==='DROP') dp++; else if(v!=='' && !isNaN(parseFloat(v.replace(',','.')))) { rSum += parseFloat(v.replace(',','.')); rCnt++; } });
+            document.getElementById('stats-content').innerHTML = `<div class="mb-6 flex justify-center"><div class="bg-blue-900/20 border border-blue-500/30 px-4 py-1.5 rounded-full inline-flex gap-2"><span class="text-[10px] font-bold text-gray-400">CATEGORY:</span><span class="text-[11px] font-black text-blue-400 uppercase">${STATE.sheet}</span></div></div>
+            <div class="grid grid-cols-2 gap-4 mb-6">${[{v: STATE.data.length, l: 'Total Items', c: 'text-blue-400'}, {v: rCnt > 0 ? (rSum/rCnt).toFixed(2) : "0.00", l: 'Average Score', c: 'text-emerald-400'}, {v: nx, l: 'Watchlist', c: 'text-white'}, {v: dp, l: 'Dropped', c: 'text-red-400'}].map(s => `<div class="bg-gray-800/30 p-5 rounded-2xl border border-gray-500/20 flex flex-col justify-center"><div class="text-3xl md:text-4xl font-black ${s.c} mb-1">${s.v}</div><div class="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">${s.l}</div></div>`).join('')}</div>`;
+        }
+
+        function clearAllData() { if(confirm("Clear local data?")) { localStorage.clear(); location.reload(); } }
+        
+        function saveDB() { 
+            ['url:url', 'pass:pass', 'api:apiKey'].forEach(p => { const [id, k] = p.split(':'); STATE[k] = document.getElementById(`db-${id}`).value.trim(); localStorage.setItem(`tk_${id}`, STATE[k]); });
+            closeModal(); showToast("Settings saved", "success"); loadData(); 
+        }
+
+        async function cleanDatabase() {
+            setLoader(true); showToast("Scanning database...", "info");
+            let dups = [], missing = 0, dead = 0; let names = new Set();
+            
+            STATE.data.forEach((r, i) => {
+                const n = (r[COL.NAME] || '').toUpperCase().trim();
+                if(n && names.has(n)) dups.push(n); else names.add(n);
+                if(!r[COL.IMDB]?.startsWith('http')) missing++;
+            });
+            
+            const checks = STATE.data.map(r => {
+                const url = r[COL.POSTER];
+                if(!url || !url.startsWith('http')) return Promise.resolve('empty');
+                return new Promise(res => {
+                    const img = new Image();
+                    img.onload = () => res('ok'); img.onerror = () => res('dead'); img.src = url;
+                });
+            });
+            
+            const results = await Promise.all(checks);
+            dead = results.filter(r => r === 'dead').length;
+            
+            setLoader(false);
+            
+            DOM.modalBox.className = `theme-modal p-8 md:p-10 rounded-2xl w-full max-w-2xl text-center relative`;
+            DOM.modalBox.innerHTML = `
+                <div class="relative flex justify-center items-center mb-6 border-b border-gray-500/20 pb-4">
+                    <h2 class="font-black uppercase theme-text text-xl flex items-center gap-2"><i class="fas fa-broom text-yellow-400"></i> CLEAN REPORT (${STATE.sheet})</h2>
+                    <button onclick="closeModal()" class="absolute right-0 text-gray-500 hover:text-gray-400 text-xl"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="text-left text-xs font-mono bg-black/50 p-4 rounded-xl border border-gray-500/20 overflow-y-auto max-h-[50vh] select-text whitespace-pre-wrap leading-relaxed"><span class="text-yellow-400 font-bold">⚠️ DUPLICATES:</span>
+${dups.length > 0 ? dups.join('\\n') : 'None'}
+
+<span class="text-blue-400 font-bold">🔗 MISSING IMDB LINKS:</span> ${missing}
+
+<span class="text-red-400 font-bold">🖼️ DEAD/INVALID POSTERS:</span> ${dead}</div>
+                <button onclick="closeModal()" class="mt-6 w-full py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-bold uppercase shadow-md text-xs transition-colors">CLOSE</button>
+            `;
+            DOM.modal.style.display = 'flex';
+        }
+
+        async function loadData() {
+            setLoader(true);
+            if(STATE.url) try { 
+                const r = await fetch(`${STATE.url}?action=read&sheet=${STATE.sheet}&pass=${encodeURIComponent(STATE.pass)}`), res = await r.json(); 
+                if(res.ok) { 
+                    STATE.headers = res.values[0]; STATE.data = res.values.slice(1); updateLocalLibrary(STATE.sheet, STATE.headers, STATE.data); 
+                    
+                    if(res.tabs && Array.isArray(res.tabs)) {
+                        STATE.allTabs = res.tabs;
+                        localStorage.setItem('tk_allTabs', JSON.stringify(STATE.allTabs));
+                    }
+
+                    if(res.config) {
+                        const map = { FONT_SIZE: ['fontSize','tk_fontSize'], THEME_COLORS: ['themeColors','tk_themeColors'], H_ALIGN: ['hAlign','tk_ha'], V_ALIGN: ['vAlign','tk_va'], T_WRAP: ['wrap','tk_wr'], API_KEY: ['apiKey','tk_api'], THEME: ['theme','tk_theme'] };
+                        Object.keys(map).forEach(k => { if(res.config[k] !== undefined) { STATE[map[k][0]] = res.config[k]; localStorage.setItem(map[k][1], STATE[map[k][0]]); } });
+                        if(res.config.HIDDEN_TABS) STATE.hiddenTabs = JSON.parse(res.config.HIDDEN_TABS);
+                        if(res.config.HIDDEN_COLS) STATE.hiddenCols = JSON.parse(res.config.HIDDEN_COLS);
+                        if(res.config.ALL_TABS && !res.tabs) {
+                            STATE.allTabs = JSON.parse(res.config.ALL_TABS);
+                            localStorage.setItem('tk_allTabs', JSON.stringify(STATE.allTabs));
+                        }
+                        localStorage.setItem('tk_hiddenTabs', JSON.stringify(STATE.hiddenTabs)); localStorage.setItem('tk_hiddenCols', JSON.stringify(STATE.hiddenCols));
+                        parseThemeColors(); applyGlobalStyles(); renderTabs();
+                    }
+                    setUnsavedState(false); mapColumns(); fullReindex(); renderTable(); return setLoader(false); 
+                } 
+            } catch(e) { console.warn("Cloud unavailable."); }
+            const l = STATE.localLibrary[STATE.sheet]; STATE.headers = l?.headers || []; STATE.data = l?.data || []; mapColumns(); fullReindex(); renderTable(); setLoader(false);
+        }
+
+        function updateLocalLibrary(s, h, d) { STATE.localLibrary[s] = { headers: h, data: d }; localStorage.setItem('tk_library', JSON.stringify(STATE.localLibrary)); setUnsavedState(true); }
+        function exportFullLibrary() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(STATE.localLibrary, null, 2)], { type: 'application/json' })); const d = new Date(); a.download = `MediaList_Backup_${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}.json`; a.click(); showToast("Exported", "info"); closeModal(); }
+        function importFullLibrary(e) { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (ev) => { try { const imp = JSON.parse(ev.target.result); if(typeof imp === 'object' && !Array.isArray(imp)) { localStorage.setItem('tk_library', JSON.stringify(STATE.localLibrary = imp)); showToast("Imported!", "success"); loadData(); closeModal(); } else throw new Error(); } catch(err) { showToast("Invalid file!", "error"); } }; r.readAsText(f); }
+
+        function fullReindex() {
+            if(!STATE.headers?.length) return; const getRank = v => v === 'DROP' ? 0.1 : (v === 'NEXT' ? -0.1 : (parseFloat(String(v).replace(',', '.')) || 0));
+            if(COL.GRADE !== undefined) STATE.data.sort((a, b) => getRank(b[COL.GRADE]) - getRank(a[COL.GRADE]));
+            const nIdx = COL['NO.'] ?? COL.NO ?? COL.ID; if(nIdx !== undefined) STATE.data.forEach((row, i) => row[nIdx] = String(i + 1).padStart(3, '0'));
+        }
+
+        function debounceSearch() { clearTimeout(searchTimeout); searchTimeout = setTimeout(renderTable, 100); }
+        function sortTable(cIdx) { if (STATE.sortCol === cIdx) { if (STATE.sortDir === 'asc') STATE.sortDir = 'desc'; else { STATE.sortCol = null; STATE.sortDir = 'asc'; } } else { STATE.sortCol = cIdx; STATE.sortDir = 'asc'; } renderTable(); }
+
+        function renderTable() {
+            const query = DOM.search.value.toLowerCase();
+            if(!STATE.headers?.length) { DOM.hRow.innerHTML = ""; return DOM.bRows.innerHTML = '<tr><td colspan="100%" class="p-20 theme-text-muted uppercase font-black italic text-center">Blank Slate.</td></tr>'; }
+
+            let thead = STATE.hiddenCols.includes('POSTER') ? '' : `<th class="w-24"><div class="flex flex-col items-center gap-1"><span>POSTER</span><button onclick="bulkSync()" class="text-[6.5px] bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded font-black border border-white/10 shadow"><i class="fas fa-rotate"></i> SYNC ALL</button></div></th>`;
+            STATE.headers.forEach((h, cIdx) => {
+                if (h.toUpperCase() === 'POSTER' || STATE.hiddenCols.includes(ALL_COLS.find(c => c.toLowerCase() === h.toLowerCase()))) return;
+                const icon = STATE.sortCol === cIdx ? (STATE.sortDir === 'asc' ? 'fa-sort-up text-blue-500' : 'fa-sort-down text-blue-500') : 'fa-sort text-gray-500/40';
+                thead += `<th class="cursor-pointer select-none hover:bg-gray-500/5 transition-colors" onclick="sortTable(${cIdx})"><div class="flex items-center justify-center gap-1.5"><span>${escapeHTML(h)}</span><i class="fas ${icon} text-xs"></i></div></th>`;
+            });
+            
+            let controlHeader = 'CONTROL';
+            if (STATE.history.length > 0) controlHeader = `<div class="flex items-center justify-center gap-2">CONTROL <button onclick="undoAction()" class="bg-red-500 hover:bg-red-400 text-white text-[9px] px-2 py-0.5 rounded shadow cursor-pointer transition-all">UNDO (${STATE.history.length})</button></div>`;
+            DOM.hRow.innerHTML = thead + (STATE.hiddenCols.includes('CONTROL') ? '' : `<th class="control-col">${controlHeader}</th>`);
+            
+            const searchColIdx = document.getElementById('search-col') ? parseInt(document.getElementById('search-col').value) : COL.NAME;
+            STATE.filteredData = STATE.data.map((row, origIdx) => ({row, origIdx})).filter(({row}) => (!query || isNaN(searchColIdx) || String(row[searchColIdx]).toLowerCase().includes(query)) && (!STATE.nextOnly || COL.GRADE === undefined || row[COL.GRADE] === 'NEXT'));
+
+            if (STATE.sortCol !== null) {
+                const dir = STATE.sortDir === 'asc' ? 1 : -1;
+                STATE.filteredData.sort((a, b) => {
+                    const vA = String(a.row[STATE.sortCol] ?? '').trim(), vB = String(b.row[STATE.sortCol] ?? '').trim();
+                    return (/^-?\d+([.,]\d+)?$/.test(vA) && /^-?\d+([.,]\d+)?$/.test(vB)) ? (parseFloat(vA.replace(',', '.')) - parseFloat(vB.replace(',', '.'))) * dir : vA.localeCompare(vB, 'en', { numeric: true }) * dir;
+                });
+            } renderTableRowsOnly();
+        }
+
+        function renderTableRowsOnly() {
+            DOM.bRows.innerHTML = ''; const fragment = document.createDocumentFragment();
+            const hiddenSet = new Set();
+            STATE.headers.forEach((h, cIdx) => { if(h.toUpperCase() === 'POSTER' || STATE.hiddenCols.includes(ALL_COLS.find(c => c.toLowerCase() === h.toLowerCase()))) hiddenSet.add(cIdx); });
+            const hasControl = !STATE.hiddenCols.includes('CONTROL'), hasTheme = Object.keys(THEME_MAP).length > 0;
+
+            STATE.filteredData.forEach(({ row, origIdx }) => {
+                const tr = document.createElement('tr'); tr.className = "border-b border-gray-500/10 transition-colors";
+                let cells = STATE.hiddenCols.includes('POSTER') ? '' : `<td><div class="poster-container mx-auto">${row[COL.POSTER] ? `<img src="${escapeHTML(row[COL.POSTER])}" class="poster-img">` : `<i class="fas fa-image opacity-10"></i>`}</div></td>`;
+                
+                row.forEach((val, cIdx) => {
+                    if(hiddenSet.has(cIdx)) return;
+                    const h = STATE.headers[cIdx].toUpperCase();
+                    let isNote = cIdx === COL.NOTE || h === 'NOTE';
+                    let content = escapeHTML(val), style = cIdx === COL.NAME ? "name-cell theme-text" : "theme-text", editable = true;
+                    
+                    if(cIdx === COL.GRADE) style = val === 'NEXT' ? "grade-next" : (val === 'DROP' ? "grade-drop" : style);
+                    
+                    if((cIdx === COL.THEME || h === 'THEME') && hasTheme && val.trim()) {
+                        content = escapeHTML(val).split(',').map(tag => {
+                            const t = tag.trim(), color = THEME_MAP[t.toUpperCase()];
+                            return color ? `<span style="color: ${color}; font-weight: 900;">${t}</span>` : t;
+                        }).join(', ');
+                    }
+
+                    if((cIdx === COL.IMDB || h === 'IMDB') && String(val).startsWith('http')) { 
+                        content = `<div class="flex items-center justify-center gap-2"><a href="${escapeHTML(val)}" target="_blank" class="imdb-link">IMDB</a><button data-act="link" data-r="${origIdx}" data-c="${cIdx}" class="text-[10px] text-gray-500 hover:theme-text"><i class="fas fa-pen pointer-events-none"></i></button></div>`; 
+                        editable = false; 
+                    } else if (isNote) {
+                        let textPart = val.trim() ? escapeHTML(val.trim().substring(0, 5)) : '';
+                        let iconPart = val.trim() ? `<i class="fas fa-comment-dots text-blue-400 ml-1"></i>` : `<i class="fas fa-pen text-gray-600/50"></i>`;
+                        content = `<button data-act="note" data-r="${origIdx}" data-c="${cIdx}" class="outline-none hover:opacity-70 transition-opacity font-bold pointer-events-auto" title="${escapeHTML(val)}">${textPart}${iconPart}</button>`;
+                        editable = false;
+                    }
+                    
+                    cells += `<td class="${style}"><div class="outline-none" ${editable ? `data-act="edit" data-r="${origIdx}" data-c="${cIdx}" contenteditable="true"` : ''}>${content}</div></td>`;
+                });
+                
+                if (hasControl) cells += `<td class="control-col"><div class="flex justify-center gap-6"><button data-act="sync" data-r="${origIdx}" class="text-gray-500 hover:text-blue-500 text-lg transition-colors"><i class="fas fa-wand-magic-sparkles pointer-events-none"></i></button><button data-act="del" data-r="${origIdx}" class="text-gray-500 hover:text-red-500 text-lg transition-colors"><i class="fas fa-trash-can pointer-events-none"></i></button></div></td>`;
+                tr.innerHTML = cells; fragment.appendChild(tr);
+            });
+            DOM.bRows.appendChild(fragment);
+        }
+
+        function submitAdd() {
+            if(!STATE.headers?.length) { STATE.headers = ["No.", "NAME", "GRADE", "THEME", "IMDB", "EXTRA", "REWATCH", "NOTE", "POSTER"]; mapColumns(); } 
+            const n = document.getElementById('add-name').value.trim(), g = document.getElementById('add-grade').value.toUpperCase().trim();
+            if(!n || !g) return;
+            if(COL.NAME !== undefined && STATE.data.some(r => r[COL.NAME].toUpperCase() === n.toUpperCase()) && !confirm("Duplicate title found. Add anyway?")) return;
+            let row = new Array(STATE.headers.length).fill(''); if(COL.NAME !== undefined) row[COL.NAME] = n; if(COL.GRADE !== undefined) row[COL.GRADE] = g;
+            STATE.data.push(row); closeModal(); commitState(`Added: ${n}`, true); syncRow(STATE.data.indexOf(row), false, true);
+        }
+
+        async function syncRow(idx, isBulk = false, force = false) {
+            if(!STATE.apiKey) return showToast("OMDb API Key Missing!", "error"), openModal('settings');
+            if(!STATE.headers?.length) return;
+            const row = STATE.data[idx], pIdx = COL.POSTER, iIdx = COL.IMDB, tIdx = COL.THEME ?? COL.GENRE, eIdx = COL.EXTRA, name = row[COL.NAME] || '', currentImdbVal = row[iIdx] || '';
+            if(isBulk && !force && row[pIdx]?.startsWith('http') && row[eIdx]?.trim()) return;
+
+            const type = STATE.sheet.includes('MOVIE') ? 'movie' : 'series', extractedIdMatch = currentImdbVal.match(/tt\d+/);
+            const targetUrl = extractedIdMatch ? `https://www.omdbapi.com/?apikey=${STATE.apiKey}&i=${extractedIdMatch[0]}` : (name.trim() ? `https://www.omdbapi.com/?apikey=${STATE.apiKey}&t=${encodeURIComponent(name)}&type=${type}` : '');
+            if (!targetUrl) return;
+
+            try {
+                const r = await fetch(targetUrl);
+                if (!r.ok) return !isBulk && showToast(`OMDb Error: ${r.status}`, "error");
+                const d = await r.json();
+                
+                if(d.Response === "True") {
+                    if(pIdx !== undefined && (!row[pIdx] || force)) row[pIdx] = d.Poster !== "N/A" ? d.Poster : '';
+                    if(tIdx !== undefined && (!row[tIdx] || force)) row[tIdx] = d.Genre !== "N/A" ? d.Genre : '';
+                    if(!extractedIdMatch && iIdx !== undefined && !currentImdbVal.trim()) row[iIdx] = `https://www.imdb.com/title/${d.imdbID}`;
+
+                    if(eIdx !== undefined && (!row[eIdx] || force)) {
+                        if(['MOVIES', 'ANIME MOVIE'].includes(STATE.sheet.toUpperCase())) row[eIdx] = d.Runtime !== "N/A" ? d.Runtime : ''; 
+                        else {
+                            const tot = parseInt(d.totalSeasons);
+                            if(!isNaN(tot)) {
+                                const seasons = await Promise.all(Array.from({length: tot}, (_, i) => fetch(`https://www.omdbapi.com/?apikey=${STATE.apiKey}&i=${d.imdbID}&Season=${i+1}`).then(res => res.json())));
+                                row[eIdx] = `${tot} Seasons | ${seasons.reduce((acc, s) => acc + (s.Episodes?.length || 0), 0)} Episodes`;
+                            } else row[eIdx] = "N/A"; 
+                        }
+                    }
+                    if(!isBulk) commitState(`Synced: ${name || d.Title}`); else updateLocalLibrary(STATE.sheet, STATE.headers, STATE.data);
+                } else if (!isBulk) showToast(`Failed: ${name || currentImdbVal}`, "warning");
+            } catch(e) { console.error(e); }
+        }
+
+        async function bulkSync() {
+            if(!STATE.headers?.length || !confirm("WARNING: POSTER, THEME, EXTRA AND IMDB LINKS WILL BE AUTO-COMPLETED FOR THE ENTIRE PAGE!!!")) return;
+            setLoader(true); showToast("Deep Sync started...", "info");
+            for(let i = 0; i < STATE.data.length; i += 5) { 
+                await Promise.all(Array.from({length: Math.min(5, STATE.data.length - i)}, (_, j) => syncRow(i + j, true, false)));
+                updateProgress(Math.min(i + 5, STATE.data.length), STATE.data.length); 
+            }
+            setLoader(false); commitState("Sync completed");
+        }
+
+        async function saveCloud() {
+            if(!STATE.url) return showToast("Cloud URL missing!", "error"), openModal('settings');
+            setLoader(true); const btn = document.getElementById('save-btn'); btn.innerText = "SAVING...";
+            try { 
+                const payload = { 
+                    action: 'write', pass: STATE.pass, sheet: STATE.sheet, values: [STATE.headers, ...STATE.data],
+                    config: { 
+                        FONT_SIZE: STATE.fontSize, THEME_COLORS: STATE.themeColors, 
+                        HIDDEN_TABS: JSON.stringify(STATE.hiddenTabs), HIDDEN_COLS: JSON.stringify(STATE.hiddenCols), 
+                        H_ALIGN: STATE.hAlign, V_ALIGN: STATE.vAlign, T_WRAP: STATE.wrap,
+                        API_KEY: STATE.apiKey, THEME: STATE.theme, ALL_TABS: JSON.stringify(STATE.allTabs)
+                    }
+                };
+                await fetch(STATE.url, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
+                showToast("Saved to Cloud!", "success"); setUnsavedState(false);
+            } catch(e) { showToast("Cloud failed!", "error"); } btn.innerText = "SAVE CLOUD"; setLoader(false);
+        }
+
+        function updateValue(r, c, v) { const nVal = v.trim(); if (STATE.data[r][c] === nVal) return; STATE.history.push({ t: 'EDIT', r, c, v: STATE.data[r][c] }); STATE.data[r][c] = nVal; commitState(null, c === COL.GRADE); }
+        function editLink(r, c) { const n = prompt("Edit URL:", STATE.data[r][c]); if(n !== null && n.trim() !== STATE.data[r][c]) { STATE.history.push({ t: 'EDIT', r, c, v: STATE.data[r][c] }); STATE.data[r][c] = n.trim(); commitState(); } }
+        function deleteRow(idx) { if(confirm("Delete item?")) { STATE.history.push({ t: 'DEL', r: idx, row: [...STATE.data[idx]] }); STATE.data.splice(idx, 1); commitState("Deleted"); } }
+        function undoAction() { if (STATE.history.length === 0) return; const act = STATE.history.pop(); if (act.t === 'EDIT') STATE.data[act.r][act.c] = act.v; else if (act.t === 'DEL') STATE.data.splice(act.r, 0, act.row); commitState(act.t === 'EDIT' ? "Edit reverted" : "Item restored", true); }
+
+        function switchTab(name) { STATE.sheet = name; STATE.sortCol = null; STATE.sortDir = 'asc'; STATE.history = []; DOM.nav.querySelectorAll('button').forEach(b => b.classList.remove('active-tab')); const target = document.getElementById(`tab-${name.replace(' ','-')}`); if(target) target.classList.add('active-tab'); loadData(); }
+        function toggleNext() { STATE.nextOnly = !STATE.nextOnly; document.getElementById('next-filter').className = STATE.nextOnly ? "flex-1 md:flex-none px-4 md:px-6 py-4 rounded-xl font-black text-xs uppercase transition-all bg-emerald-500 text-white shadow-lg" : "theme-text flex-1 md:flex-none px-4 md:px-6 py-4 border border-gray-500/20 rounded-xl font-black text-xs uppercase transition-all"; renderTable(); }
+        function setLoader(show) { DOM.loader.style.display = show ? 'block' : 'none'; }
+        function updateProgress(c, t) { DOM.bar.style.width = (c / t * 100) + '%'; }
+        
+        window.onload = () => { 
+            DOM.loader = document.getElementById('loader'); DOM.bar = document.getElementById('bar'); DOM.toast = document.getElementById('toast-container'); DOM.nav = document.getElementById('main-nav');
+            DOM.search = document.getElementById('search'); DOM.hRow = document.getElementById('h-row'); DOM.bRows = document.getElementById('b-rows');
+            DOM.modal = document.getElementById('master-modal'); DOM.modalBox = document.getElementById('master-modal-box');
+            
+            DOM.bRows.addEventListener('click', e => {
+                const btn = e.target.closest('[data-act]'); if(!btn) return;
+                const r = parseInt(btn.dataset.r), c = parseInt(btn.dataset.c), act = btn.dataset.act;
+                if(act === 'del') deleteRow(r); 
+                else if(act === 'sync') syncRow(r, false, true); 
+                else if(act === 'link') editLink(r, c);
+                else if(act === 'note') openNoteEditor(r, c);
+            });
+            DOM.bRows.addEventListener('focusout', e => {
+                const div = e.target.closest('[data-act="edit"]');
+                if(div) updateValue(parseInt(div.dataset.r), parseInt(div.dataset.c), div.innerText);
+            });
+
+            applyGlobalStyles(); applyThemeUI(); renderTabs();
+        };
+    </script>
+</body>
+</html>
