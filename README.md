@@ -2,6 +2,7 @@
 -MediaHub is an HTML-based application designed as a list format to track your movies, TV shows, and anime. Dependent on Google Drive, it uses a Google Sheets spreadsheet,Google Apps Script backend for storage and configuration, making it highly customizable.
 
 MEDIA HUB — What it is:
+<img width="1782" height="873" alt="Screenshot 2026-09-08 115817" src="https://github.com/user-attachments/assets/035e0526-7069-414d-9eaf-9862cb523457" />
 
 -A single-file web app (HTML + Tailwind CSS + vanilla JS, no installation needed) for organizing and tracking your personal collection of movies, TV series, anime, and cartoons — with rating, statistics, cloud sync, and automatic detection of new content.
 
