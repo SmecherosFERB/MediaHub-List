@@ -26,6 +26,9 @@ const BACKUP_PREFIX      = '_BK_';
 const STAMP_FORMAT       = 'yyyyMMdd-HHmmss';
 const DROP_CONFIG_KEYS   = ['TMDB_KEY'];   // never stored in the sheet (the app does not send it, for privacy)
 const URL_COLUMNS        = ['POSTER', 'IMDB'];
+// Headers were renamed in the sheet; both the old and the new names format the same way.
+const HEADER_ALIASES     = { '#': 'NO', 'TITLE': 'NAME', 'SCORE': 'GRADE', 'GENRES': 'THEME', 'LENGTH': 'EXTRA',
+                             'REWATCHES': 'REWATCH', 'NOTES': 'NOTE', 'IMAGE': 'POSTER' };
 
 
 // ============================== BASICS ==============================
@@ -76,6 +79,12 @@ function tableHash_(table) {
   while (rows.length && rows[rows.length - 1].every(c => c === '')) rows.pop();
   const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, JSON.stringify(rows), Utilities.Charset.UTF_8);
   return bytes.map(b => ((b + 256) % 256).toString(16).padStart(2, '0')).join('');
+}
+
+/** "Title" and "NAME", "Image" and "POSTER"... -> one key. */
+function canon_(header) {
+  const k = String(header).toUpperCase().trim().replace(/\.+$/, '');
+  return HEADER_ALIASES[k] || k;
 }
 
 function readJsonProp_(key) {
@@ -223,7 +232,7 @@ function formatBand_(sh, style, headers, startRow, numRows) {
     .setBorder(true, true, true, true, true, true);
   headers.forEach((header, i) => {
     const col = sh.getRange(startRow, i + 1, numRows, 1);
-    const h = String(header).toUpperCase().trim();
+    const h = canon_(header);
     if (URL_COLUMNS.indexOf(h) !== -1)       col.setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
     else if (h === 'NAME')                    col.setFontSize(style.font + 2).setHorizontalAlignment('left');
     else if (h === 'GRADE' || h === 'EXTRA')  col.setFontSize(style.font + 1);
@@ -237,7 +246,7 @@ function formatHeader_(sh, style, headers) {
     .setHorizontalAlignment('center')
     .setWrap(false);
   headers.forEach((header, i) => {
-    if (URL_COLUMNS.indexOf(String(header).toUpperCase().trim()) !== -1) sh.setColumnWidth(i + 1, 70);
+    if (URL_COLUMNS.indexOf(canon_(header)) !== -1) sh.setColumnWidth(i + 1, 70);
   });
   sh.setFrozenRows(1);
 }
