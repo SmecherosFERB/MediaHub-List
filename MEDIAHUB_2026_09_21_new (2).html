@@ -115,6 +115,16 @@
         .act-go { flex:0 0 auto; width:1.75rem; height:1.75rem; border-radius:999px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--theme-accent) 12%, transparent); color:var(--theme-accent); font-size:.625rem; transition:background .2s, color .2s, transform .2s; }
         .act-row:hover .act-go { background:var(--theme-accent); color:#fff; transform:translateX(2px); }
 
+        /* drawers: a pill bar with a summary and a chevron that opens the options underneath */
+        .drw + .drw { margin-top:.5rem; }
+        .drw-sum { flex:0 0 auto; font-size:.5625rem; font-weight:900; text-transform:uppercase; letter-spacing:.02em; color:var(--theme-accent); padding:.25rem .5rem; border-radius:999px; background:color-mix(in srgb, var(--theme-accent) 12%, transparent); white-space:nowrap; }
+        .drw-hd .drw-chev i { transition:transform .25s; }
+        .drw-hd:hover .drw-chev { transform:none; }
+        .drw.open .drw-hd { border-color:color-mix(in srgb, var(--theme-accent) 50%, transparent); }
+        .drw.open .drw-chev i { transform:rotate(180deg); }
+        .drw-body { display:none; padding:.625rem .25rem .25rem; }
+        .drw.open .drw-body { display:block; }
+
         /* storage usage meter */
         .meter { height:.4375rem; border-radius:999px; background:color-mix(in srgb, var(--text-muted) 28%, transparent); overflow:hidden; }
         .meter-fill { display:block; height:100%; border-radius:999px; background:var(--theme-accent); transition:width .45s ease; }
@@ -761,93 +771,109 @@
             <span id="disp-prof-txt" class="set-badge"></span>
         </div>
 
+        <!-- drawers: closed by default, a summary on the bar, the arrow opens them -->
         <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-sliders"></i><span class="set-ttl" data-tr="beh">Behaviour</span></div>
-            <p class="set-hint" style="margin-bottom:.625rem;" data-tr="hEx">Small comfort options. Each one applies instantly.</p>
-            <button type="button" id="b-trk" onclick="tTrk()" class="sw-row" role="switch" aria-checked="false"></button>
-            <button type="button" id="b-rm" onclick="tRM()" class="sw-row" role="switch" aria-checked="false"></button>
-            <button type="button" id="b-vib" onclick="tVib()" class="sw-row" role="switch" aria-checked="false"></button>
-        </div>
-
-        <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-folder-open"></i><span class="set-ttl" data-tr="vT">Visible categories</span></div>
-            <p class="set-hint" data-tr="hTb">Categories shown in the top bar. Hidden ones keep their data.</p>
-            <div id="c-tb" class="pill-wrap"></div>
-        </div>
-
-        <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-table-columns"></i><span class="set-ttl" data-tr="vC">Visible columns</span></div>
-            <p class="set-hint" data-tr="hCl">Columns shown in the table. Saved per layout profile.</p>
-            <div id="c-cl" class="pill-wrap"></div>
-        </div>
-
-        <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-font"></i><span class="set-ttl" data-tr="sTxt">Table text</span></div>
-            <p class="set-hint" data-tr="hTxt">Font size and alignment inside table cells. Saved per layout profile.</p>
-            <div class="flex gap-3" style="margin-bottom:.625rem;">
-                <div style="flex:1;"><label for="i-fs" class="lbl" data-tr="fS">Font size</label><input type="number" id="i-fs" class="inp inp-pill"></div>
-                <div style="flex:1;"><label for="s-wr" class="lbl" data-tr="txW">Text wrap</label><select id="s-wr" class="inp inp-pill px-2"><option value="nowrap" data-tr="nW">NO WRAP</option><option value="normal" data-tr="w">WRAP</option></select></div>
+            <div class="drw" data-drw="beh">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-beh" onclick="tDrw('beh')">
+                    <span class="sw-ico"><i class="fas fa-sliders"></i></span>
+                    <span class="sw-txt"><span class="sw-name" data-tr="beh">Behaviour</span><span class="sw-sub" data-tr="hEx">Small comfort options. Each one applies instantly.</span></span>
+                    <span class="drw-sum" id="drw-sum-beh"></span>
+                    <span class="act-go drw-chev"><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <div class="drw-body" id="drw-b-beh">
+                    <button type="button" id="b-trk" onclick="tTrk()" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-rm" onclick="tRM()" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-vib" onclick="tVib()" class="sw-row" role="switch" aria-checked="false"></button>
+                </div>
             </div>
-            <div class="flex gap-3">
-                <div style="flex:1;"><label for="s-ha" class="lbl" data-tr="hzA">Horizontal</label><select id="s-ha" class="inp inp-pill px-2"><option value="left" data-tr="l">LEFT</option><option value="center" data-tr="c">CENTER</option><option value="right" data-tr="r">RIGHT</option></select></div>
-                <div style="flex:1;"><label for="s-va" class="lbl" data-tr="vrA">Vertical</label><select id="s-va" class="inp inp-pill px-2"><option value="top" data-tr="t">TOP</option><option value="middle" data-tr="m">MIDDLE</option><option value="bottom" data-tr="b">BOTTOM</option></select></div>
+
+            <div class="drw" data-drw="tabs">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-tabs" onclick="tDrw('tabs')">
+                    <span class="sw-ico"><i class="fas fa-folder-open"></i></span>
+                    <span class="sw-txt"><span class="sw-name" data-tr="vT">Visible categories</span><span class="sw-sub" data-tr="hTb">Categories shown in the top bar. Hidden ones keep their data.</span></span>
+                    <span class="drw-sum" id="drw-sum-tabs"></span>
+                    <span class="act-go drw-chev"><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <div class="drw-body" id="drw-b-tabs"><div id="c-tb" class="pill-wrap"></div></div>
+            </div>
+
+            <div class="drw" data-drw="cols">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-cols" onclick="tDrw('cols')">
+                    <span class="sw-ico"><i class="fas fa-table-columns"></i></span>
+                    <span class="sw-txt"><span class="sw-name" data-tr="vC">Visible columns</span><span class="sw-sub" data-tr="hCl">Columns shown in the table. Saved per layout profile.</span></span>
+                    <span class="drw-sum" id="drw-sum-cols"></span>
+                    <span class="act-go drw-chev"><i class="fas fa-chevron-down"></i></span>
+                </button>
+                <div class="drw-body" id="drw-b-cols"><div id="c-cl" class="pill-wrap"></div></div>
             </div>
         </div>
 
         <button type="button" class="act-row" onclick="openFine()" style="margin-top:.5rem;">
             <span class="sw-ico"><i class="fas fa-sliders"></i></span>
-            <span class="sw-txt"><span class="sw-name" data-tr="sFine">Fine tuning</span><span class="sw-sub" data-tr="hFineEntry">Density, colours and exact sizes.</span></span>
+            <span class="sw-txt"><span class="sw-name" data-tr="sFine">Fine tuning</span><span class="sw-sub" data-tr="hFineEntry">Colours, table text and exact sizes.</span></span>
             <span class="act-go"><i class="fas fa-chevron-right"></i></span>
         </button>
 
         </div><button onclick="sCst()" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
     </template>
     <template id="tpl-fine"><div class="text-left">
+
+        <!-- 1) COLOR FORMATTING: the on/off switch, the accent colour and the rules together -->
         <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-up-right-and-down-left-from-center"></i><span class="set-ttl" data-tr="sDens">Density</span></div>
-            <p class="set-hint" data-tr="hDens">Row height, poster size and how many genre pills fit, all at once.</p>
-            <div id="c-dens" class="seg" role="group">
-                <button type="button" class="seg-btn" data-dn="compact" onclick="setDens('compact')"><i class="fas fa-bars"></i><span data-tr="densC">COMPACT</span></button>
-                <button type="button" class="seg-btn" data-dn="normal" onclick="setDens('normal')"><i class="fas fa-grip-lines"></i><span data-tr="densN">NORMAL</span></button>
-                <button type="button" class="seg-btn" data-dn="spacious" onclick="setDens('spacious')"><i class="fas fa-grip-lines-vertical"></i><span data-tr="densS">SPACIOUS</span></button>
-            </div>
-        </div>
+            <div class="set-hd"><i class="fas fa-palette"></i><span class="set-ttl" data-tr="sColF">Color formatting</span></div>
+            <p class="set-hint" data-tr="hColF">Accent colour for the app and colour rules for the table.</p>
+            <div class="set-card">
+                <button type="button" id="b-cf" onclick="tCF()" class="sw-row" role="switch" aria-checked="false" style="background:var(--card-bg);"></button>
 
-        <div class="set-sec set-card">
-            <button type="button" id="b-cf" onclick="tCF()" class="sw-row" role="switch" aria-checked="false" style="background:var(--card-bg);"></button>
-
-            <div style="margin-top:1.25rem;">
-                <div class="set-hd"><i class="fas fa-droplet"></i><span class="set-ttl" data-tr="acC">Accent colour</span></div>
-                <p class="set-hint" style="margin-bottom:.625rem;" data-tr="hAc">Used for buttons, links and highlights across the app.</p>
-                <div class="flex items-center gap-3" style="margin-left:1.625rem;">
-                    <input type="color" id="i-ac" aria-label="Accent colour" oninput="$('ac-val').textContent=this.value.toUpperCase(); setAccent(this.value);">
-                    <span id="ac-val" class="text-[13px] font-mono text-[var(--text-muted)] uppercase"></span>
+                <div style="margin-top:1.25rem;">
+                    <div class="set-hd"><i class="fas fa-droplet"></i><span class="set-ttl" data-tr="acC">Accent colour</span></div>
+                    <p class="set-hint" style="margin-bottom:.625rem;" data-tr="hAc">Used for buttons, links and highlights across the app.</p>
+                    <div class="flex items-center gap-3" style="margin-left:1.625rem;">
+                        <input type="color" id="i-ac" aria-label="Accent colour" oninput="$('ac-val').textContent=this.value.toUpperCase(); setAccent(this.value);">
+                        <span id="ac-val" class="text-[13px] font-mono text-[var(--text-muted)] uppercase"></span>
+                    </div>
                 </div>
-            </div>
 
-            <div style="margin-top:1.25rem;">
-                <div class="set-hd"><i class="fas fa-list-check"></i><span class="set-ttl" data-tr="uR">Rules</span></div>
-                <p class="set-hint" style="margin-bottom:.625rem;" data-tr="hRulB">Colour a column when it matches. GRADE takes a number or a range like 8-10.</p>
-                <div id="cr-list"></div>
-                <button type="button" class="cr-add" onclick="addRule()"><i class="fas fa-plus"></i><span data-tr="crAdd">Add rule</span></button>
-                <div id="cr-raw-wrap" style="margin-top:.75rem;">
-                    <button type="button" id="cr-raw-btn" onclick="tRawRules()" aria-expanded="false"><i id="cr-raw-chev" class="fas fa-chevron-down"></i><span data-tr="crRaw">Edit as text</span></button>
-                    <div class="cr-raw-body">
-                        <textarea id="i-cr" class="inp font-mono h-32" style="border-radius:1rem;" oninput="onRawRules()" onfocus="RAW_FOCUS=true" onblur="onRawBlur()" placeholder="GRADE 1-4 #810B38&#10;THEME Action #23a05b"></textarea>
+                <div style="margin-top:1.25rem;">
+                    <div class="set-hd"><i class="fas fa-list-check"></i><span class="set-ttl" data-tr="uR">Rules</span></div>
+                    <p class="set-hint" style="margin-bottom:.625rem;" data-tr="hRulB">Colour a column when it matches. GRADE takes a number or a range like 8-10.</p>
+                    <div id="cr-list"></div>
+                    <button type="button" class="cr-add" onclick="addRule()"><i class="fas fa-plus"></i><span data-tr="crAdd">Add rule</span></button>
+                    <div id="cr-raw-wrap" style="margin-top:.75rem;">
+                        <button type="button" id="cr-raw-btn" onclick="tRawRules()" aria-expanded="false"><i id="cr-raw-chev" class="fas fa-chevron-down"></i><span data-tr="crRaw">Edit as text</span></button>
+                        <div class="cr-raw-body">
+                            <textarea id="i-cr" class="inp font-mono h-32" style="border-radius:1rem;" oninput="onRawRules()" onfocus="RAW_FOCUS=true" onblur="onRawBlur()" placeholder="GRADE 1-4 #810B38&#10;THEME Action #23a05b"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- 2) DEPTH CUSTOMIZATION: table text, density and every exact size -->
         <div class="set-sec">
-            <div class="set-hd"><i class="fas fa-sliders"></i><span class="set-ttl" data-tr="sFine">Fine tuning</span><span id="po-ratio"></span></div>
-            <p class="set-hint" data-tr="hFine">Exact sizes, in steps. Saved per layout profile.</p>
+            <div class="set-hd"><i class="fas fa-ruler-combined"></i><span class="set-ttl" data-tr="sDepth">Depth Customization</span><span id="po-ratio"></span></div>
+            <p class="set-hint" data-tr="hFine">Table text and exact sizes. Saved per layout profile.</p>
+
+            <div class="set-card" style="margin-bottom:.75rem;">
+                <div class="set-hd"><i class="fas fa-font"></i><span class="set-ttl" data-tr="sTxt">Table text</span></div>
+                <p class="set-hint" data-tr="hTxt">Font size and alignment inside table cells. Saved per layout profile.</p>
+                <div class="flex gap-3" style="margin-bottom:.625rem;">
+                    <div style="flex:1;"><label for="i-fs" class="lbl" data-tr="fS">Font size</label><input type="number" id="i-fs" class="inp inp-pill"></div>
+                    <div style="flex:1;"><label for="s-wr" class="lbl" data-tr="txW">Text wrap</label><select id="s-wr" class="inp inp-pill px-2"><option value="nowrap" data-tr="nW">NO WRAP</option><option value="normal" data-tr="w">WRAP</option></select></div>
+                </div>
+                <div class="flex gap-3">
+                    <div style="flex:1;"><label for="s-ha" class="lbl" data-tr="hzA">Horizontal</label><select id="s-ha" class="inp inp-pill px-2"><option value="left" data-tr="l">LEFT</option><option value="center" data-tr="c">CENTER</option><option value="right" data-tr="r">RIGHT</option></select></div>
+                    <div style="flex:1;"><label for="s-va" class="lbl" data-tr="vrA">Vertical</label><select id="s-va" class="inp inp-pill px-2"><option value="top" data-tr="t">TOP</option><option value="middle" data-tr="m">MIDDLE</option><option value="bottom" data-tr="b">BOTTOM</option></select></div>
+                </div>
+            </div>
+
+            <div id="c-fine-a" style="margin-bottom:.625rem;"></div>
             <div id="c-pofit" class="seg" role="group" style="margin-bottom:.625rem;">
                 <button type="button" class="seg-btn" data-pf="fill" onclick="setPoFit('fill')"><i class="fas fa-expand"></i><span data-tr="pfFill">Fill - equal</span></button>
                 <button type="button" class="seg-btn" data-pf="fit" onclick="setPoFit('fit')"><i class="fas fa-compress"></i><span data-tr="pfFit">Fit - whole image</span></button>
             </div>
             <div id="c-fine"></div>
-            <button type="button" class="fine-reset" onclick="resetFine()"><i class="fas fa-rotate-left"></i><span data-tr="fReset">Reset to density defaults</span></button>
+            <button type="button" class="fine-reset" onclick="resetFine()"><i class="fas fa-rotate-left"></i><span data-tr="fReset">Reset to defaults</span></button>
         </div>
 
         </div><button onclick="sCst()" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
@@ -1045,14 +1071,14 @@
                 mSv:"Saved!", mF:"Failed!", mSy:"Synced: ", mAd:"Added: ", mDl:"Deleted", mRv:"Reverted", mRs:"Restored", mNt:"Note saved", mEx:"Exported", mIm:"Imported!", mIv:"Invalid file!", mNC:"Sync Cloud first", mAM:"API Key Missing!", mSc:"Scanning...", mSC:"Sync completed", mSF:"Sync failed, showing local data", impW:"Overwrite local data with this file?", tmR:"Multiple matches. Pick one:", del:"DELETE", mTOk:"Connection OK!", mTFail:"Connection failed!",
                 "cNO.":"#", cNO:"#", cNAME:"Title", cGRADE:"Score", cTHEME:"Genres", cGENRE:"Genre", cEXTRA:"Length", cIMDB:"IMDB", cREWATCH:"Rewatches", cNOTE:"Notes", cPOSTER:"Image", cCONTROL:"CONTROL",
                 sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sDr:"DROP", sEp:"Episodes", sTi:"Time", sCat:"CATEGORY:",
-                mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", pfFill:"Fill - equal", pfFit:"Fit - whole image", hFineEntry:"Density, colours and exact sizes.", sFine:"Fine tuning", hFine:"Exact sizes, in steps. Saved per layout profile.", fPoW:"Poster width", hPoW:"How wide the image in the POSTER column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to density defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead posters", clGrade:"Grades normalised", clGradeSub:"Commas in grades were replaced with dots.", clNone:"Nothing to fix here.", clFix:"Repair", clAdd:"Add", clShow:"Show", clClear:"Clear", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", clPosterDone:"Posters repaired:", sDens:"Density", hDens:"Row height, poster size and how many genre pills fit, all at once.", densC:"Compact", densN:"Normal", densS:"Spacious", hRulB:"Colour a column when it matches. GRADE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuNote:"Note", mnuSyncTbl:"Sync whole table", mnuHideHdr:"Hide header", mnuShowHdr:"Show header", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrHGrade:"Only scan titles you rated at least this high.", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hRul:"One rule per line, e.g. GRADE 9-10 #23a05b", sTxt:"Table text", hTxt:"Font size and alignment inside table cells. Saved per layout profile.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrComplete:"COMPLETE", rdrAiring:"AIRING", rdrNewMovie:"NEW IN COLLECTION", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION",
+                mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", pfFill:"Fill - equal", pfFit:"Fit - whole image", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the POSTER column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead posters", clGrade:"Grades normalised", clGradeSub:"Commas in grades were replaced with dots.", clNone:"Nothing to fix here.", clFix:"Repair", clAdd:"Add", clShow:"Show", clClear:"Clear", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", clPosterDone:"Posters repaired:", sDens:"Density", hDens:"Row height, poster size and how many genre pills fit, all at once.", densC:"Compact", densN:"Normal", densS:"Spacious", hRulB:"Colour a column when it matches. GRADE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuNote:"Note", mnuSyncTbl:"Sync whole table", mnuHideHdr:"Hide header", mnuShowHdr:"Show header", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrHGrade:"Only scan titles you rated at least this high.", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hRul:"One rule per line, e.g. GRADE 9-10 #23a05b", sTxt:"Table text", hTxt:"Font size and alignment inside table cells. Saved per layout profile.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrComplete:"COMPLETE", rdrAiring:"AIRING", rdrNewMovie:"NEW IN COLLECTION", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION",
                 mNoSave:"Nothing to save: this category is empty", mCfl:"The cloud copy changed since you loaded it (another device?). Overwrite it with this device's data?", mNoBase:"This category was not loaded from the cloud in this session. Saving will REPLACE the cloud copy with local data. Continue?", mSvBad:"Save cancelled",
                 srchAnimeMovie:"Anime films", shkBtn:"SHORTCUTS", shkTtl:"KEYBOARD SHORTCUTS", shkGen:"General", shkTbl:"Table Editing", shkFocus:"Focus search bar", shkAdd:"Add new item", shkUndo:"Undo last change", shkSave:"Save to Cloud", shkEsc:"Close modal / Clear search", shkEnter:"Confirm \"Add New Item\"", shkRow:"Move to previous / next row", shkCol:"Move to previous / next column", shkMove:"Move row up / down", mAll:"All", mSort:"Sort", mTitles:"titles", mDef:"Default order" },
             RO: { sC:"Salvează", sP:"CAUTĂ...", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", ap:"Aspect", th:"Temă", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aW:"Aliniere & Tăiere", aS:"Aplică", mB:"Gestionează salvări.", imp:"IMPORTĂ", exp:"EXPORTĂ", impC:"IMPORTĂ CSV", expC:"EXPORTĂ CSV", csvHint:"Afectează doar categoria curentă", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", sA:"SINCR.", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", ex:"EXTRA", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrComplete:"COMPLET", rdrAiring:"ÎN DESFĂȘURARE", rdrNewMovie:"NOU ÎN COLECȚIE", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE",
                 mSv:"Salvat!", mF:"Eroare!", mSy:"Sincronizat: ", mAd:"Adăugat: ", mDl:"Șters", mRv:"Anulat", mRs:"Restaurat", mNt:"Notiță", mEx:"Exportat", mIm:"Importat!", mIv:"Fișier invalid!", mNC:"Sincronizează Cloud întâi", mAM:"Cheie API Lipsă!", mSc:"Se scanează...", mSC:"Sincronizare gata", mSF:"Sincronizare eșuată, date locale", impW:"Suprascrii datele locale cu acest fișier?", tmR:"Mai multe rezultate. Alege:", del:"ȘTERGE", mTOk:"Conexiune reușită!", mTFail:"Conexiune eșuată!",
                 "cNO.":"#", cNO:"#", cNAME:"Titlu", cGRADE:"Notă", cTHEME:"Genuri", cGENRE:"Gen", cEXTRA:"Durată", cIMDB:"IMDB", cREWATCH:"Revizionări", cNOTE:"Notițe", cPOSTER:"Imagine", cCONTROL:"CONTROL",
                 sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sDr:"DROP", sEp:"Episoade", sTi:"Timp", sCat:"CATEGORIE:",
-                mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", pfFill:"Umple - egale", pfFit:"Încadrează - întregi", hFineEntry:"Densitate, culori și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Dimensiuni exacte, în pași. Se salvează pe fiecare profil.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana POSTER.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile densității", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte", clGrade:"Note normalizate", clGradeSub:"Virgulele din note au fost înlocuite cu punct.", clNone:"Nimic de reparat aici.", clFix:"Repară", clAdd:"Adaugă", clShow:"Arată", clClear:"Golește", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", clPosterDone:"Postere reparate:", sDens:"Densitate", hDens:"Înălțimea rândului, mărimea posterului și câte pastile de gen încap, dintr-o dată.", densC:"Compact", densN:"Normal", densS:"Spațios", hRulB:"Colorează o coloană când se potrivește. GRADE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuNote:"Notiță", mnuSyncTbl:"Sincronizează tot tabelul", mnuHideHdr:"Ascunde antetul", mnuShowHdr:"Arată antetul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrHGrade:"Scanează doar titlurile notate cel puțin atât.", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hRul:"O regulă pe linie, ex. GRADE 9-10 #23a05b", sTxt:"Text tabel", hTxt:"Mărimea și alinierea textului din celule. Se salvează pe fiecare profil.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
+                mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", pfFill:"Umple - egale", pfFit:"Încadrează - întregi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana POSTER.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte", clGrade:"Note normalizate", clGradeSub:"Virgulele din note au fost înlocuite cu punct.", clNone:"Nimic de reparat aici.", clFix:"Repară", clAdd:"Adaugă", clShow:"Arată", clClear:"Golește", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", clPosterDone:"Postere reparate:", sDens:"Densitate", hDens:"Înălțimea rândului, mărimea posterului și câte pastile de gen încap, dintr-o dată.", densC:"Compact", densN:"Normal", densS:"Spațios", hRulB:"Colorează o coloană când se potrivește. GRADE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuNote:"Notiță", mnuSyncTbl:"Sincronizează tot tabelul", mnuHideHdr:"Ascunde antetul", mnuShowHdr:"Arată antetul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrHGrade:"Scanează doar titlurile notate cel puțin atât.", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hRul:"O regulă pe linie, ex. GRADE 9-10 #23a05b", sTxt:"Text tabel", hTxt:"Mărimea și alinierea textului din celule. Se salvează pe fiecare profil.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
                 mNoSave:"Nimic de salvat: categoria e goală", mCfl:"Copia din cloud s-a schimbat de când ai încărcat-o (alt dispozitiv?). O suprascrii cu datele de pe acest dispozitiv?", mNoBase:"Categoria asta nu a fost încărcată din cloud în această sesiune. Salvarea va ÎNLOCUI copia din cloud cu datele locale. Continui?", mSvBad:"Salvare anulată",
                 srchAnimeMovie:"Filme anime", shkBtn:"SCURTĂTURI", shkTtl:"SCURTĂTURI TASTATURĂ", shkGen:"General", shkTbl:"Editare tabel", shkFocus:"Focus pe bara de căutare", shkAdd:"Adaugă element nou", shkUndo:"Anulează ultima modificare", shkSave:"Salvează în Cloud", shkEsc:"Închide fereastra / Golește căutarea", shkEnter:"Confirmă „Adaugă element nou”", shkRow:"Rândul anterior / următor", shkCol:"Coloana anterioară / următoare", shkMove:"Mută rândul sus / jos", mAll:"Toate", mSort:"Sortare", mTitles:"titluri", mDef:"Ordine implicită" }
         };
@@ -1066,16 +1092,17 @@
            columns...) is appended so it also gets a visibility toggle instead of being always-on. */
         function allCols(){ const out=[...ALL_COLS]; (STATE.hdrs||[]).forEach(h=>{ const k=colKey(h); if(k&&!out.some(x=>colKey(x)===k)) out.push(k); }); return out; }
         function isHidden(h){ const k=colKey(h); return (STATE.hC||[]).some(x=>colKey(x)===k); }
-        let DOM={}, COL={}, tHT=[], tHC=[], tDens='normal', tRules=[], tFine={poW:44,poH:64,words:0,pills:0,note:5}, tText={fs:'14',ha:'center',va:'middle',wr:'normal'}, tAccent='#e50914', tPoFit='fill', CST_DRAFT=false, C_RUL={GRADE:[], TEXT:{}}, P_TAB='', TMR_CB=null, CUR_ACCENT='#e50914', TAB_FADE=false, SAVING=false, SAV_TAB=null, PEND_STG=null, LOCK_CNT=0, CLN_ROWS=[];
+        let DOM={}, COL={}, tHT=[], tHC=[], tRules=[], tFine={pad:9,poW:44,poH:66,words:0,pills:0,note:5}, tText={fs:'14',ha:'center',va:'middle',wr:'normal'}, tAccent='#e50914', tPoFit='fill', CST_DRAFT=false, C_RUL={GRADE:[], TEXT:{}}, P_TAB='', TMR_CB=null, CUR_ACCENT='#e50914', TAB_FADE=false, SAVING=false, SAV_TAB=null, PEND_STG=null, LOCK_CNT=0, CLN_ROWS=[];
         
         let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], nx:false, sC:null, sD:'asc', lib:lsJSON('library',{}), fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false' };
-        (function initDisp(){ const def={fs:STATE.fs, ha:STATE.ha, va:STATE.va, wr:STATE.wr, dens:'normal', poW:44, poH:66, poFit:'fill', words:0, pills:0, note:5, hC:[...STATE.hC]};
+        (function initDisp(){ const def={fs:STATE.fs, ha:STATE.ha, va:STATE.va, wr:STATE.wr, pad:9, poW:44, poH:66, poFit:'fill', words:0, pills:0, note:5, hC:[...STATE.hC]};
             if(!STATE.dPc) STATE.dPc={...def, hC:[...def.hC]}; if(!STATE.dMb) STATE.dMb={...def, hC:[...def.hC]};
             /* profiles saved before density existed */
             [STATE.dPc, STATE.dMb].forEach(p=>{
-                if(!p.dens) p.dens='normal';
                 const d={compact:{w:34,h:50},normal:{w:44,h:64},spacious:{w:58,h:84}}[p.dens]||{w:44,h:64};
                 if(p.poW==null) p.poW=d.w; if(p.poH==null) p.poH=d.h;
+                /* density used to be compact/normal/spacious; it is a number of pixels now */
+                if(p.pad==null) p.pad={compact:4,normal:9,spacious:15}[p.dens]??9;
                 if(!p.poFit) p.poFit='fill'; if(p.words==null) p.words=0; if(p.pills==null) p.pills=0; if(p.note==null) p.note=5;
             }); })();
 
@@ -1109,16 +1136,16 @@
         function curDev(){ return document.body.classList.contains('is-mobile') ? 'mobile' : 'pc'; }
         function applyDisp(render=true){
             const d = curDev()==='mobile' ? STATE.dMb : STATE.dPc;
-            STATE.fs=d.fs; STATE.ha=d.ha; STATE.va=d.va; STATE.wr=d.wr; STATE.hC=[...d.hC]; STATE.dens=d.dens||'normal';
+            STATE.fs=d.fs; STATE.ha=d.ha; STATE.va=d.va; STATE.wr=d.wr; STATE.hC=[...d.hC]; STATE.pad=d.pad??9;
             STATE.poW=d.poW; STATE.poH=d.poH; STATE.poFit=d.poFit||'fill';
             document.body.classList.toggle('po-fit', STATE.poFit==='fit'); STATE.words=d.words||0; STATE.pills=d.pills||0; STATE.note=d.note??5;
-            aGlSt(); applyDens(STATE.dens);
+            aGlSt(); applyDens(STATE.pad);
             document.documentElement.style.setProperty('--po-w', (STATE.poW||44)+'px');
             document.documentElement.style.setProperty('--po-h', (STATE.poH||64)+'px');
             if(render) rTab();
         }
         function rDispUI(){
-            rTg(); rDensUI(); rSteppers();
+            rTg(); rSteppers();
             const fs=$('i-fs'); if(fs) fs.value=tText.fs;
             if($('s-ha')){ $('s-ha').value=tText.ha; $('s-va').value=tText.va; $('s-wr').value=tText.wr; }
             const b=$('disp-prof-txt'); if(b) b.innerHTML=`${ic(curDev()==='mobile'?'mobile-screen-button':'desktop')}<span>${esc(t('dspP'))}: ${curDev()==='mobile'?'MOBILE':'PC'}</span>`;
@@ -1134,13 +1161,31 @@
                 + `<span class="sw-txt"><span class="sw-name">${esc(t(nameKey))}</span><span class="sw-sub">${esc(t(hintKey))}</span></span>`
                 + `<span class="sw-state">${esc(t(isOn?'on':'off'))}</span><span class="sw-tgl"></span>`;
         }
+        /* UI Customization drawers (Behaviour, Visible categories, Visible columns): closed by
+           default, the bar shows a summary, and they stay as left while the app is open. */
+        const DRW_OPEN=new Set();
+        function tDrw(id){ DRW_OPEN.has(id)?DRW_OPEN.delete(id):DRW_OPEN.add(id); applyDrw(); }
+        function applyDrw(){
+            document.querySelectorAll('.drw[data-drw]').forEach(d=>{
+                const on=DRW_OPEN.has(d.dataset.drw); d.classList.toggle('open',on);
+                d.querySelector('.drw-hd')?.setAttribute('aria-expanded', on?'true':'false');
+            });
+            rDrwSum();
+        }
+        function rDrwSum(){
+            const set=(id,txt)=>{ const e=$('drw-sum-'+id); if(e) e.textContent=txt; };
+            const beh=[STATE.track, !STATE.reduceMotion, STATE.vib].filter(Boolean).length;
+            set('beh', `${beh} / 3 ${t('on')}`);
+            set('tabs', `${STATE.aT.filter(x=>!tHT.includes(x)).length} / ${STATE.aT.length}`);
+            const cols=allCols(); set('cols', `${cols.filter(x=>!tHC.some(y=>colKey(y)===colKey(x))).length} / ${cols.length}`);
+        }
         function tTrk() { STATE.track = !STATE.track; ls('track', STATE.track); setUns(true,false); rTrkUI(); }
-        function rTrkUI() { rSwitch('b-trk','location-crosshairs','trk','hTrk', STATE.track); }
+        function rTrkUI() { rSwitch('b-trk','location-crosshairs','trk','hTrk', STATE.track); rDrwSum(); }
         function aRM(){ document.body.classList.toggle('force-reduced-motion', STATE.reduceMotion); }
         function tRM(){ STATE.reduceMotion=!STATE.reduceMotion; ls('reduceMotion', STATE.reduceMotion); aRM(); setUns(true,false); rRMUI(); }
-        function rRMUI(){ rSwitch('b-rm','person-walking','mot','hRm', !STATE.reduceMotion); }
+        function rRMUI(){ rSwitch('b-rm','person-walking','mot','hRm', !STATE.reduceMotion); rDrwSum(); }
         function tVib(){ STATE.vib=!STATE.vib; ls('vib', STATE.vib); setUns(true,false); rVibUI(); }
-        function rVibUI(){ rSwitch('b-vib','mobile-screen-button','vib','hVib', STATE.vib); }
+        function rVibUI(){ rSwitch('b-vib','mobile-screen-button','vib','hVib', STATE.vib); rDrwSum(); }
         function vibSv(){ if(STATE.vib && navigator.vibrate) navigator.vibrate(15); }
 
         function onKeydown(e){
@@ -1200,10 +1245,10 @@
             if(id==='cst'||id==='fine'){
                 if(!CST_DRAFT){ initCstDraft(); CST_DRAFT=true; }
                 rDispUI();
-                if(id==='cst'){ aThUI(); rThmUI(); upLng(); rVMUI(); rTrkUI(); rRMUI(); rVibUI(); }
+                if(id==='cst'){ aThUI(); rThmUI(); upLng(); rVMUI(); rTrkUI(); rRMUI(); rVibUI(); applyDrw(); }
                 else {
                     const raw=$('i-cr'); if(raw) raw.value=rulesToText(tRules, null);
-                    rRules(); rDensUI(); rSteppers(); rCFUI();
+                    rRules(); rSteppers(); rCFUI();
                     const ac=$('i-ac'); if(ac){ ac.value=tAccent; $('ac-val').textContent=tAccent.toUpperCase(); }
                 }
             }
@@ -1241,6 +1286,7 @@
             const bt=$('c-tb'), bc=$('c-cl'); if(!bt||!bc)return;
             bt.innerHTML=STATE.aT.map(x=>pillHTML('data-tmp-t', x, x, !tHT.includes(x))).join('');
             bc.innerHTML=allCols().map(x=>pillHTML('data-tmp-c', x, colLabel(x),!tHC.some(y=>colKey(y)===colKey(x)))).join('');
+            rDrwSum();
         }
         function tTmp(tp,v){ if(tp==='t'){ tHT.includes(v)?tHT=tHT.filter(x=>x!==v):tHT.push(v); } else { const k=colKey(v); tHC.some(x=>colKey(x)===k)?tHC=tHC.filter(x=>colKey(x)!==k):tHC.push(k); } rTg(); }
         
@@ -1258,11 +1304,11 @@
         }
 
         /* The customization panel and its Fine Tuning submenu edit the same draft (tHT, tHC,
-           tDens, tFine, tRules, tText, tAccent). Only the inputs that happen to be on screen are
+           tFine, tRules, tText, tAccent). Only the inputs that happen to be on screen are
            pulled in, so applying from either screen keeps the other screen's edits. */
         function initCstDraft(){
-            tHT=[...STATE.hT]; tHC=[...STATE.hC]; tDens=STATE.dens||'normal';
-            tFine={ poW:STATE.poW||44, poH:STATE.poH||66, words:STATE.words||0, pills:STATE.pills||0, note:STATE.note??5 };
+            tHT=[...STATE.hT]; tHC=[...STATE.hC];
+            tFine={ pad:STATE.pad??9, poW:STATE.poW||44, poH:STATE.poH||66, words:STATE.words||0, pills:STATE.pills||0, note:STATE.note??5 };
             tPoFit=STATE.poFit||'fill';
             tText={ fs:STATE.fs, ha:STATE.ha, va:STATE.va, wr:STATE.wr };
             tAccent=/^#[0-9a-fA-F]{6}$/.test(CUR_ACCENT)?CUR_ACCENT:'#e50914';
@@ -1280,7 +1326,6 @@
             const prof = curDev()==='mobile' ? STATE.dMb : STATE.dPc;
             prof.hC=[...tHC];
             ['fs','ha','va','wr'].forEach(k=>{ prof[k]=tText[k]; });
-            prof.dens=tDens||'normal';
             Object.keys(STEPPERS).forEach(k=>{ prof[k]=clampStep(k, tFine[k]); });
             prof.poFit=tPoFit||'fill';
             ls(curDev()==='mobile'?'dispMobile':'dispPc', JSON.stringify(prof));
@@ -1669,9 +1714,9 @@
         }
         /* ================= FINE TUNING (numeric steppers) =================
            Each value lives on the display profile (PC / mobile) next to fs/ha/va/wr, so the two
-           devices can be tuned independently. Density still sets the starting point for the
-           poster; picking a density resets the poster steppers to that density's size. */
+           devices can be tuned independently. */
         const STEPPERS={
+            pad:  {min:0,  max:24,  step:1,  icon:'up-right-and-down-left-from-center', name:'fDens', hint:'hDensN', unit:'px'},
             poW:  {min:24, max:160, step:2,  icon:'arrows-left-right',  name:'fPoW',   hint:'hPoW',   unit:'px'},
             poH:  {min:34, max:240, step:2,  icon:'arrows-up-down',     name:'fPoH',   hint:'hPoH',   unit:'px'},
             words:{min:0,  max:12,  step:1,  icon:'text-width',         name:'fWords', hint:'hWords', unit:''},
@@ -1689,7 +1734,7 @@
         }
         function stepperHTML(k){
             const s=STEPPERS[k], v=tFine[k];
-            const off = (k!=='poW'&&k!=='poH'&&v===0);
+            const off = (['words','pills','note'].includes(k)&&v===0);
             return `<div class="stp-row">
                 <span class="sw-ico">${ic(s.icon)}</span>
                 <span class="sw-txt"><span class="sw-name">${esc(t(s.name))}</span><span class="sw-sub">${esc(t(s.hint))}</span></span>
@@ -1706,17 +1751,15 @@
         function rSteppers(){
             rPoFitUI();
             const box=$('c-fine'); if(!box) return;
-            box.innerHTML=Object.keys(STEPPERS).map(stepperHTML).join('');
+            const a=$('c-fine-a'); if(a) a.innerHTML=stepperHTML('pad');
+            box.innerHTML=Object.keys(STEPPERS).filter(k=>k!=='pad'||!a).map(stepperHTML).join('');
             const pv=$('po-ratio'); if(pv) pv.textContent=`${tFine.poW}×${tFine.poH}`;
         }
-        /* Snap the poster back to whatever the chosen density implies. */
+        /* Back to the defaults: 9px density and a 44x66 poster (exact 2:3, the shape of a film poster). */
         function resetFine(){
-            const d=DENS_SIZE[tDens]||DENS_SIZE.normal;
-            tFine={ poW:d.w, poH:d.h, words:0, pills:0, note:5 }; tPoFit='fill';
+            tFine={ pad:9, poW:44, poH:66, words:0, pills:0, note:5 }; tPoFit='fill';
             rSteppers(); rPoFitUI();
         }
-        /* exact 2:3, the shape of a film poster, so filling the box crops next to nothing */
-        const DENS_SIZE={compact:{w:34,h:51}, normal:{w:44,h:66}, spacious:{w:58,h:87}};
 
         /* Force a break after every N words. CSS cannot count words, so the break is inserted at
            render time; uVal collapses newlines back to spaces so the stored value is unaffected. */
@@ -1743,22 +1786,14 @@
         }
 
         /* ================= DENSITY =================
-           Font size alone never changed how tall a row is: the poster and the cell padding were
-           fixed in CSS. Density moves all three together. */
-        const DENSITIES=['compact','normal','spacious'];
-        function setDens(v){
-            if(!DENSITIES.includes(v)) v='normal';
-            tDens=v; rDensUI();
-            const d=DENS_SIZE[v]||DENS_SIZE.normal; tFine.poW=d.w; tFine.poH=d.h; rSteppers();
-        }
-        function rDensUI(){
-            document.querySelectorAll('#c-dens .seg-btn').forEach(b=>{
-                const on=b.dataset.dn===tDens; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false');
-            });
-        }
-        function applyDens(v){
-            document.body.classList.remove('dens-compact','dens-normal','dens-spacious');
-            document.body.classList.add('dens-'+(DENSITIES.includes(v)?v:'normal'));
+           The number is the space inside every cell, in px. The compact/normal/spacious class is
+           still derived from it because the phone card layout keys off those classes. */
+        function applyDens(pad){
+            const n=Math.max(0, Math.min(24, parseInt(pad,10)||0)), b=document.body;
+            b.classList.remove('dens-compact','dens-normal','dens-spacious');
+            b.classList.add('dens-'+(n<=6?'compact':(n>=13?'spacious':'normal')));
+            b.style.setProperty('--dens-pad', `${n}px ${8+Math.round(n/4)}px`);
+            b.style.setProperty('--dens-tp', `${Math.max(2,Math.round(n/3))}px ${6+Math.round(n/3)}px`);
         }
 
         /* ================= COLOUR RULE BUILDER =================
