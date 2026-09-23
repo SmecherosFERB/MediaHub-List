@@ -194,6 +194,14 @@
         .nt > .no-cell { flex-shrink:0; }
         .nt .no-val { display:inline-block; min-width:26px; padding:2px 7px; border-radius:999px; text-align:center; font-size:calc(var(--app-font-size) - 3px); font-weight:800; line-height:1.4; color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 16%, transparent); }
         .nt-title { min-width:0; }
+        /* # on the poster: a small badge bottom-right; on PC the move arrows open inside it when the badge is hovered,
+           so the rest of the poster keeps its hover-zoom */
+        .poster-container .po-no { position:absolute; right:3px; bottom:3px; z-index:20; gap:0; padding:1px 0; border-radius:7px; background:rgba(0,0,0,.72); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); box-shadow:0 1px 4px rgba(0,0,0,.4); }
+        .po-no .no-val { display:block; min-width:18px; padding:1px 5px; font-size:10px; font-weight:900; line-height:1.25; color:#fff; text-align:center; }
+        .po-no .no-arrow { display:none; width:100%; height:14px; line-height:14px; font-size:8px; color:#fff; }
+        .po-no:hover .no-arrow:not(:disabled), .po-no:focus-within .no-arrow:not(:disabled) { display:block; opacity:.85; }
+        tr:hover .po-no { box-shadow:0 0 0 1px color-mix(in srgb, var(--theme-accent) 60%, transparent), 0 1px 4px rgba(0,0,0,.4); }
+        .po-no .no-arrow:hover:not(:disabled) { opacity:1; }
         .cell-merge { display:flex; flex-direction:column; gap:3px; }
         .cm-line { display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:var(--t-ha,center); }
         .cm-line > .cell-pills { flex:0 1 auto; min-height:24px; }
@@ -628,6 +636,7 @@
         body.is-mobile #b-rows .cell-merge { flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; }
         body.is-mobile #b-rows .cm-line { display:contents; }
         body.is-mobile #b-rows .no-cell .no-val { display:block; min-width:22px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.72); color:#fff; font-size:11px; font-weight:900; text-align:center; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+        body.is-mobile #b-rows .po-no .no-val { min-width:20px; padding:1px 6px; font-size:10.5px; background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; }
         body.is-mobile #b-rows .nt .no-val { background:color-mix(in srgb, var(--text-muted) 18%, transparent); color:var(--text-muted); -webkit-backdrop-filter:none; backdrop-filter:none; }
 
         body.is-mobile #b-rows .poster-container { width:var(--m-pw) !important; height:var(--m-ph) !important; margin:0; border:0; border-radius:14px; box-shadow:0 6px 14px -4px rgba(0,0,0,.5); }
@@ -1980,7 +1989,7 @@
         }
 
         /* Which columns are drawn together in one cell:
-             #  + Title                 -> number badge in front of the title
+             #                          -> small badge on the poster, bottom-right (in front of the title when the poster is hidden)
              Genres + Length (+ IMDB)   -> one "info" cell
              Rewatches + Notes          -> one cell
            A part the user has hidden is simply left out; the merged cell lives in the first
@@ -1988,20 +1997,22 @@
         function rowCtx(){
             const hid=new Set(), vis=k=>COL[k]!==undefined && !isHidden(k), nCol=numCol();
             STATE.hdrs.forEach((h,c)=>{const k=colKey(h); if(k==='POSTER'||k==='IMDB'||isHidden(h))hid.add(c);});
-            const noIn = (nCol!==undefined && !hid.has(nCol) && vis('NAME') && nCol!==COL.NAME) ? COL.NAME : null;
-            if(noIn!==null) hid.add(nCol);
+            const poster=!isHidden('POSTER'), noShown=nCol!==undefined && !hid.has(nCol) && nCol!==COL.NAME;
+            const noPo = noShown && poster;
+            const noIn = (noShown && !poster && vis('NAME')) ? COL.NAME : null;
+            if(noPo || noIn!==null) hid.add(nCol);
             const infoIn = vis('THEME') ? COL.THEME : (vis('EXTRA') ? COL.EXTRA : null);
             if(infoIn!==null && infoIn!==COL.EXTRA && COL.EXTRA!==undefined) hid.add(COL.EXTRA);
             const rnIn = vis('REWATCH') ? COL.REWATCH : (vis('NOTE') ? COL.NOTE : null);
             if(rnIn!==null && rnIn!==COL.NOTE && COL.NOTE!==undefined) hid.add(COL.NOTE);
-            return { hid, hCt:!isHidden('CONTROL'), poster:!isHidden('POSTER'), nCol, noIn,
+            return { hid, hCt:!isHidden('CONTROL'), poster, nCol, noIn, noPo,
                      infoIn, genIn: vis('THEME')?infoIn:null, lenIn: vis('EXTRA')?infoIn:null,
                      rnIn, rwIn: vis('REWATCH')?rnIn:null, noteIn: vis('NOTE')?rnIn:null,
                      imdbIn: isHidden('IMDB')?null:(infoIn!==null?infoIn:COL.NAME) };
         }
-        function noCellHTML(r, oi, idx, nCol){
+        function noCellHTML(r, oi, idx, nCol, cls=''){
             const noUp=idx===0, noDn=idx===STATE.fDat.length-1;
-            return `<div class="no-cell"><button data-a="mu" data-r="${oi}" tabindex="-1" aria-label="${esc(t('mvU'))}" class="no-arrow"${noUp?' disabled':''}>${ic('chevron-up')}</button><span class="no-val">${esc(r[nCol]??'')}</span><button data-a="md" data-r="${oi}" tabindex="-1" aria-label="${esc(t('mvD'))}" class="no-arrow"${noDn?' disabled':''}>${ic('chevron-down')}</button></div>`;
+            return `<div class="no-cell${cls}"><button data-a="mu" data-r="${oi}" tabindex="-1" aria-label="${esc(t('mvU'))}" class="no-arrow"${noUp?' disabled':''}>${ic('chevron-up')}</button><span class="no-val">${esc(r[nCol]??'')}</span><button data-a="md" data-r="${oi}" tabindex="-1" aria-label="${esc(t('mvD'))}" class="no-arrow"${noDn?' disabled':''}>${ic('chevron-down')}</button></div>`;
         }
         /* genres: the first pillMax() + "+N", then the rating (R+ / R- ...) which is never hidden */
         function genresGroupHTML(v, oi, c){
@@ -2035,7 +2046,7 @@
         }
         function buildRowHTML(r, oi, idx, q, sc, ctx){
             const {hid, hCt, nCol}=ctx; let rH = '';
-            if(ctx.poster) rH+=`<td data-k="POSTER"><div class="poster-container mx-auto">${r[COL.POSTER]?`<img src="${esc(posterSrc(r[COL.POSTER]))}" data-full="${esc(r[COL.POSTER])}" class="poster-img" loading="lazy" decoding="async" alt="${esc(r[COL.NAME]||'')}" onerror="if(this.src!==this.dataset.full){this.src=this.dataset.full;}">`:`${ic('image','opacity-10')}`}</div></td>`;
+            if(ctx.poster) rH+=`<td data-k="POSTER"><div class="poster-container mx-auto">${r[COL.POSTER]?`<img src="${esc(posterSrc(r[COL.POSTER]))}" data-full="${esc(r[COL.POSTER])}" class="poster-img" loading="lazy" decoding="async" alt="${esc(r[COL.NAME]||'')}" onerror="if(this.src!==this.dataset.full){this.src=this.dataset.full;}">`:`${ic('image','opacity-10')}`}${ctx.noPo?noCellHTML(r, oi, idx, nCol, ' po-no'):''}</div></td>`;
             r.forEach((v,c)=>{
                 if(hid.has(c))return; const h=colKey(STATE.hdrs[c]); let val=esc(v), cls=c===COL.NAME?"name-cell theme-text":(c===COL.GRADE?"grade-cell theme-text":"theme-text"), ed=true, eCl="outline-none", sty="";
                 if(q && c===sc && fold(v).includes(q)) cls+=" search-hl";
