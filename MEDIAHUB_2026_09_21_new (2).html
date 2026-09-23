@@ -119,9 +119,8 @@
         .dp-row { flex-wrap:wrap; row-gap:.5rem; }
         .dp-row > .sw-txt { flex:1 1 11rem; } /* the control only drops below the text on a really narrow screen */
         .dp-ctl { margin-left:auto; display:flex; align-items:center; gap:.5rem; flex-shrink:0; }
-        .dp-list > .dp-block, .dp-list > .stp-row, .dp-list > .sw-row { margin-top:.5rem; }
+        .dp-list > .stp-row, .dp-list > .sw-row, .dp-list > .drw { margin-top:.5rem; }
         .dp-list > :first-child { margin-top:0; }
-        .dp-sub { padding:.625rem .5rem .25rem; }
         .seg-sm { padding:.1875rem; gap:.125rem; background:var(--card-bg); }
         .seg-sm .seg-btn { flex:0 0 auto; padding:.375rem .625rem; font-size:.5625rem; }
         .seg-sm .seg-btn i { font-size:.6875rem; }
@@ -136,8 +135,24 @@
         .drw-hd:hover .drw-chev { transform:none; }
         .drw.open .drw-hd { border-color:color-mix(in srgb, var(--theme-accent) 50%, transparent); }
         .drw.open .drw-chev i { transform:rotate(180deg); }
-        .drw-body { display:none; padding:.625rem .25rem .25rem; }
+        .drw-body { display:none; padding:.5rem 0 .25rem .75rem; margin:0 0 .25rem 1.4rem; border-left:2px solid color-mix(in srgb, var(--theme-accent) 30%, transparent); }
         .drw.open .drw-body { display:block; }
+        /* rows inside an open drawer are one size down from the drawer bar, so the nesting reads at a glance */
+        .drw-body .stp-row, .drw-body .sw-row, .drw-body .act-row { padding:.4375rem .625rem; gap:.5rem; }
+        .drw-body .stp-row + .stp-row, .drw-body .sw-row + .sw-row, .drw-body .dp-list > * { margin-top:.375rem; }
+        .drw-body .dp-list > :first-child { margin-top:0; }
+        .drw-body .sw-ico { width:1.5rem; height:1.5rem; font-size:.625rem; }
+        .drw-body .sw-name { font-size:.625rem; }
+        .drw-body .sw-sub { font-size:.5625rem; }
+        .drw-body .sw-state, .drw-body .stp-unit { font-size:.5rem; }
+        .drw-body .sw-tgl { width:2rem; height:1.125rem; }
+        .drw-body .sw-tgl::after { width:.875rem; height:.875rem; }
+        .drw-body .sw-row.on .sw-tgl::after { transform:translateX(.875rem); }
+        .drw-body .stp-btn { width:1.25rem; height:1.25rem; font-size:.5625rem; }
+        .drw-body .stp-val { width:2.2rem; font-size:.6875rem; }
+        .drw-body .seg-sm .seg-btn { padding:.3125rem .5rem; font-size:.5rem; }
+        .drw-body .cr-row { padding:.3125rem .4375rem; }
+        .drw-body .cr-row select, .drw-body .cr-row input:not(.cr-color) { font-size:.625rem; }
 
         /* storage usage meter */
         .meter { height:.4375rem; border-radius:999px; background:color-mix(in srgb, var(--text-muted) 28%, transparent); overflow:hidden; }
@@ -887,13 +902,14 @@
                     <span class="sw-txt"><span class="sw-name" data-tr="acC">Accent colour</span><span class="sw-sub" data-tr="hAc">Used for buttons, links and highlights across the app.</span></span>
                     <div class="dp-ctl"><span id="ac-val" class="ac-hex"></span><input type="color" id="i-ac" class="ac-pick" aria-label="Accent colour" oninput="$('ac-val').textContent=this.value.toUpperCase(); setAccent(this.value);"></div>
                 </div>
-                <div class="dp-block">
-                    <div class="stp-row dp-row">
+                <div class="drw" data-drw="rules">
+                    <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-rules" onclick="tDrw('rules')">
                         <span class="sw-ico"><i class="fas fa-list-check"></i></span>
                         <span class="sw-txt"><span class="sw-name" data-tr="uR">Rules</span><span class="sw-sub" data-tr="hRulB">Colour a column when it matches. SCORE takes a number or a range like 8-10.</span></span>
                         <span id="cr-count" class="drw-sum"></span>
-                    </div>
-                    <div class="dp-sub">
+                        <span class="act-go drw-chev"><i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div class="drw-body" id="drw-b-rules">
                         <div id="cr-list"></div>
                         <button type="button" class="cr-add" onclick="addRule()"><i class="fas fa-plus"></i><span data-tr="crAdd">Add rule</span></button>
                         <div id="cr-raw-wrap" style="margin-top:.75rem;">
