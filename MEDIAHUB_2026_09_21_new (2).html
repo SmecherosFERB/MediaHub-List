@@ -170,8 +170,9 @@
         .nt > .no-cell { flex-shrink:0; }
         .nt .no-val { display:inline-block; min-width:26px; padding:2px 7px; border-radius:999px; text-align:center; font-size:calc(var(--app-font-size) - 3px); font-weight:800; line-height:1.4; color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 16%, transparent); }
         .nt-title { min-width:0; }
-        .cell-merge { display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:var(--t-ha,center); }
-        .cell-merge > .cell-pills { flex:0 1 auto; min-height:24px; }
+        .cell-merge { display:flex; flex-direction:column; gap:3px; }
+        .cm-line { display:flex; flex-wrap:wrap; align-items:center; gap:4px; justify-content:var(--t-ha,center); }
+        .cm-line > .cell-pills { flex:0 1 auto; min-height:24px; }
         .tp-len { background:color-mix(in srgb, #7c5cff 20%, transparent); color:#9d86ff; }
         body.light-theme .tp-len { color:#5b3fd6; }
         .rn-cell { display:flex; flex-wrap:wrap; align-items:center; gap:10px; justify-content:var(--t-ha,center); }
@@ -594,6 +595,8 @@
         body.is-mobile #b-rows .no-cell .no-arrow { display:none; }
         body.is-mobile #b-rows .nt, body.is-mobile #b-rows .cell-merge, body.is-mobile #b-rows .rn-cell { justify-content:flex-start; }
         body.is-mobile #b-rows .nt { gap:8px; }
+        body.is-mobile #b-rows .cell-merge { flex-direction:row; flex-wrap:wrap; align-items:center; gap:6px; }
+        body.is-mobile #b-rows .cm-line { display:contents; }
         body.is-mobile #b-rows .no-cell .no-val { display:block; min-width:22px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.72); color:#fff; font-size:11px; font-weight:900; text-align:center; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
         body.is-mobile #b-rows .nt .no-val { background:color-mix(in srgb, var(--text-muted) 18%, transparent); color:var(--text-muted); -webkit-backdrop-filter:none; backdrop-filter:none; }
 
@@ -1958,9 +1961,13 @@
             return { rate:rate.map(x=>x.replace(/\s+/g,'').toUpperCase()),
                      html:`<div class="cell-pills cell-gen${inner?'':' is-empty'}" data-a="pe" data-r="${oi}" data-c="${c}" title="${esc(t('clickEdit'))}">${inner}</div>` };
         }
-        /* length: a rating found in the Length text (unless Genres already shows it), then one pill */
-        function lengthGroupHTML(v, oi, c, shownRate){
-            const chips=extraChips(v).filter(([k,l])=>!(k==='tp-rate' && shownRate.includes(l.toUpperCase())))
+        /* length: one pill only. A rating written in the Length text is shown on line 1 instead (lengthRates). */
+        function lengthRates(v, shownRate){
+            return extraChips(v).filter(([k,l])=>k==='tp-rate' && !shownRate.includes(l.toUpperCase()))
+                .map(([,l])=>`<span class="tp tp-rate">${esc(l)}</span>`).join('');
+        }
+        function lengthGroupHTML(v, oi, c){
+            const chips=extraChips(v).filter(([k])=>k!=='tp-rate')
                 .map(([k,l])=>`<span class="tp ${k}">${esc(l)}</span>`).join('');
             return `<div class="cell-pills cell-extra${chips?'':' is-empty'}" data-a="pe" data-r="${oi}" data-c="${c}" title="${esc(t('clickEdit'))}">${chips}</div>`;
         }
@@ -2006,10 +2013,13 @@
                 }
                 const imdbHere = (ctx.imdbIn===c) ? imdbPillHTML(oi, r[COL.IMDB]) : '';
                 if(c===ctx.infoIn){
-                    let rate=[], inner='';
-                    if(ctx.genIn===c){ const g=genresGroupHTML(r[COL.THEME], oi, COL.THEME); rate=g.rate; inner+=g.html; }
-                    if(ctx.lenIn===c) inner+=lengthGroupHTML(r[COL.EXTRA], oi, COL.EXTRA, rate);
-                    rH+=`<td class="theme-text info-cell${q && (sc===COL.THEME||sc===COL.EXTRA) && fold((ctx.genIn===c?r[COL.THEME]:'')+' '+(ctx.lenIn===c?r[COL.EXTRA]:'')).includes(q)?' search-hl':''}" data-k="${esc(h)}"><div class="cell-merge">${inner}${imdbHere}</div></td>`;
+                    /* PC: line 1 = genres, +N, R+/R-, IMDB; line 2 = Length. On the phone both lines flow together. */
+                    let rate=[], l1='', l2='';
+                    if(ctx.genIn===c){ const g=genresGroupHTML(r[COL.THEME], oi, COL.THEME); rate=g.rate; l1+=g.html; }
+                    if(ctx.lenIn===c){ l1+=lengthRates(r[COL.EXTRA], rate); l2=lengthGroupHTML(r[COL.EXTRA], oi, COL.EXTRA); }
+                    l1+=imdbHere;
+                    const inner=(l1?`<div class="cm-line cm-l1">${l1}</div>`:'')+(l2?`<div class="cm-line cm-l2">${l2}</div>`:'');
+                    rH+=`<td class="theme-text info-cell${q && (sc===COL.THEME||sc===COL.EXTRA) && fold((ctx.genIn===c?r[COL.THEME]:'')+' '+(ctx.lenIn===c?r[COL.EXTRA]:'')).includes(q)?' search-hl':''}" data-k="${esc(h)}"><div class="cell-merge">${inner}</div></td>`;
                     return;
                 }
                 if(c===ctx.rnIn){
