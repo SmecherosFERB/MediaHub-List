@@ -310,10 +310,6 @@
         body.po-fit .poster-img { object-fit:contain; }
 
         /* ---- clean report ---- */
-        .cl-sec { margin-bottom:1.25rem; }
-        .cl-hd { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; font-size:.6875rem; font-weight:900; text-transform:uppercase; letter-spacing:.03em; color:var(--text-color); }
-        .cl-hd i { color:var(--theme-accent); font-size:.75rem; width:1rem; text-align:center; }
-        .cl-hd b { margin-left:auto; padding:.125rem .5rem; border-radius:999px; background:color-mix(in srgb, var(--theme-accent) 16%, transparent); color:var(--theme-accent); font-size:.625rem; }
         .cl-row { display:flex; align-items:center; gap:.5rem; padding:.4375rem .625rem; border-radius:999px; background:var(--input-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 12%, transparent); margin-bottom:.3125rem; }
         .cl-name { flex:1; min-width:0; font-size:.6875rem; font-weight:700; color:var(--text-color); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .cl-btn { flex-shrink:0; padding:.1875rem .625rem; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--theme-accent) 40%, transparent); background:transparent; color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
@@ -328,6 +324,30 @@
         .cl-fixall:hover { filter:brightness(1.08); }
         .cl-fixall:disabled { opacity:.7; cursor:wait; }
 
+        /* ---- clean report: total + Fix all, drawers with Auto, rows with old -> new ---- */
+        .cl-top { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; padding:.75rem .875rem; margin-bottom:.75rem; border-radius:var(--r-lg); background:color-mix(in srgb, var(--theme-accent) 8%, transparent); border:1px solid color-mix(in srgb, var(--theme-accent) 22%, transparent); }
+        .cl-tot { flex:1 1 auto; display:flex; align-items:baseline; gap:.5rem; min-width:0; }
+        .cl-tot b { font-size:1.5rem; font-weight:900; color:var(--theme-accent); line-height:1; }
+        .cl-tot span { font-size:.6875rem; font-weight:900; text-transform:uppercase; color:var(--text-muted); letter-spacing:.02em; }
+        .cl-top .cl-fixall { width:auto; margin:0; padding:.5rem 1rem; }
+        .cl-prog { font-size:.6875rem; font-weight:900; text-transform:uppercase; color:var(--text-color); display:inline-flex; align-items:center; gap:.4rem; }
+        .cl-stop { padding:.4375rem .875rem; border-radius:var(--r-pill); border:1px solid #e0342c; background:transparent; color:#e0342c; font-family:inherit; font-size:.625rem; font-weight:900; cursor:pointer; transition:var(--btn-tr); }
+        .cl-stop:hover { background:#e0342c; color:#fff; }
+        .cl-bar { display:flex; align-items:center; gap:.5rem; }
+        .cl-bar .drw-hd { flex:1 1 auto; min-width:0; }
+        .cl-auto { flex:0 0 auto; min-height:var(--h-sm); padding:0 .875rem; border-radius:var(--r-pill); border:none; background:var(--theme-accent); color:#fff; font-family:inherit; font-size:.625rem; font-weight:900; text-transform:uppercase; letter-spacing:.03em; cursor:pointer; transition:var(--btn-tr); }
+        .cl-auto:hover { filter:brightness(1.1); }
+        .cl-auto:disabled { opacity:.35; cursor:not-allowed; filter:none; }
+        .drw-sum.zero { color:var(--text-muted); background:color-mix(in srgb, var(--text-muted) 14%, transparent); }
+        .cl-row.has-diff { flex-wrap:wrap; border-radius:1rem; row-gap:.25rem; }
+        .cl-diff { order:5; flex:1 1 100%; min-width:0; padding:0 .25rem; font-size:.625rem; font-weight:700; color:var(--text-muted); overflow-wrap:anywhere; white-space:pre-wrap; }
+        .cl-diff s { opacity:.7; } .cl-diff b { color:var(--text-color); } .cl-diff i { font-size:.5rem; margin:0 .2rem; color:var(--theme-accent); } .cl-diff em { font-style:normal; color:#f0a020; margin-left:.3rem; }
+        .cl-tag { flex-shrink:0; font-style:normal; font-size:.5625rem; font-weight:900; text-transform:uppercase; color:#f0a020; }
+        .cl-btn.danger { border-color:rgba(224,52,44,.5); color:#e0342c; } .cl-btn.danger:hover, .cl-btn.arm { background:#e0342c; border-color:#e0342c; color:#fff; }
+        .cl-repl { display:inline-flex; align-items:center; gap:.4rem; margin:0 0 .5rem; padding:.375rem .875rem; border-radius:var(--r-pill); border:1px dashed color-mix(in srgb, var(--theme-accent) 45%, transparent); background:transparent; color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; transition:var(--btn-tr); }
+        .cl-repl:hover { background:var(--hov); } .cl-repl.arm { background:#e0342c; border-color:#e0342c; color:#fff; } .cl-repl:disabled { opacity:.4; cursor:not-allowed; }
+        .cl-secs .drw-body { padding-right:.25rem; }
+        .cl-secs .drw-body .cl-note { margin-left:0; }
         /* ---- colour rule builder ---- */
         .cr-row { display:flex; align-items:center; gap:.375rem; padding:.4375rem .5rem; border-radius:999px; background:var(--input-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 15%, transparent); margin-bottom:.375rem; }
         .cr-row:hover { border-color:color-mix(in srgb, var(--theme-accent) 40%, transparent); }
@@ -1182,16 +1202,16 @@
         const prefersReducedMotion = () => document.body.classList.contains('force-reduced-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         const DICT = {
-            EN: { sC:"Save Cloud", sP:"SEARCH...", noRes:"No results for «{q}»", noNext:"No NEXT titles in this category", clrSrchB:"Clear search", showAll:"Show all", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 DROP/NEXT", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
+            EN: { sC:"Save Cloud", sP:"SEARCH...", clProb:"problems", clManualN:"{n} need you", clManual1:"edit it yourself", clAll:"Fix all", clStop:"STOP", clStopped:"Stopped", clSure:"Sure?", clDel:"Delete", clLink:"Link", clRepl:"All posters from TMDB", hClRepl:"Replaces every poster that is not on image.tmdb.org, even ones that work.", clNoKey:"No TMDB key: only the local fixes were done.", clFixedN:"Fixed: {n}", clNoTitle:"(no title)", clEmptyRow:"empty row", clEmpty:"empty", clDeadS:"dead", clImdbOk:"IMDB link found", clImdbFail:"No IMDB link found on TMDB", clGBad:"Invalid grades", clLen:"Length formats", clGen:"Genres", clTxt:"Text cleanup", hClDup:"Same title more than once. Show it or delete one.", hClImdb:"Found on TMDB by title.", hClPo:"Replaced with the TMDB poster.", hClGrade:"Any mark between digits becomes a dot: 9,10 → 9.10.", hClGBad:"Not 1-10, NEXT or DROP. Clear cases are fixed, the rest you edit.", hClLen:"One format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"One spelling, no repeats: Sci-Fi, Action.", hClTxt:"Extra spaces, Rewatches as a number, empty rows.", noRes:"No results for «{q}»", noNext:"No NEXT titles in this category", clrSrchB:"Clear search", showAll:"Show all", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 DROP/NEXT", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
                 mSv:"Saved!", mF:"Failed!", mSy:"Synced: ", mAd:"Added: ", mDl:"Deleted", mRv:"Reverted", mRs:"Restored", mNt:"Note saved", mEx:"Exported", mIm:"Imported!", mIv:"Invalid file!", mNC:"Sync Cloud first", mAM:"API Key Missing!", mSc:"Scanning...", mSC:"Sync completed", mSF:"Sync failed, showing local data", impW:"Overwrite local data with this file?", tmR:"Multiple matches. Pick one:", del:"DELETE", mTOk:"Connection OK!", mTFail:"Connection failed!",
                 "cNO.":"#", cNO:"#", cNAME:"Title", cGRADE:"Score", cTHEME:"Genres", cGENRE:"Genre", cEXTRA:"Length", cIMDB:"IMDB", cREWATCH:"Rewatches", cNOTE:"Notes", cPOSTER:"Image", cCONTROL:"CONTROL",
-                sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sDr:"DROP", sEp:"Episodes", sTi:"Time",                 mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fAuto:"auto", fHfs:"Header size", hHfs:"Size of the column names. 0 = follows font size.", fFw:"Text weight", hFw:"How bold the text in the table is.", fwN:"Normal", fwB:"Bold", fwK:"Black", fUpper:"Uppercase", hUpper:"Pills and table header in CAPITALS.", fLines:"Row lines", hLines:"The line between rows.", lnNone:"None", lnSoft:"Soft", lnStrong:"Strong", fSticky:"Sticky header", hSticky:"Column names stay on top while scrolling.", fTw:"Table width", hTw:"Full screen, or limited and centred.", twFull:"Full", twLim:"Limited", fPoLock:"Lock 2:3", hPoLock:"Changing the width adjusts the height.", fPoRad:"Corners", hPoRad:"Shape of the poster corners.", rSq:"Square", rRd:"Rounded", rVr:"Very", fBadge:"# badge", hBadge:"Row number on the poster, or off.", bTL:"Top left", bTR:"Top right", bBL:"Bottom left", bBR:"Bottom right", fZoom:"Hover zoom", hZoom:"Enlarged poster when you point at it.", fPillSt:"Pill style", hPillSt:"Filled, outline or text only.", psF:"Filled", psO:"Outline", psT:"Text", fLenFmt:"Length format", hLenFmt:"How seasons and episodes are written.", fImdb:"IMDB button", hImdb:"Full, icon only or hidden.", imF:"Full", imI:"Icon", imH:"Hidden", fRPlus:"R+ pill", hRPlus:"Show R+ wherever you wrote it.", fRMinus:"R- pill", hRMinus:"Show R- wherever you wrote it.", twCus:"Custom", fTwPx:"Custom width", hTwPx:"Maximum table width, in pixels.", fScSt:"Score style", hScSt:"Coloured pill, coloured text or plain.", ssP:"Pill", ssT:"Text", ssN:"Plain", fScFmt:"Score display", hScFmt:"The sheet always keeps the score out of 10.", dgTxt:"Text", hdgTxt:"Size, weight, capitals and alignment.", dgRows:"Rows", hdgRows:"Density, lines, header and width.", dgPo:"Poster", hdgPo:"Size, corners, # badge and zoom.", dgPills:"Pills", hdgPills:"Genres · Length · IMDB.", dgSc:"Score", hdgSc:"How the score looks.", cfOn:"Colour the table", hFs:"Size of the text in table cells.", hWr:"Long text breaks onto new lines.", hHa:"Alignment inside cells, left to right.", hVa:"Alignment inside cells, top to bottom.", fPoFit:"Poster fit", hPoFit:"Fill crops every poster to the same size, Fit shows the whole image.", pfFillS:"Fill", pfFitS:"Fit", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the Image column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead posters", clGrade:"Grades normalised", clGradeSub:"Commas in grades were replaced with dots.", clNone:"Nothing to fix here.", clFix:"Repair", clAdd:"Add", clShow:"Show", clClear:"Clear", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", clPosterDone:"Posters repaired:", hRulB:"Colour a column when it matches. SCORE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuSyncTbl:"Sync whole table", mnuHideHdr:"Hide header", mnuShowHdr:"Show header", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", mSvUnk:"The cloud copy does not show this save - it may not have gone through. Your changes are kept, try again.", mCfgBad:"Some cloud settings were invalid and were skipped", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION", lazyN:"LAZY LOADING", hLazy:"On: rows and posters load as you scroll, fast start. Off: the whole table loads at once.",
+                sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sDr:"DROP", sEp:"Episodes", sTi:"Time",                 mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fAuto:"auto", fHfs:"Header size", hHfs:"Size of the column names. 0 = follows font size.", fFw:"Text weight", hFw:"How bold the text in the table is.", fwN:"Normal", fwB:"Bold", fwK:"Black", fUpper:"Uppercase", hUpper:"Pills and table header in CAPITALS.", fLines:"Row lines", hLines:"The line between rows.", lnNone:"None", lnSoft:"Soft", lnStrong:"Strong", fSticky:"Sticky header", hSticky:"Column names stay on top while scrolling.", fTw:"Table width", hTw:"Full screen, or limited and centred.", twFull:"Full", twLim:"Limited", fPoLock:"Lock 2:3", hPoLock:"Changing the width adjusts the height.", fPoRad:"Corners", hPoRad:"Shape of the poster corners.", rSq:"Square", rRd:"Rounded", rVr:"Very", fBadge:"# badge", hBadge:"Row number on the poster, or off.", bTL:"Top left", bTR:"Top right", bBL:"Bottom left", bBR:"Bottom right", fZoom:"Hover zoom", hZoom:"Enlarged poster when you point at it.", fPillSt:"Pill style", hPillSt:"Filled, outline or text only.", psF:"Filled", psO:"Outline", psT:"Text", fLenFmt:"Length format", hLenFmt:"How seasons and episodes are written.", fImdb:"IMDB button", hImdb:"Full, icon only or hidden.", imF:"Full", imI:"Icon", imH:"Hidden", fRPlus:"R+ pill", hRPlus:"Show R+ wherever you wrote it.", fRMinus:"R- pill", hRMinus:"Show R- wherever you wrote it.", twCus:"Custom", fTwPx:"Custom width", hTwPx:"Maximum table width, in pixels.", fScSt:"Score style", hScSt:"Coloured pill, coloured text or plain.", ssP:"Pill", ssT:"Text", ssN:"Plain", fScFmt:"Score display", hScFmt:"The sheet always keeps the score out of 10.", dgTxt:"Text", hdgTxt:"Size, weight, capitals and alignment.", dgRows:"Rows", hdgRows:"Density, lines, header and width.", dgPo:"Poster", hdgPo:"Size, corners, # badge and zoom.", dgPills:"Pills", hdgPills:"Genres · Length · IMDB.", dgSc:"Score", hdgSc:"How the score looks.", cfOn:"Colour the table", hFs:"Size of the text in table cells.", hWr:"Long text breaks onto new lines.", hHa:"Alignment inside cells, left to right.", hVa:"Alignment inside cells, top to bottom.", fPoFit:"Poster fit", hPoFit:"Fill crops every poster to the same size, Fit shows the whole image.", pfFillS:"Fill", pfFitS:"Fit", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the Image column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead or empty posters", clGrade:"Grades normalised", clNone:"Nothing to fix here.", clFix:"Repair", clShow:"Show", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", hRulB:"Colour a column when it matches. SCORE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuSyncTbl:"Sync whole table", mnuHideHdr:"Hide header", mnuShowHdr:"Show header", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", mSvUnk:"The cloud copy does not show this save - it may not have gone through. Your changes are kept, try again.", mCfgBad:"Some cloud settings were invalid and were skipped", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION", lazyN:"LAZY LOADING", hLazy:"On: rows and posters load as you scroll, fast start. Off: the whole table loads at once.",
                 mNoSave:"Nothing to save: this category is empty", mCfl:"The cloud copy changed since you loaded it (another device?). Overwrite it with this device's data?", mNoBase:"This category was not loaded from the cloud in this session. Saving will REPLACE the cloud copy with local data. Continue?", mSvBad:"Save cancelled",
                 srchAnimeMovie:"Anime films", shkBtn:"SHORTCUTS", instBtn:"INSTALL", instDone:"App installed", instIOS:"On iPhone: tap Share, then Add to Home Screen", shkTtl:"KEYBOARD SHORTCUTS", shkGen:"General", shkTbl:"Table Editing", shkFocus:"Focus search bar", shkAdd:"Add new item", shkUndo:"Undo last change", shkSave:"Save to Cloud", shkEsc:"Close modal / Clear search", shkEnter:"Confirm \"Add New Item\"", shkRow:"Move to previous / next row", shkCol:"Move to previous / next column", shkMove:"Move row up / down", mAll:"All", mSort:"Sort", mTitles:"titles", mDef:"Default order" },
-            RO: { sC:"Salvează", sP:"CAUTĂ...", noRes:"Niciun rezultat pentru «{q}»", noNext:"Niciun titlu NEXT în categoria asta", clrSrchB:"Șterge căutarea", showAll:"Arată tot", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
+            RO: { sC:"Salvează", sP:"CAUTĂ...", clProb:"probleme", clManualN:"{n} cer atenția ta", clManual1:"editează-l tu", clAll:"Repară tot", clStop:"STOP", clStopped:"Oprit", clSure:"Sigur?", clDel:"Șterge", clLink:"Link", clRepl:"Toate posterele din TMDB", hClRepl:"Înlocuiește orice poster care nu e pe image.tmdb.org, chiar și pe cele care merg.", clNoKey:"Fără cheie TMDB: s-au făcut doar reparările locale.", clFixedN:"Reparate: {n}", clNoTitle:"(fără titlu)", clEmptyRow:"rând gol", clEmpty:"gol", clDeadS:"mort", clImdbOk:"Link IMDB găsit", clImdbFail:"Niciun link IMDB găsit pe TMDB", clGBad:"Note invalide", clLen:"Formate Length", clGen:"Genuri", clTxt:"Curățenie text", hClDup:"Același titlu de mai multe ori. Arată-l sau șterge unul.", hClImdb:"Găsit pe TMDB după titlu.", hClPo:"Înlocuit cu posterul din TMDB.", hClGrade:"Orice semn între cifre devine punct: 9,10 → 9.10.", hClGBad:"Nu e 1-10, NEXT sau DROP. Cazurile clare se repară, restul le editezi tu.", hClLen:"Un singur format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"O singură scriere, fără repetări: Sci-Fi, Action.", hClTxt:"Spații în plus, Rewatches ca număr, rânduri goale.", noRes:"Niciun rezultat pentru «{q}»", noNext:"Niciun titlu NEXT în categoria asta", clrSrchB:"Șterge căutarea", showAll:"Arată tot", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
                 mSv:"Salvat!", mF:"Eroare!", mSy:"Sincronizat: ", mAd:"Adăugat: ", mDl:"Șters", mRv:"Anulat", mRs:"Restaurat", mNt:"Notiță", mEx:"Exportat", mIm:"Importat!", mIv:"Fișier invalid!", mNC:"Sincronizează Cloud întâi", mAM:"Cheie API Lipsă!", mSc:"Se scanează...", mSC:"Sincronizare gata", mSF:"Sincronizare eșuată, date locale", impW:"Suprascrii datele locale cu acest fișier?", tmR:"Mai multe rezultate. Alege:", del:"ȘTERGE", mTOk:"Conexiune reușită!", mTFail:"Conexiune eșuată!",
                 "cNO.":"#", cNO:"#", cNAME:"Titlu", cGRADE:"Notă", cTHEME:"Genuri", cGENRE:"Gen", cEXTRA:"Durată", cIMDB:"IMDB", cREWATCH:"Revizionări", cNOTE:"Notițe", cPOSTER:"Imagine", cCONTROL:"CONTROL",
-                sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sDr:"DROP", sEp:"Episoade", sTi:"Timp",                 mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fAuto:"auto", fHfs:"Mărime antet", hHfs:"Mărimea numelor de coloane. 0 = după mărimea fontului.", fFw:"Grosime text", hFw:"Cât de gros e textul din tabel.", fwN:"Normal", fwB:"Îngroșat", fwK:"Foarte gros", fUpper:"Majuscule", hUpper:"Pastilele și antetul tabelului cu MAJUSCULE.", fLines:"Linii între rânduri", hLines:"Linia dintre rânduri.", lnNone:"Fără", lnSoft:"Discrete", lnStrong:"Vizibile", fSticky:"Antet fix", hSticky:"Numele coloanelor rămân sus la derulare.", fTw:"Lățime tabel", hTw:"Cât ecranul, sau limitată și centrată.", twFull:"Tot ecranul", twLim:"Limitată", fPoLock:"Blochează 2:3", hPoLock:"Când schimbi lățimea, înălțimea se ajustează singură.", fPoRad:"Colțuri", hPoRad:"Forma colțurilor posterului.", rSq:"Drepte", rRd:"Rotunjite", rVr:"Foarte", fBadge:"Insigna #", hBadge:"Numărul rândului pe poster, sau oprit.", bTL:"Stânga sus", bTR:"Dreapta sus", bBL:"Stânga jos", bBR:"Dreapta jos", fZoom:"Zoom la hover", hZoom:"Poster mărit când treci cu mouse-ul peste el.", fPillSt:"Stil pastile", hPillSt:"Pline, doar contur sau doar text.", psF:"Pline", psO:"Contur", psT:"Text", fLenFmt:"Format durată", hLenFmt:"Cum sunt scrise sezoanele și episoadele.", fImdb:"Buton IMDB", hImdb:"Complet, doar iconiță sau ascuns.", imF:"Complet", imI:"Iconiță", imH:"Ascuns", fRPlus:"Pastila R+", hRPlus:"Arată R+ oriunde l-ai scris.", fRMinus:"Pastila R-", hRMinus:"Arată R- oriunde l-ai scris.", twCus:"Personalizat", fTwPx:"Lățime personalizată", hTwPx:"Lățimea maximă a tabelului, în pixeli.", fScSt:"Stil notă", hScSt:"Pastilă colorată, text colorat sau simplu.", ssP:"Pastilă", ssT:"Text", ssN:"Simplu", fScFmt:"Afișare notă", hScFmt:"În sheet nota rămâne mereu din 10.", dgTxt:"Text", hdgTxt:"Mărime, grosime, majuscule și aliniere.", dgRows:"Rânduri", hdgRows:"Densitate, linii, antet și lățime.", dgPo:"Poster", hdgPo:"Mărime, colțuri, insigna # și zoom.", dgPills:"Pastile", hdgPills:"Genuri · Durată · IMDB.", dgSc:"Notă", hdgSc:"Cum arată nota.", cfOn:"Colorează tabelul", hFs:"Mărimea textului din celulele tabelului.", hWr:"Textul lung trece pe rând nou.", hHa:"Alinierea în celule, de la stânga la dreapta.", hVa:"Alinierea în celule, de sus în jos.", fPoFit:"Încadrare poster", hPoFit:"Umple taie toate posterele la aceeași mărime, Încadrează arată toată imaginea.", pfFillS:"Umple", pfFitS:"Încadrează", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana Image.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte", clGrade:"Note normalizate", clGradeSub:"Virgulele din note au fost înlocuite cu punct.", clNone:"Nimic de reparat aici.", clFix:"Repară", clAdd:"Adaugă", clShow:"Arată", clClear:"Golește", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", clPosterDone:"Postere reparate:", hRulB:"Colorează o coloană când se potrivește. SCORE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuSyncTbl:"Sincronizează tot tabelul", mnuHideHdr:"Ascunde antetul", mnuShowHdr:"Arată antetul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", mSvUnk:"Copia din cloud nu arată salvarea - probabil nu a ajuns. Modificările tale sunt păstrate, încearcă din nou.", mCfgBad:"Unele setări din cloud erau invalide și au fost sărite", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
+                sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sDr:"DROP", sEp:"Episoade", sTi:"Timp",                 mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fAuto:"auto", fHfs:"Mărime antet", hHfs:"Mărimea numelor de coloane. 0 = după mărimea fontului.", fFw:"Grosime text", hFw:"Cât de gros e textul din tabel.", fwN:"Normal", fwB:"Îngroșat", fwK:"Foarte gros", fUpper:"Majuscule", hUpper:"Pastilele și antetul tabelului cu MAJUSCULE.", fLines:"Linii între rânduri", hLines:"Linia dintre rânduri.", lnNone:"Fără", lnSoft:"Discrete", lnStrong:"Vizibile", fSticky:"Antet fix", hSticky:"Numele coloanelor rămân sus la derulare.", fTw:"Lățime tabel", hTw:"Cât ecranul, sau limitată și centrată.", twFull:"Tot ecranul", twLim:"Limitată", fPoLock:"Blochează 2:3", hPoLock:"Când schimbi lățimea, înălțimea se ajustează singură.", fPoRad:"Colțuri", hPoRad:"Forma colțurilor posterului.", rSq:"Drepte", rRd:"Rotunjite", rVr:"Foarte", fBadge:"Insigna #", hBadge:"Numărul rândului pe poster, sau oprit.", bTL:"Stânga sus", bTR:"Dreapta sus", bBL:"Stânga jos", bBR:"Dreapta jos", fZoom:"Zoom la hover", hZoom:"Poster mărit când treci cu mouse-ul peste el.", fPillSt:"Stil pastile", hPillSt:"Pline, doar contur sau doar text.", psF:"Pline", psO:"Contur", psT:"Text", fLenFmt:"Format durată", hLenFmt:"Cum sunt scrise sezoanele și episoadele.", fImdb:"Buton IMDB", hImdb:"Complet, doar iconiță sau ascuns.", imF:"Complet", imI:"Iconiță", imH:"Ascuns", fRPlus:"Pastila R+", hRPlus:"Arată R+ oriunde l-ai scris.", fRMinus:"Pastila R-", hRMinus:"Arată R- oriunde l-ai scris.", twCus:"Personalizat", fTwPx:"Lățime personalizată", hTwPx:"Lățimea maximă a tabelului, în pixeli.", fScSt:"Stil notă", hScSt:"Pastilă colorată, text colorat sau simplu.", ssP:"Pastilă", ssT:"Text", ssN:"Simplu", fScFmt:"Afișare notă", hScFmt:"În sheet nota rămâne mereu din 10.", dgTxt:"Text", hdgTxt:"Mărime, grosime, majuscule și aliniere.", dgRows:"Rânduri", hdgRows:"Densitate, linii, antet și lățime.", dgPo:"Poster", hdgPo:"Mărime, colțuri, insigna # și zoom.", dgPills:"Pastile", hdgPills:"Genuri · Durată · IMDB.", dgSc:"Notă", hdgSc:"Cum arată nota.", cfOn:"Colorează tabelul", hFs:"Mărimea textului din celulele tabelului.", hWr:"Textul lung trece pe rând nou.", hHa:"Alinierea în celule, de la stânga la dreapta.", hVa:"Alinierea în celule, de sus în jos.", fPoFit:"Încadrare poster", hPoFit:"Umple taie toate posterele la aceeași mărime, Încadrează arată toată imaginea.", pfFillS:"Umple", pfFitS:"Încadrează", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana Image.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte sau goale", clGrade:"Note normalizate", clNone:"Nimic de reparat aici.", clFix:"Repară", clShow:"Arată", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", hRulB:"Colorează o coloană când se potrivește. SCORE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuSyncTbl:"Sincronizează tot tabelul", mnuHideHdr:"Ascunde antetul", mnuShowHdr:"Arată antetul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", mSvUnk:"Copia din cloud nu arată salvarea - probabil nu a ajuns. Modificările tale sunt păstrate, încearcă din nou.", mCfgBad:"Unele setări din cloud erau invalide și au fost sărite", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
                 mNoSave:"Nimic de salvat: categoria e goală", mCfl:"Copia din cloud s-a schimbat de când ai încărcat-o (alt dispozitiv?). O suprascrii cu datele de pe acest dispozitiv?", mNoBase:"Categoria asta nu a fost încărcată din cloud în această sesiune. Salvarea va ÎNLOCUI copia din cloud cu datele locale. Continui?", mSvBad:"Salvare anulată",
                 srchAnimeMovie:"Filme anime", shkBtn:"SCURTĂTURI", instBtn:"INSTALEAZĂ", instDone:"Aplicație instalată", instIOS:"Pe iPhone: apasă Share, apoi Add to Home Screen", shkTtl:"SCURTĂTURI TASTATURĂ", shkGen:"General", shkTbl:"Editare tabel", shkFocus:"Focus pe bara de căutare", shkAdd:"Adaugă element nou", shkUndo:"Anulează ultima modificare", shkSave:"Salvează în Cloud", shkEsc:"Închide fereastra / Golește căutarea", shkEnter:"Confirmă „Adaugă element nou”", shkRow:"Rândul anterior / următor", shkCol:"Coloana anterioară / următoare", shkMove:"Mută rândul sus / jos", mAll:"Toate", mSort:"Sortare", mTitles:"titluri", mDef:"Ordine implicită" }
         };
@@ -1205,7 +1225,7 @@
            columns...) is appended so it also gets a visibility toggle instead of being always-on. */
         function allCols(){ const out=[...ALL_COLS]; (STATE.hdrs||[]).forEach(h=>{ const k=colKey(h); if(k&&!out.some(x=>colKey(x)===k)) out.push(k); }); return out; }
         function isHidden(h){ const k=colKey(h); return (STATE.hC||[]).some(x=>colKey(x)===k); }
-        let DOM={}, COL={}, tHT=[], tHC=[], tRules=[], tFine={fs:14,hfs:0,pad:9,poW:70,poH:70,words:0,pills:0,note:5,twPx:1600}, tLook={}, tText={fs:'14',ha:'center',va:'middle',wr:'normal'}, tAccent='#e50914', tPoFit='fill', CST_DRAFT=false, C_RUL={GRADE:[], TEXT:{}}, P_TAB='', TMR_CB=null, CUR_ACCENT='#e50914', TAB_FADE=false, SAVING=false, SAV_TAB=null, PEND_STG=null, LOCK_CNT=0, CLN_ROWS=[];
+        let DOM={}, COL={}, tHT=[], tHC=[], tRules=[], tFine={fs:14,hfs:0,pad:9,poW:70,poH:70,words:0,pills:0,note:5,twPx:1600}, tLook={}, tText={fs:'14',ha:'center',va:'middle',wr:'normal'}, tAccent='#e50914', tPoFit='fill', CST_DRAFT=false, C_RUL={GRADE:[], TEXT:{}}, P_TAB='', TMR_CB=null, CUR_ACCENT='#e50914', TAB_FADE=false, SAVING=false, SAV_TAB=null, PEND_STG=null, LOCK_CNT=0;
         
         let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], nx:false, sC:null, sD:'asc', lib:lsJSON('library',{}), fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false', lazy:ls('lazy')!=='false' };
         /* Look settings from Depth Customization (per PC / mobile profile, this device only). The defaults
@@ -1518,20 +1538,6 @@
             await Promise.all(Array.from({length:Math.min(limit,urls.length)}, worker));
             return rs;
         }
-        let CLN_DEAD=[];
-        function clnReg(row){ CLN_ROWS.push(row); return CLN_ROWS.length-1; }
-        function clnItem(row, label, action){
-            const idx=clnReg(row);
-            const lbl=action==='poster'?t('clFix'):(action==='imdb'?t('clAdd'):t('clShow'));
-            return `<div id="cln-${idx}" class="cl-row"><span class="cl-name">${esc(label)}</span><button onclick="clnFix(${idx},'${action}')" class="cl-btn">${esc(lbl)}</button></div>`;
-        }
-        function clnFix(idx, action){
-            const row=CLN_ROWS[idx]; if(!row)return;
-            const ri=STATE.data.indexOf(row); if(ri<0)return;
-            if(action==='imdb'){ eLnk(ri, COL.IMDB); return; }
-            if(action==='poster'){ fixPoster(idx, row); return; }
-            if(action==='dup'){ STATE.hlRef=row; cMod(); rTab(); return; }
-        }
         /* Fetch a fresh poster from TMDB rather than just blanking the dead URL.
            873 of this library's 934 posters hotlink Amazon, which rewrites its URLs without
            warning; image.tmdb.org is stable, so a repair migrates the row off Amazon. */
@@ -1550,85 +1556,275 @@
             const p=d?.results?.find(x=>x.poster_path)?.poster_path;
             return p?tmdbImg(p,'w500'):null;
         }
-        async function fixPoster(idx, row){
-            const li=$(`cln-${idx}`), btn=li?.querySelector('button');
-            if(btn){ btn.disabled=true; btn.innerHTML=ic('spinner','fa-spin'); }
-            const url=await tmdbPosterFor(row);
-            if(url){
-                row[COL.POSTER]=url;
-                upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true);
-                if(li) li.remove();
-                sTst(t('clPosterOk'),'success');
-            } else if(btn){
-                btn.disabled=false; btn.innerHTML=esc(t('clClear'));
-                btn.onclick=()=>{ row[COL.POSTER]=''; upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); li?.remove(); };
-                sTst(t('clPosterFail'),'warning');
-            }
+        /* ===================== CLEAN REPORT =====================
+           Every check returns issues { row, edits:[[col,value]], del, man, label, from, to }.
+           man = needs the user (no safe automatic fix). Fixes are applied into an accumulator and
+           committed as ONE undo step ({t:'B'}), so Ctrl+Z reverts a whole Auto / Fix all at once. */
+        let CLN={}, CLN_ITEMS=[], CLN_DEAD=new Map(), CLN_BUSY=null, CLN_STOP=false, CLN_ARM=null;
+        const CL_SECS=[
+            {id:'dup',   icon:'clone',                name:'clDup',    sub:'hClDup'},
+            {id:'imdb',  icon:'link-slash',           name:'clNoImdb', sub:'hClImdb', tmdb:true},
+            {id:'poster',icon:'image',                name:'clDead',   sub:'hClPo',   tmdb:true},
+            {id:'grade', icon:'wand-magic-sparkles',  name:'clGrade',  sub:'hClGrade'},
+            {id:'gbad',  icon:'triangle-exclamation', name:'clGBad',   sub:'hClGBad'},
+            {id:'len',   icon:'ruler-horizontal',     name:'clLen',    sub:'hClLen'},
+            {id:'gen',   icon:'tags',                 name:'clGen',    sub:'hClGen'},
+            {id:'txt',   icon:'broom',                name:'clTxt',    sub:'hClTxt'}
+        ];
+        const clName=r=>String(r[COL.NAME]??'').trim()||t('clNoTitle');
+        /* grades: any mark between digits becomes a dot (9,10 -> 9.10, 9..10 -> 9.10); next/drop in capitals */
+        const GRADE_OK=v=>/^(NEXT|DROP)$/.test(v) || (/^\d+(\.\d+)?$/.test(v) && +v>=1 && +v<=10);
+        function clGradeSep(v){
+            const s=String(v??'').trim(), u=s.toUpperCase();
+            if(u==='DROPPED') return 'DROP';
+            if(/^(NEXT|DROP)$/.test(u)) return u!==s?u:null;
+            if(s.includes('/')) return null;
+            const n=s.replace(/(\d)\s*[.,;:·][\s.,;:·]*(?=\d)/g,'$1.');
+            return n!==s?n:null;
         }
-        /* Repairs every dead poster in one pass. */
-        async function fixAllPosters(btn){
-            if(!CLN_DEAD.length) return;
-            if(!STATE.tmdbKey){ sTst(t('mAM'),'error'); return; }
-            if(btn){ btn.disabled=true; btn.innerHTML=`${ic('spinner','fa-spin')} <span>0/${CLN_DEAD.length}</span>`; }
-            lockNav(true);
-            let done=0, fixed=0, idx=0;
-            const rows=[...CLN_DEAD];
-            async function worker(){
-                while(idx<rows.length){
-                    const r=rows[idx++];
-                    const url=await tmdbPosterFor(r);
-                    if(url && STATE.data.includes(r)){ r[COL.POSTER]=url; fixed++; }
-                    done++;
-                    if(btn) btn.innerHTML=`${ic('spinner','fa-spin')} <span>${done}/${rows.length}</span>`;
-                }
-            }
-            await Promise.all(Array.from({length:Math.min(4,rows.length)}, worker));
-            lockNav(false);
-            if(fixed){ upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); }
-            if(btn){ btn.disabled=false; btn.innerHTML=`${ic('images')} <span>${esc(t('clFixAll'))}</span>`; }
-            sTst(`${t('clPosterDone')} ${fixed}/${rows.length}`, fixed?'success':'warning');
+        /* not 1-10 / NEXT / DROP: fixed only when the intent is clear (10/10, 9.5., 8+), otherwise left to the user */
+        function clGradeBad(v){
+            const s=String(v??'').trim(); if(!s || GRADE_OK(s)) return null;
+            let m=s.match(/^(\d+(?:\.\d+)?)\s*\/\s*10$/), to=null;
+            if(m) to=m[1]; else { m=s.match(/^(\d+(?:\.\d+)?)[^\d]*$/); if(m) to=m[1]; }
+            return { to: to!==null && GRADE_OK(to) ? to : null };
         }
-        async function clnDb(){
-            setLd(true); sTst(t("mSc"),"info"); CLN_ROWS=[]; CLN_DEAD=[];
-            let noI=[], gFix=0;
-            /* Duplicates are matched on the normalised title, so punctuation and diacritics no
-               longer hide a pair: "[C] CONTROL" vs "C CONTROL", "A Sister's All You Need." vs
-               the same name without the full stop. The exact check missed all of those. */
+        /* Length: the format the TMDB sync writes, rating first: "R- 4 Seasons | 89 Episodes", "148 min" */
+        function clLen(v){
+            const raw=String(v??'').trim(); if(!raw || /^n\/?a$/i.test(raw)) return null;
+            const {rate,rest}=splitRate(raw), o=parseOwned(rest);
+            const left=rest.replace(/\d+\s*[-\s]?seasons?/ig,'').replace(/\d+\s*(?:episodes?|eps?\b)/ig,'').replace(/\d+\s*min(?:utes?|s)?\.?/ig,'').replace(/[\s|·,;:\-–—/()]+/g,'');
+            let len='';
+            if(o.seasons!=null && o.episodes!=null) len=`${o.seasons} Seasons | ${o.episodes} Episodes`;
+            else if(o.seasons!=null) len=`${o.seasons} Seasons`;
+            else if(o.episodes!=null) len=`${o.episodes} Episodes`;
+            else if(o.runtime!=null) len=`${o.runtime} min`;
+            if(!len || left) return { to:null };
+            const to=[...rate, len].join(' ');
+            return to!==raw ? { to } : null;
+        }
+        /* Genres: one spelling, no repeats, ratings (R+, PG-13) untouched */
+        const GEN_ALIAS={'science fiction':'Sci-Fi','science-fiction':'Sci-Fi','scifi':'Sci-Fi','sci fi':'Sci-Fi','sci-fi':'Sci-Fi','sci-fi & fantasy':'Sci-Fi, Fantasy','action & adventure':'Action, Adventure','war & politics':'War, Politics'};
+        const GEN_SMALL=new Set(['of','and','the','in','a','an','for','to','with','or']);
+        const capW=w=>w.split('-').map(x=>x?x[0].toUpperCase()+x.slice(1):x).join('-');
+        function genWord(w,i){
+            if(!/\p{L}/u.test(w)) return w;
+            if(w===w.toLowerCase()) return (i>0 && GEN_SMALL.has(w)) ? w : capW(w);
+            if(w===w.toUpperCase() && w.replace(/[^\p{L}]/gu,'').length>=4) return capW(w.toLowerCase());
+            return w;
+        }
+        function clGen(v){
+            const raw=String(v??''); if(!raw.trim()) return null;
+            const out=[], seen=new Set();
+            raw.split(/[,/|;]/).forEach(p=>{
+                p=p.replace(/\s+/g,' ').trim(); if(!p) return;
+                const al=GEN_ALIAS[p.toLowerCase()];
+                (al?al.split(', '):[p]).forEach(g=>{
+                    if(!RATE_RX.test(g)) g=g.split(' ').map(genWord).join(' ');
+                    const k=fold(g); if(!seen.has(k)){ seen.add(k); out.push(g); }
+                });
+            });
+            const to=out.join(', ');
+            return to!==raw ? { to } : null;
+        }
+        /* text: trim, no double spaces (notes keep their line breaks), Rewatches as a number, empty rows */
+        function clTxt(r){
+            const edits=[];
+            r.forEach((v,c)=>{
+                v=String(v??''); let n;
+                if(c===COL.NOTE) n=v.split('\n').map(l=>l.replace(/[ \t]{2,}/g,' ').trimEnd()).join('\n').trim();
+                else n=v.replace(/\s+/g,' ').trim();
+                if(c===COL.REWATCH && !/^\d+$/.test(n)){ const m=n.match(/\d+/); n=m?String(parseInt(m[0],10)):'0'; }
+                if(n!==v) edits.push([c,n]);
+            });
+            return edits;
+        }
+        const clBlankRow=r=>r.every((v,c)=>c===numCol() || c===COL.REWATCH || !String(v??'').trim());
+        /* spaces that matter (at the ends, doubled) are shown as · so a whitespace fix is visible */
+        const clVis=v=>String(v??'').replace(/^ +| +$/g,m=>'·'.repeat(m.length)).replace(/ {2,}/g,m=>'·'.repeat(m.length))||'∅';
+        const clDiff=(a,b)=>({ from:clVis(a), to:clVis(b) });
+
+        function clScan(){
+            const S={}; CL_SECS.forEach(s=>S[s.id]=[]);
             const groups=new Map();
             STATE.data.forEach(r=>{
-                const key=normTitle(r[COL.NAME]);
-                if(key){ if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(r); }
-                if(!r[COL.IMDB]?.startsWith('http'))noI.push(r);
-                if(COL.GRADE!==undefined && String(r[COL.GRADE]).includes(',')){ r[COL.GRADE]=String(r[COL.GRADE]).replace(/,/g,'.'); gFix++; }
+                const nm=String(r[COL.NAME]??'').trim(), label=clName(r);
+                const key=normTitle(r[COL.NAME]); if(key){ if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(r); }
+                if(nm && COL.IMDB!==undefined && !String(r[COL.IMDB]||'').trim().startsWith('http')) S.imdb.push({row:r, label, edits:[], man:false});
+                if(nm && COL.POSTER!==undefined){ const u=String(r[COL.POSTER]||'').trim(); if(!u.startsWith('http') || CLN_DEAD.get(r)===u) S.poster.push({row:r, label, edits:[], man:false, empty:!u.startsWith('http')}); }
+                if(COL.GRADE!==undefined){
+                    const g=r[COL.GRADE], sep=clGradeSep(g);
+                    if(sep!==null) S.grade.push({row:r, label, edits:[[COL.GRADE,sep]], ...clDiff(g,sep)});
+                    else { const b=clGradeBad(g); if(b) S.gbad.push({row:r, label, edits:b.to!==null?[[COL.GRADE,b.to]]:[], man:b.to===null, ...clDiff(g,b.to??g)}); }
+                }
+                if(COL.EXTRA!==undefined){ const l=clLen(r[COL.EXTRA]); if(l) S.len.push({row:r, label, edits:l.to!==null?[[COL.EXTRA,l.to]]:[], man:l.to===null, ...clDiff(r[COL.EXTRA], l.to??r[COL.EXTRA])}); }
+                const gc=COL.THEME??COL.GENRE; if(gc!==undefined){ const g=clGen(r[gc]); if(g) S.gen.push({row:r, label, edits:[[gc,g.to]], ...clDiff(r[gc],g.to)}); }
+                if(clBlankRow(r)) S.txt.push({row:r, label, edits:[], del:true, from:t('clEmptyRow'), to:t('clDel')});
+                else {
+                    const e=clTxt(r);
+                    if(e.length){ const [c,v]=e[0]; S.txt.push({row:r, label, edits:e, ...clDiff(r[c],v)}); }
+                    if(!nm) S.txt.push({row:r, label, edits:[], man:true, from:t('clNoTitle'), to:''});
+                }
             });
-            const dupGroups=[...groups.values()].filter(g=>g.length>1);
-            if(gFix>0){ upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); }
-            lockNav(true);
-            const rowsSnapshot=[...STATE.data]; /* snapshot so a tab switch mid-scan can't pair this sheet's liveness results with another sheet's rows */
-            const rs=await chkImgsThrottled(rowsSnapshot.map(r=>r[COL.POSTER]));
-            const dead=rowsSnapshot.filter((r,i)=>rs[i]==='dead');
-            CLN_DEAD=dead;
-            const hosts={};
-            rowsSnapshot.forEach(r=>{ const u=String(r[COL.POSTER]||''); if(u.startsWith('http')){ try{ const h=new URL(u).hostname.replace(/^www\./,''); hosts[h]=(hosts[h]||0)+1; }catch(e){} } });
-            lockNav(false);
-            setLd(false); oMod('cln');
-            const sec=(icn,title,count,body)=>`<div class="cl-sec"><div class="cl-hd">${ic(icn)}<span>${esc(title)}</span><b>${count}</b></div>${body}</div>`;
-            const none=`<p class="cl-none">${esc(t('clNone'))}</p>`;
-            const dupBody=dupGroups.length
-                ? dupGroups.map(g=>`<div class="cl-group">${g.map(r=>clnItem(r, `${r[COL.NAME]||'?'}${COL.GRADE!==undefined&&r[COL.GRADE]?`  ·  ${r[COL.GRADE]}`:''}`, 'dup')).join('')}</div>`).join('')
-                : none;
-            const hostLine=Object.keys(hosts).length
-                ? `<p class="cl-note">${Object.entries(hosts).sort((a,b)=>b[1]-a[1]).map(([h,c])=>`${esc(h)} <b>${c}</b>`).join(' · ')}</p>` : '';
-            const deadBody=dead.length
-                ? `<button type="button" class="cl-fixall" onclick="fixAllPosters(this)">${ic('images')} <span>${esc(t('clFixAll'))}</span></button>${dead.map(r=>clnItem(r,r[COL.NAME]||'?','poster')).join('')}`
-                : none;
-            $('cl-rp').innerHTML =
-                sec('clone', t('clDup'), dupGroups.length, dupBody)
-              + sec('link-slash', t('clNoImdb'), noI.length, noI.length?noI.map(r=>clnItem(r,r[COL.NAME]||'?','imdb')).join(''):none)
-              + sec('image', t('clDead'), dead.length, hostLine+deadBody)
-              + sec('wand-magic-sparkles', t('clGrade'), gFix, `<p class="cl-note">${esc(t('clGradeSub'))}</p>`);
+            S.dup=[...groups.values()].filter(g=>g.length>1);
+            return S;
         }
-        
+        const clCount=S=>CL_SECS.reduce((n,s)=>n+(s.id==='dup'?S.dup.reduce((a,g)=>a+g.length-1,0):S[s.id].length),0);
+        const clManual=S=>S.dup.reduce((a,g)=>a+g.length-1,0)+CL_SECS.reduce((n,s)=>n+(s.id==='dup'?0:S[s.id].filter(i=>i.man).length),0);
+
+        /* apply into an accumulator (rows change at once), then clCommit() records one undo step */
+        const clAcc=()=>({edits:[], dels:[]});
+        function clApply(items, acc){
+            items.forEach(it=>{
+                if(it.man || !STATE.data.includes(it.row)) return;
+                if(it.del){ const i=STATE.data.indexOf(it.row); acc.dels.push({r:i, row:it.row}); STATE.data.splice(i,1); return; }
+                (it.edits||[]).forEach(([c,v])=>{ if(String(it.row[c]??'')!==v){ acc.edits.push({rowRef:it.row, c, v:it.row[c]}); it.row[c]=v; } });
+            });
+            return acc;
+        }
+        function clCommit(acc, msg=true){
+            const n=acc.edits.length+acc.dels.length;
+            if(n){ STATE.hist.push({t:'B', edits:acc.edits, dels:acc.dels}); upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); }
+            if(msg) sTst(n?t('clFixedN').replace('{n}',n):t('clNone'), n?'success':'info');
+            clRender();
+            return n;
+        }
+        /* TMDB work: 4 at a time, progress in the top card, STOP between requests */
+        async function clRun(jobs, label){
+            CLN_BUSY={label, done:0, total:jobs.length}; CLN_STOP=false; lockNav(true); clRender();
+            const out=[]; let idx=0;
+            async function worker(){ while(idx<jobs.length && !CLN_STOP){ const j=jobs[idx++]; let v=null; try{ v=await j.fn(j.row); }catch(e){} if(v) out.push({row:j.row, edits:[[j.col,v]], kind:j.kind}); CLN_BUSY.done++; clProg(); } }
+            await Promise.all(Array.from({length:Math.min(4,jobs.length)}, worker));
+            lockNav(false); const stopped=CLN_STOP; CLN_BUSY=null; CLN_STOP=false;
+            if(stopped) sTst(t('clStopped'),'info');
+            return out;
+        }
+        function clProg(){ const p=$('cl-prog'); if(p&&CLN_BUSY) p.textContent=`${CLN_BUSY.label} ${CLN_BUSY.done}/${CLN_BUSY.total}`; }
+        const clJob=(it,kind)=>kind==='imdb'?{row:it.row, col:COL.IMDB, kind, fn:tmdbImdbFor}:{row:it.row, col:COL.POSTER, kind, fn:tmdbPosterFor};
+        function clTmdbDone(res, acc){ res.forEach(r=>{ if(r.kind==='poster') CLN_DEAD.delete(r.row); }); return clApply(res, acc); }
+        const clNeedKey=()=>{ if(STATE.tmdbKey) return true; sTst(t('mAM'),'error'); return false; };
+
+        /* Look up the IMDB id on TMDB by title (film or series, guessed from the tab like the sync does) */
+        async function tmdbImdbFor(row){
+            if(!STATE.tmdbKey) return null;
+            const name=String(row[COL.NAME]||'').trim(); if(!name) return null;
+            const lng=STATE.lang==='RO'?'ro-RO':'en-US', isMovie=STATE.sheet.toUpperCase().includes('MOVIE');
+            for(const type of (isMovie?['movie','tv']:['tv','movie'])){
+                const d=await tmdbGet(tmdbUrl(`search/${type}`,{query:name, language:lng}));
+                const hit=d?.results?.[0]; if(!hit) continue;
+                const ex=await tmdbGet(tmdbUrl(`${type}/${hit.id}/external_ids`));
+                return ex?.imdb_id ? `https://www.imdb.com/title/${ex.imdb_id}` : null;
+            }
+            return null;
+        }
+
+        /* ---- report UI: total + Fix all on top, one drawer per check with its Auto button and the list ---- */
+        function clItemHTML(it, sec){
+            const i=CLN_ITEMS.push({it, sec})-1, dis=CLN_BUSY?' disabled':'';
+            const btn=(act,lbl,cls='')=>`<button type="button" class="cl-btn${cls}" data-act="${act}" data-i="${i}"${dis}>${esc(lbl)}</button>`;
+            let b;
+            if(sec==='dup') b=btn('clShow',t('clShow'))+btn('clDel', CLN_ARM===`del${i}`?t('clSure'):t('clDel'), ' danger'+(CLN_ARM===`del${i}`?' arm':''));
+            else if(sec==='imdb') b=btn('clOne','Auto')+btn('clLink',t('clLink'));
+            else if(sec==='poster') b=btn('clOne',t('clFix'));
+            else if(it.man) b=btn('clShow',t('clShow'));
+            else b=btn('clOne', it.del?t('clDel'):t('clFix'), it.del?' danger':'');
+            const diff=(it.from!==undefined && sec!=='dup')?`<span class="cl-diff"><s>${esc(it.from)}</s>${it.to?` <i class="fas fa-arrow-right"></i> <b>${esc(it.to)}</b>`:''}${it.man&&it.to===it.from?` <em>${esc(t('clManual1'))}</em>`:''}</span>`:'';
+            const extra=sec==='dup'&&COL.GRADE!==undefined&&it.row[COL.GRADE]?`  ·  ${it.row[COL.GRADE]}`:'';
+            const sub=sec==='poster'?`<em class="cl-tag">${esc(it.empty?t('clEmpty'):t('clDeadS'))}</em>`:'';
+            return `<div class="cl-row${diff?' has-diff':''}"><span class="cl-name">${esc(it.label+extra)}</span>${sub}${b}${diff}</div>`;
+        }
+        function clRender(){
+            const box=$('cl-rp'); if(!box || !$('m-mod')?.classList.contains('open')) return;
+            const S=clScan(); CLN=S; CLN_ITEMS=[];
+            const total=clCount(S), man=clManual(S), dis=CLN_BUSY?' disabled':'';
+            const top=`<div class="cl-top"><div class="cl-tot"><b>${total}</b><span>${esc(t('clProb'))}${man?` · ${esc(t('clManualN').replace('{n}',man))}`:''}</span></div>`
+                +(CLN_BUSY?`<span id="cl-prog" class="cl-prog">${ic('spinner','fa-spin')} ${esc(CLN_BUSY.label)} ${CLN_BUSY.done}/${CLN_BUSY.total}</span><button type="button" class="cl-stop" data-act="clStop">${esc(t('clStop'))}</button>`
+                           :`<button type="button" class="cl-fixall" data-act="clAll"${total-man>0?'':' disabled'}>${ic('wand-magic-sparkles')} <span>${esc(t('clAll'))}</span></button>`)+`</div>`;
+            const secs=CL_SECS.map(s=>{
+                const list=S[s.id], n=s.id==='dup'?list.reduce((a,g)=>a+g.length-1,0):list.length;
+                const fixable=s.id==='dup'?0:list.filter(i=>!i.man).length;
+                let body;
+                if(!n) body=`<p class="cl-none">${esc(t('clNone'))}</p>`;
+                else if(s.id==='dup') body=list.map(g=>`<div class="cl-group">${g.map(r=>clItemHTML({row:r, label:clName(r)},'dup')).join('')}</div>`).join('');
+                else body=list.map(it=>clItemHTML(it,s.id)).join('');
+                if(s.id==='poster'){
+                    const off=STATE.data.filter(r=>String(r[COL.NAME]??'').trim() && !String(r[COL.POSTER]||'').startsWith('https://image.tmdb.org')).length;
+                    const armed=CLN_ARM==='repl';
+                    body=`<div class="cl-note">${esc(t('hClRepl'))}</div><button type="button" class="cl-repl${armed?' arm':''}" data-act="clRepl"${off&&!CLN_BUSY?'':' disabled'}>${ic('images')} <span>${esc(armed?`${t('clSure')} ${off}`:`${t('clRepl')} (${off})`)}</span></button>`+body;
+                }
+                return `<div class="drw cl-drw" data-drw="cl-${s.id}"><div class="cl-bar">`
+                    +`<button type="button" class="drw-hd act-row" aria-expanded="false" data-act="clDrw" data-d="cl-${s.id}"><span class="sw-ico">${ic(s.icon)}</span><span class="sw-txt"><span class="sw-name">${esc(t(s.name))}</span><span class="sw-sub">${esc(t(s.sub))}</span></span><span class="drw-sum${n?'':' zero'}">${n}</span><span class="act-go drw-chev">${ic('chevron-down')}</span></button>`
+                    +(s.id==='dup'?'':`<button type="button" class="cl-auto" data-act="clAuto" data-s="${s.id}"${fixable&&!CLN_BUSY?'':' disabled'}>Auto</button>`)
+                    +`</div><div class="drw-body">${body}</div></div>`;
+            }).join('');
+            const st=box.scrollTop; box.innerHTML=top+`<div class="cl-secs">${secs}</div>`; box.scrollTop=st; applyDrw();
+        }
+        const clLocalIds=['grade','gbad','len','gen','txt'];
+        async function clAuto(id){
+            if(CLN_BUSY) return;
+            const items=(CLN[id]||[]).filter(i=>!i.man);
+            if(clLocalIds.includes(id)) return clCommit(clApply(items, clAcc()));
+            if(!clNeedKey()) return;
+            const res=await clRun(items.map(it=>clJob(it,id)), t(id==='imdb'?'clNoImdb':'clDead'));
+            clCommit(clTmdbDone(res, clAcc()));
+        }
+        async function clAll(){
+            if(CLN_BUSY) return;
+            const acc=clAcc();
+            for(let pass=0; pass<3; pass++){ /* a grade fixed by one check can be picked up by the next (9,5. -> 9.5. -> 9.5) */
+                const S=clScan(), items=clLocalIds.flatMap(id=>S[id].filter(i=>!i.man));
+                if(!items.length) break; clApply(items, acc);
+            }
+            if(STATE.tmdbKey){
+                const S=clScan(), jobs=[...S.imdb.map(it=>clJob(it,'imdb')), ...S.poster.map(it=>clJob(it,'poster'))];
+                if(jobs.length){ const res=await clRun(jobs,'TMDB'); clTmdbDone(res, acc); }
+            } else if(clScan().imdb.length+clScan().poster.length) sTst(t('clNoKey'),'warning');
+            clCommit(acc);
+        }
+        async function clReplAll(b){
+            if(CLN_BUSY || !clNeedKey()) return;
+            if(CLN_ARM!=='repl'){ clArm('repl'); return; }
+            CLN_ARM=null;
+            const rows=STATE.data.filter(r=>String(r[COL.NAME]??'').trim() && !String(r[COL.POSTER]||'').startsWith('https://image.tmdb.org'));
+            const res=await clRun(rows.map(r=>clJob({row:r},'poster')), t('clRepl'));
+            clCommit(clTmdbDone(res, clAcc()));
+        }
+        function clArm(key){ CLN_ARM=key; clRender(); setTimeout(()=>{ if(CLN_ARM===key){ CLN_ARM=null; clRender(); } }, 4000); }
+        async function clOne(b){
+            const x=CLN_ITEMS[+b.dataset.i]; if(!x || CLN_BUSY) return;
+            if(x.sec==='imdb' || x.sec==='poster'){
+                if(!clNeedKey()) return;
+                b.disabled=true; b.innerHTML=ic('spinner','fa-spin');
+                const v=await (x.sec==='imdb'?tmdbImdbFor:tmdbPosterFor)(x.it.row);
+                if(!v){ sTst(t(x.sec==='imdb'?'clImdbFail':'clPosterFail'),'warning'); clRender(); return; }
+                clCommit(clTmdbDone([{row:x.it.row, edits:[[x.sec==='imdb'?COL.IMDB:COL.POSTER, v]], kind:x.sec}], clAcc()), false);
+                sTst(t(x.sec==='imdb'?'clImdbOk':'clPosterOk'),'success');
+                return;
+            }
+            clCommit(clApply([x.it], clAcc()), false);
+        }
+        function clDelRow(b){
+            const i=+b.dataset.i, x=CLN_ITEMS[i]; if(!x || CLN_BUSY) return;
+            if(CLN_ARM!==`del${i}`){ clArm(`del${i}`); return; }
+            CLN_ARM=null; clCommit(clApply([{row:x.it.row, del:true}], clAcc()), false); sTst(t('mDl'),'success');
+        }
+        function clShowRow(b){ const x=CLN_ITEMS[+b.dataset.i]; if(!x) return; STATE.hlRef=x.it.row; cMod(); rTab(); }
+        function clLinkRow(b){ const x=CLN_ITEMS[+b.dataset.i]; if(!x) return; const ri=STATE.data.indexOf(x.it.row); if(ri>=0) eLnk(ri, COL.IMDB); }
+        Object.assign(ACT, { clAll:()=>clAll(), clAuto:b=>clAuto(b.dataset.s), clOne:b=>clOne(b), clDel:b=>clDelRow(b), clShow:b=>clShowRow(b), clLink:b=>clLinkRow(b), clRepl:b=>clReplAll(b), clStop:()=>{ CLN_STOP=true; }, clDrw:b=>tDrw(b.dataset.d) });
+
+        async function clnDb(){
+            if(!STATE.hdrs?.length) return;
+            setLd(true); sTst(t("mSc"),"info"); CLN_DEAD=new Map(); CLN_ARM=null;
+            lockNav(true);
+            const rows=STATE.data.filter(r=>String(r[COL.POSTER]||'').startsWith('http')); /* snapshot so a tab switch mid-scan can't mix sheets */
+            const urls=rows.map(r=>String(r[COL.POSTER]).trim());
+            const rs=await chkImgsThrottled(urls);
+            rows.forEach((r,i)=>{ if(rs[i]==='dead') CLN_DEAD.set(r, urls[i]); });
+            lockNav(false); setLd(false);
+            ['cl-dup','cl-imdb','cl-poster','cl-grade','cl-gbad','cl-len','cl-gen','cl-txt'].forEach(d=>DRW_OPEN.delete(d)); /* the report opens with every list closed */
+            oMod('cln'); clRender();
+        }
+
         /* Loading placeholder shaped like the real rows (cards on the phone); the shimmer stops when animations are off */
         function showSkeleton(n){
             n=n||(document.body.classList.contains('is-mobile')?5:8);
@@ -3290,6 +3486,11 @@
             if(a.t==='E') { a.rowRef[a.c]=a.v; STATE.hlRef = a.rowRef; }
             else if(a.t==='D') { STATE.data.splice(a.r,0,a.row); STATE.hlRef = a.row; }
             else if(a.t==='A') { const i=STATE.data.indexOf(a.rowRef); if(i>=0) STATE.data.splice(i,1); STATE.hlRef=null; }
+            else if(a.t==='B') { /* one Clean report step: put deleted rows back where they were, then the old values */
+                for(let k=a.dels.length-1;k>=0;k--){ const d=a.dels[k]; STATE.data.splice(Math.min(d.r, STATE.data.length), 0, d.row); }
+                for(let k=a.edits.length-1;k>=0;k--){ const e=a.edits[k]; e.rowRef[e.c]=e.v; }
+                STATE.hlRef=null; setUns(true); cmtSt(t("mRv")); if(typeof clRender==='function') clRender(); return;
+            }
             else if(a.t==='M') { const ia=STATE.data.indexOf(a.a), ib=STATE.data.indexOf(a.b); if(ia>=0&&ib>=0){ [STATE.data[ia],STATE.data[ib]]=[STATE.data[ib],STATE.data[ia]]; } STATE.hlRef=a.a; setUns(true); return cmtSt(t("mRv"),'num'); }
             cmtSt(a.t==='E'?t("mRv"):t("mRs"),true); 
         }
