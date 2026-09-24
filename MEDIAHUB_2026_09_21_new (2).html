@@ -35,6 +35,14 @@
             --poster-bg: #080808; --active-tab-bg: rgba(255,255,255,0.05); --active-tab-text: #ffffff;
             --app-font-size: 14px; --t-ha: center; --t-va: middle; --t-wr: normal;
             --theme-accent: #e50914; --active-tab-border: var(--theme-accent);
+            /* shared button look: corners, heights, type, shadows, timing and the hover tint every button family uses */
+            --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+            --h-sm:32px; --h-md:40px; --h-lg:48px;
+            --btn-px:18px; --btn-fs:.75rem; --btn-fw:900;
+            --sh-1:0 4px 6px -1px rgba(0,0,0,.1); --sh-2:0 18px 40px rgba(0,0,0,.5);
+            --t-fast:.15s; --t-med:.25s;
+            --hov:color-mix(in srgb, var(--theme-accent) 13%, transparent);
+            --btn-tr:background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast), filter var(--t-fast), opacity var(--t-fast), transform .12s;
         }
         
         body.light-theme {
@@ -46,16 +54,23 @@
         body { background: var(--bg-color); color: var(--text-color); margin: 0; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; transition: all .3s; }
         
         /* CUSTOM UTILITY COMPONENTS */
-        .btn { font-weight:900; text-transform:uppercase; transition:all .3s; display:flex; align-items:center; justify-content:center; gap:.5rem; border-radius:.75rem; padding:.75rem; font-size:.75rem; cursor:pointer; box-shadow:0 4px 6px -1px rgba(0,0,0,.1); border:none; }
-        .btn:disabled, .btn-p:disabled, .btn-s:disabled { opacity:.6; cursor:not-allowed; pointer-events:none; }
+        .btn { font-weight:var(--btn-fw); text-transform:uppercase; transition:var(--btn-tr); display:flex; align-items:center; justify-content:center; gap:.5rem; border-radius:var(--r-md); padding:.75rem; font-size:.75rem; cursor:pointer; box-shadow:var(--sh-1); border:none; }
+        /* primary / secondary buttons: same shape and height everywhere (modals, toolbar); the round header buttons keep their own size below */
+        .btn-p, .btn-s { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:var(--h-md); padding:0 var(--btn-px); border-radius:var(--r-md); font-size:var(--btn-fs); font-weight:var(--btn-fw); text-transform:uppercase; cursor:pointer; transition:var(--btn-tr); box-sizing:border-box; }
+        #btn-sv, #m-fab { border-radius:var(--r-pill); }
+        .btn:disabled, .btn-p:disabled, .btn-s:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
         .btn:active, .btn-p:active, .btn-s:active, .btn-i:active { transform:scale(.96); }
-        .btn-p { background:var(--theme-accent); color:#fff; } .btn-p:hover { filter:brightness(.85); }
-        .btn-s { background:transparent; color:var(--text-color); border:1px solid color-mix(in srgb, var(--theme-accent) 20%, transparent); } .btn-s:hover { background:var(--theme-accent); color:#fff; }
-        .btn-i { background:transparent; border:1px solid var(--border-color); color:var(--theme-accent); padding:.5rem; border-radius:.75rem; font-size:.5rem; flex-direction:column; gap:.25rem; } .btn-i:hover { background:rgba(128,128,128,0.1); }
+        .btn-p { background:var(--theme-accent); color:#fff; } .btn-p:hover { filter:brightness(1.1); box-shadow:0 6px 18px -8px color-mix(in srgb, var(--theme-accent) 75%, transparent); }
+        .btn-s { background:transparent; color:var(--text-color); border:1px solid color-mix(in srgb, var(--theme-accent) 20%, transparent); } .btn-s:hover { background:var(--theme-accent); border-color:var(--theme-accent); color:#fff; }
+        .btn-i { background:transparent; border:1px solid var(--border-color); color:var(--theme-accent); padding:.5rem; border-radius:var(--r-md); font-size:.5rem; flex-direction:column; gap:.25rem; } .btn-i:hover { background:var(--hov); }
         .inp { background:var(--input-bg); color:var(--text-color); border:1px solid var(--border-color); width:100%; border-radius:.75rem; padding:.875rem; font-size:.75rem; font-weight:700; outline:none; transition:all .3s; box-sizing:border-box; }
         .inp:focus { box-shadow:0 0 0 2px color-mix(in srgb, var(--theme-accent) 50%, transparent); }
+        /* keyboard focus: one ring for everything (mouse clicks do not show it) */
         :focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 2px; }
         .inp:focus-visible { outline: none; }
+        #srch-wrap:focus-within { box-shadow:0 0 0 2px color-mix(in srgb, var(--theme-accent) 50%, transparent); }
+        #h-row th:focus-visible, .pop-item:focus-visible, .s-col-opt:focus-visible { outline-offset:-2px; }
+        .pop-item:focus-visible { background:var(--hov); }
         .lbl { font-size:.625rem; font-weight:900; color:var(--text-muted); text-transform:uppercase; margin:0 0 .25rem .25rem; display:block; }
         .h-sub { font-size:.6875rem; font-weight:900; color:var(--text-muted); text-transform:uppercase; margin-bottom:.75rem; }
         input[type="color"] { -webkit-appearance:none; appearance:none; width:44px; height:44px; padding:0; border:1px solid var(--border-color); border-radius:.75rem; background:var(--input-bg); cursor:pointer; }
@@ -81,10 +96,10 @@
 
         /* segmented control (one choice out of N) */
         .seg { display:flex; gap:.25rem; padding:.25rem; border-radius:999px; background:var(--input-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 18%, transparent); }
-        .seg-btn { flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:.375rem; padding:.625rem .5rem; border:none; border-radius:999px; background:transparent; color:var(--text-muted); font-family:inherit; font-size:.6875rem; font-weight:900; text-transform:uppercase; letter-spacing:.01em; cursor:pointer; transition:background .2s, color .2s, transform .15s, box-shadow .2s; }
+        .seg-btn { flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:.375rem; padding:.625rem .5rem; border:none; border-radius:var(--r-pill); background:transparent; color:var(--text-muted); font-family:inherit; font-size:.6875rem; font-weight:900; text-transform:uppercase; letter-spacing:.01em; cursor:pointer; transition:var(--btn-tr); }
         .seg-btn i { font-size:.75rem; flex-shrink:0; }
         .seg-btn span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .seg-btn:hover { color:var(--text-color); background:color-mix(in srgb, var(--theme-accent) 10%, transparent); }
+        .seg-btn:hover { color:var(--text-color); background:var(--hov); }
         .seg-btn.on { background:var(--theme-accent); color:#fff; box-shadow:0 1px 6px color-mix(in srgb, var(--theme-accent) 35%, transparent); }
         .seg-btn.on:hover { background:var(--theme-accent); filter:brightness(1.05); }
         .seg-btn:active { transform:scale(.95); }
@@ -174,11 +189,11 @@
 
         /* danger card */
         .set-card.danger { border-color:color-mix(in srgb, var(--theme-accent) 38%, transparent); background:color-mix(in srgb, var(--theme-accent) 8%, transparent); }
-        .btn-danger { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; box-sizing:border-box; padding:.75rem; border-radius:999px; font-family:inherit; font-size:.6875rem; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; background:transparent; color:var(--theme-accent); border:1px solid color-mix(in srgb, var(--theme-accent) 45%, transparent); transition:background .2s, color .2s, transform .15s; }
+        .btn-danger { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; box-sizing:border-box; padding:.75rem; border-radius:var(--r-pill); font-family:inherit; font-size:.6875rem; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; background:transparent; color:var(--theme-accent); border:1px solid color-mix(in srgb, var(--theme-accent) 45%, transparent); transition:var(--btn-tr); }
         .btn-danger:hover { background:var(--theme-accent); color:#fff; border-color:var(--theme-accent); }
         .btn-danger:active { transform:scale(.97); }
 
-        .btn-pill { border-radius:999px; padding:.9375rem; font-size:.8125rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
+        .btn-pill { border-radius:var(--r-pill); padding:.9375rem; font-size:.8125rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; }
         @media (max-width:420px) {
             .seg-btn { font-size:.625rem; padding:.5625rem .375rem; }
             .sw-sub { display:none; }
@@ -200,6 +215,10 @@
         .poster-container { width:44px; height:64px; flex-shrink:0; overflow:hidden; position:relative; border:1px solid var(--border-color); border-radius:5px; display:flex; align-items:center; justify-content:center; background:var(--poster-bg); }
         /* fill (cover) by default so every poster is the same size; body.po-fit switches to contain */
         .poster-img { width:100%; height:100%; object-fit:cover; object-position:center; cursor:zoom-in; position:relative; z-index:10; border-radius:3px; display:block; }
+        /* note tooltip + note preview text */
+        #note-tip { position:fixed; z-index:2600; max-width:340px; padding:10px 13px; border-radius:var(--r-lg); background:var(--card-bg); color:var(--text-color); border:1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent); box-shadow:var(--sh-2); font-size:12px; font-weight:600; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; text-align:left; pointer-events:none; opacity:0; visibility:hidden; transform:translateY(3px); transition:opacity var(--t-fast), transform var(--t-fast), visibility 0s linear var(--t-fast); }
+        #note-tip.show { opacity:1; visibility:visible; transform:none; transition:opacity var(--t-fast), transform var(--t-fast); }
+        body:not(.is-mobile) .note-tx { display:inline-block; max-width:28ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; }
         #zoom-preview { position:fixed; z-index:9999; pointer-events:none; border-radius:6px; box-shadow:10px 0 30px rgba(0,0,0,.9); outline:2px solid var(--theme-accent); object-fit:cover; display:none; }
         td,th { border:0; text-align:var(--t-ha); vertical-align:var(--t-va); white-space:var(--t-wr); padding:9px 10px; transition:background-color .2s; } tr:hover { background-color:var(--table-hover)!important; }
         .no-cell { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
@@ -277,15 +296,15 @@
         .stp-row + .stp-row { margin-top:.5rem; }
         .stp-row:hover { border-color:color-mix(in srgb, var(--theme-accent) 40%, transparent); }
         .stp { display:flex; align-items:center; gap:.25rem; flex-shrink:0; padding:.1875rem; border-radius:999px; background:var(--card-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 22%, transparent); }
-        .stp-btn { display:flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border:none; border-radius:999px; background:transparent; color:var(--theme-accent); font-size:.625rem; cursor:pointer; transition:background .15s, transform .12s; }
-        .stp-btn:hover { background:color-mix(in srgb, var(--theme-accent) 16%, transparent); }
+        .stp-btn { display:flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border:none; border-radius:var(--r-pill); background:transparent; color:var(--theme-accent); font-size:.625rem; cursor:pointer; transition:var(--btn-tr); }
+        .stp-btn:hover { background:var(--hov); }
         .stp-btn:active { transform:scale(.88); }
         .stp-btn:disabled { opacity:.3; cursor:not-allowed; }
         .stp-val { width:2.6rem; border:none; outline:none; background:transparent; color:var(--text-color); font-family:inherit; font-size:.75rem; font-weight:900; text-align:center; -moz-appearance:textfield; }
         .stp-val::-webkit-outer-spin-button, .stp-val::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
         .stp-unit { flex-shrink:0; min-width:1.75rem; font-size:.5625rem; font-weight:900; text-transform:uppercase; color:var(--text-muted); letter-spacing:.02em; }
-        .fine-reset { display:inline-flex; align-items:center; gap:.375rem; margin-top:.625rem; padding:.375rem .875rem; border-radius:999px; background:transparent; border:1px dashed color-mix(in srgb, var(--theme-accent) 40%, transparent); color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
-        .fine-reset:hover { background:color-mix(in srgb, var(--theme-accent) 12%, transparent); }
+        .fine-reset { display:inline-flex; align-items:center; gap:.375rem; margin-top:.625rem; padding:.375rem .875rem; border-radius:var(--r-pill); background:transparent; border:1px dashed color-mix(in srgb, var(--theme-accent) 40%, transparent); color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
+        .fine-reset:hover { background:var(--hov); }
         .ww-cell { white-space:normal !important; }
         tr.row-sentinel, tr.row-sentinel td { height:1px; padding:0 !important; border:0 !important; background:transparent !important; }
         body.po-fit .poster-img { object-fit:contain; }
@@ -297,7 +316,7 @@
         .cl-hd b { margin-left:auto; padding:.125rem .5rem; border-radius:999px; background:color-mix(in srgb, var(--theme-accent) 16%, transparent); color:var(--theme-accent); font-size:.625rem; }
         .cl-row { display:flex; align-items:center; gap:.5rem; padding:.4375rem .625rem; border-radius:999px; background:var(--input-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 12%, transparent); margin-bottom:.3125rem; }
         .cl-name { flex:1; min-width:0; font-size:.6875rem; font-weight:700; color:var(--text-color); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .cl-btn { flex-shrink:0; padding:.1875rem .625rem; border-radius:999px; border:1px solid color-mix(in srgb, var(--theme-accent) 40%, transparent); background:transparent; color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
+        .cl-btn { flex-shrink:0; padding:.1875rem .625rem; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--theme-accent) 40%, transparent); background:transparent; color:var(--theme-accent); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
         .cl-btn:hover { background:var(--theme-accent); color:#fff; }
         .cl-btn:disabled { opacity:.5; cursor:wait; }
         .cl-group { padding:.375rem; border-radius:1rem; border:1px dashed color-mix(in srgb, var(--theme-accent) 35%, transparent); margin-bottom:.4375rem; }
@@ -305,7 +324,7 @@
         .cl-none { font-size:.6875rem; font-weight:500; color:var(--text-muted); margin:0 0 0 1.5rem; opacity:.8; }
         .cl-note { font-size:.625rem; font-weight:500; color:var(--text-muted); margin:0 0 .5rem 1.5rem; line-height:1.5; }
         .cl-note b { color:var(--theme-accent); font-weight:900; }
-        .cl-fixall { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; box-sizing:border-box; padding:.5rem; margin-bottom:.5rem; border-radius:999px; border:none; background:var(--theme-accent); color:#fff; font-family:inherit; font-size:.625rem; font-weight:900; text-transform:uppercase; letter-spacing:.03em; cursor:pointer; }
+        .cl-fixall { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; box-sizing:border-box; padding:.5rem; margin-bottom:.5rem; border-radius:var(--r-pill); border:none; background:var(--theme-accent); color:#fff; font-family:inherit; font-size:.625rem; font-weight:900; text-transform:uppercase; letter-spacing:.03em; cursor:pointer; }
         .cl-fixall:hover { filter:brightness(1.08); }
         .cl-fixall:disabled { opacity:.7; cursor:wait; }
 
@@ -333,8 +352,8 @@
         .cr-bad { border-color:rgba(224,52,44,.5); }
         .cr-warn { color:#e0342c; font-size:.75rem; }
         .cr-raw { flex:1; font-family:ui-monospace,monospace; font-size:.625rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; }
-        .cr-add { display:inline-flex; align-items:center; gap:.375rem; padding:.4375rem .875rem; border-radius:999px; background:transparent; border:1px dashed color-mix(in srgb, var(--theme-accent) 45%, transparent); color:var(--theme-accent); font-family:inherit; font-size:.625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
-        .cr-add:hover { background:color-mix(in srgb, var(--theme-accent) 12%, transparent); }
+        .cr-add { display:inline-flex; align-items:center; gap:.375rem; padding:.4375rem .875rem; border-radius:var(--r-pill); background:transparent; border:1px dashed color-mix(in srgb, var(--theme-accent) 45%, transparent); color:var(--theme-accent); font-family:inherit; font-size:.625rem; font-weight:900; text-transform:uppercase; cursor:pointer; }
+        .cr-add:hover { background:var(--hov); }
         #cr-raw-wrap .cr-raw-body { display:none; margin-top:.5rem; }
         #cr-raw-wrap.open .cr-raw-body { display:block; }
         #cr-raw-btn { display:inline-flex; align-items:center; gap:.375rem; background:transparent; border:none; color:var(--text-muted); font-family:inherit; font-size:.5625rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; padding:.25rem 0; }
@@ -381,15 +400,15 @@
 
         /* popup menu for row / table actions */
         .pop-menu { position:fixed; z-index:2500; min-width:190px; padding:6px; border-radius:16px; background:var(--card-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent); box-shadow:0 18px 40px rgba(0,0,0,.5); }
-        .pop-item { display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; padding:9px 12px; border:none; border-radius:999px; background:transparent; color:var(--text-color); font-family:inherit; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; text-align:left; transition:background .15s; }
+        .pop-item { display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; padding:9px 12px; border:none; border-radius:var(--r-pill); background:transparent; color:var(--text-color); font-family:inherit; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; text-align:left; transition:var(--btn-tr); }
         .pop-item i { width:14px; text-align:center; color:var(--theme-accent); font-size:11px; }
-        .pop-item:hover { background:color-mix(in srgb, var(--theme-accent) 12%, transparent); }
+        .pop-item:hover { background:var(--hov); }
         .pop-item.danger, .pop-item.danger i { color:#e0342c; }
         .pop-item.danger:hover { background:rgba(224,52,44,.14); }
         .pop-item:disabled { opacity:.4; cursor:not-allowed; }
         .pop-sep { height:1px; margin:5px 8px; background:color-mix(in srgb, var(--theme-accent) 18%, transparent); }
-        .menu-btn { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:999px; border:1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent); background:transparent; color:var(--theme-accent); cursor:pointer; font-size:12px; transition:background .15s, transform .12s; }
-        .menu-btn:hover { background:color-mix(in srgb, var(--theme-accent) 14%, transparent); }
+        .menu-btn { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--theme-accent) 25%, transparent); background:transparent; color:var(--theme-accent); cursor:pointer; font-size:12px; transition:var(--btn-tr); }
+        .menu-btn:hover { background:var(--hov); }
         .menu-btn:active { transform:scale(.92); }
 
         .search-hl { background:color-mix(in srgb, var(--theme-accent) 18%, transparent)!important; border-radius:4px; }
@@ -397,7 +416,7 @@
         .group:hover #s-col-btn { border-left-color:color-mix(in srgb, var(--theme-accent) 60%, transparent); }
         #s-col-btn:hover, #s-col-btn:focus { background-color:color-mix(in srgb, var(--theme-accent) 12%, transparent); }
         #s-col-btn:focus { box-shadow:0 0 0 0.3px color-mix(in srgb, var(--theme-accent) 10%, transparent) !important; }
-        #s-col-btn:focus-visible { outline:1px solid var(--theme-accent); outline-offset:1px; }
+        #s-col-btn:focus-visible { outline-offset:-2px; }
         #srch:focus, #srch:focus-visible { outline:none !important; box-shadow:0 0 0 0.3px color-mix(in srgb, var(--theme-accent) 10%, transparent) !important; }
         #srch:-webkit-autofill, #srch:-webkit-autofill:hover, #srch:-webkit-autofill:focus, #srch:-webkit-autofill:active { -webkit-box-shadow:0 0 0 1000px var(--card-bg) inset !important; box-shadow:0 0 0 1000px var(--card-bg) inset !important; -webkit-text-fill-color:var(--text-color) !important; caret-color:var(--text-color); transition:background-color 5000s ease-in-out 0s; }
         .s-col-list { display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:100%; max-height:220px; overflow-y:auto; background:var(--card-bg); border:1px solid var(--border-color); border-radius:.6rem; box-shadow:0 8px 20px rgba(0,0,0,.35); z-index:300; }
@@ -507,6 +526,7 @@
         #hdr-left { gap:6.4px; }
         #hdr-gear, #btn-sv, #hdr-radar { width:38.4px; font-size:17.28px; padding:0; }
         #hdr-gear, #hdr-radar { height:38.4px; }
+        #hdr-gear, #hdr-radar { transition:var(--btn-tr); } #hdr-gear:hover, #hdr-radar:hover { background:var(--hov); } #hdr-gear:active, #hdr-radar:active { transform:scale(.94); }
         #btn-sv { height:auto; min-height:38.4px; padding:6px 0; flex-direction:column; gap:0; }
         #hdr-title { font-size:19.2px; }
         #uns-dot { width:9.6px; height:9.6px; }
@@ -523,8 +543,24 @@
         [contenteditable="true"] { outline:none; overflow-wrap:break-word; word-break:normal; max-width:400px; transition:background-color .2s; }
         [contenteditable="true"]:focus { background:color-mix(in srgb, var(--theme-accent) 10%, transparent); border-radius:4px; }
 
-        .skeleton-row td { border:none; padding:8px 10px; }
-        .skeleton-bar { height:20px; border-radius:6px; background:linear-gradient(90deg, var(--input-bg) 25%, var(--table-hover) 50%, var(--input-bg) 75%); background-size:200% 100%; animation: skeletonShimmer 1.4s ease-in-out infinite; }
+        .skeleton-row td { border:none !important; padding:6px 10px; }
+        tr.skeleton-row:hover, tr.empty-row:hover { background-color:transparent !important; }
+        #tbl-box tbody tr.skeleton-row:hover td, #tbl-box tbody tr.empty-row:hover td { background:transparent; }
+        .sk { display:flex; align-items:center; gap:24px; padding:3px 0; }
+        .sk-body { flex:1; min-width:0; display:flex; align-items:center; gap:24px; }
+        .sk i { display:block; flex-shrink:0; border-radius:var(--r-pill); background:linear-gradient(90deg, var(--input-bg) 25%, var(--table-hover) 50%, var(--input-bg) 75%); background-color:var(--input-bg); background-size:200% 100%; animation:skeletonShimmer 1.4s ease-in-out infinite; animation-delay:var(--sk-d,0s); }
+        .sk .sk-po { width:var(--po-w,70px); height:var(--po-h,70px); border-radius:6px; }
+        .sk .sk-t { flex:0 0 var(--sk-w,170px); height:16px; }
+        .sk .sk-sc { width:44px; height:24px; }
+        .sk-pills { flex:1; display:flex; justify-content:center; gap:6px; }
+        .sk-pills i { width:58px; height:18px; } .sk-pills i:last-child { width:40px; }
+        .sk .sk-n { width:48px; height:14px; }
+        .empty-row td { padding:56px 16px !important; border:0 !important; }
+        .empty-st { display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; }
+        .empty-ic { font-size:2.25rem; color:var(--theme-accent); opacity:.35; margin-bottom:4px; }
+        .empty-t { max-width:520px; font-size:calc(var(--app-font-size) + 1px); font-weight:900; font-style:italic; text-transform:uppercase; color:var(--text-muted); overflow-wrap:anywhere; }
+        .empty-s { font-size:11px; font-weight:500; color:var(--text-muted); opacity:.75; }
+        .empty-b { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:10px; }
         @keyframes skeletonShimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
         
         
@@ -622,15 +658,16 @@
         body.is-mobile #m-tools.m-empty { display:none; }
         .m-tools-row { display:flex; align-items:center; gap:8px; }
         .m-sp { flex:1; }
-        .m-chip { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:0 16px; border-radius:999px; border:1px solid color-mix(in srgb, var(--theme-accent) 24%, transparent); background:transparent; color:var(--text-muted); font-family:inherit; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; transition:background .2s, color .2s, transform .12s; }
+        .m-chip { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:0 16px; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--theme-accent) 24%, transparent); background:transparent; color:var(--text-muted); font-family:inherit; font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:.02em; cursor:pointer; transition:var(--btn-tr); }
         .m-chip b { font-weight:900; font-size:11px; padding:1px 7px; border-radius:999px; background:color-mix(in srgb, currentColor 18%, transparent); }
         .m-chip b:empty { display:none; }
         .m-chip.on { background:var(--theme-accent); border-color:var(--theme-accent); color:#fff; }
         #m-sort.on { background:color-mix(in srgb, var(--theme-accent) 16%, transparent); border-color:color-mix(in srgb, var(--theme-accent) 45%, transparent); color:var(--theme-accent); }
-        .m-ico { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:999px; border:1px solid color-mix(in srgb, var(--theme-accent) 24%, transparent); background:transparent; color:var(--theme-accent); font-size:15px; cursor:pointer; }
+        .m-ico { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:var(--r-pill); border:1px solid color-mix(in srgb, var(--theme-accent) 24%, transparent); background:transparent; color:var(--theme-accent); font-size:15px; cursor:pointer; }
         .m-chip:active, .m-ico:active { transform:scale(.95); }
         #m-sort-l { max-width:11ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .m-chip, .m-ico { flex:0 0 auto; }
+        @media (hover:hover) { .m-chip:not(.on):hover, .m-ico:hover { background:var(--hov); } }
         @media (max-width:400px) { .m-tools-row { gap:6px; } .m-chip { padding:0 12px; gap:5px; font-size:12px; } .m-ico { width:38px; } }
         /* very narrow phones (320px): sort shows only its icon, and the note chip drops to its own row instead of being squeezed beside the rewatch stepper */
         @media (max-width:350px) { #m-sort-l { display:none; } }
@@ -709,7 +746,14 @@
         body.is-mobile #b-rows tr:not([data-oi]) > td { display:block; padding:0; }
         body.is-mobile #b-rows tr:not([data-oi]) > td.p-20 { padding:56px 16px; }
         body.is-mobile tr.skeleton-row { margin:0 0 12px; }
-        body.is-mobile .skeleton-bar { height:132px; border-radius:20px; }
+        body.is-mobile tr.skeleton-row > td { padding:0 !important; }
+        body.is-mobile .sk { align-items:flex-start; gap:14px; padding:12px; border-radius:20px; background:var(--card-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 12%, transparent); }
+        body.is-mobile .sk .sk-po { width:var(--m-pw,96px); height:var(--m-ph,144px); border-radius:14px; }
+        body.is-mobile .sk-body { flex-direction:column; align-items:flex-start; gap:12px; padding-top:4px; }
+        body.is-mobile .sk .sk-t { flex:0 0 auto; width:min(80%, var(--sk-w,170px)); height:18px; }
+        body.is-mobile .sk .sk-sc { width:56px; height:32px; }
+        body.is-mobile .sk-pills { flex:0 0 auto; justify-content:flex-start; }
+        body.is-mobile .sk .sk-n { width:96px; height:28px; }
 
         /* --- floating Add button, toasts, sheets --- */
         body.is-mobile #tst-container { left:16px; right:16px; bottom:calc(88px + env(safe-area-inset-bottom)); align-items:stretch; gap:8px; }
@@ -760,12 +804,12 @@
         <div id="m-top">
         <header id="app-header"class="theme-card relative flex items-center justify-between rounded-2xl" style="margin-bottom:9.6px;">
             <div id="hdr-left" class="flex items-center z-10">
-                <button onclick="oMod('stg')" data-tr-al="mSe" id="hdr-gear" class="flex items-center justify-center border border-[var(--theme-accent)]/30 rounded-full hover:bg-[var(--theme-accent)]/10 transition-all theme-text flex-shrink-0"><i class="fas fa-cog"></i></button>
-                <button onclick="oMod('radar')" data-tr-al="rdrB" id="hdr-radar" class="flex items-center justify-center border border-[var(--theme-accent)]/30 rounded-full hover:bg-[var(--theme-accent)]/10 transition-all flex-shrink-0"><i class="fas fa-satellite-dish text-[var(--theme-accent)]"></i></button>
+                <button type="button" data-act="stg" data-tr-al="mSe" id="hdr-gear" class="flex items-center justify-center border border-[var(--theme-accent)]/30 rounded-full hover:bg-[var(--theme-accent)]/10 transition-all theme-text flex-shrink-0"><i class="fas fa-cog"></i></button>
+                <button type="button" data-act="radar" data-tr-al="rdrB" id="hdr-radar" class="flex items-center justify-center border border-[var(--theme-accent)]/30 rounded-full hover:bg-[var(--theme-accent)]/10 transition-all flex-shrink-0"><i class="fas fa-satellite-dish text-[var(--theme-accent)]"></i></button>
             </div>
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><h1 id="hdr-title" class="font-black italic uppercase tracking-tighter pointer-events-auto theme-text">MEDIA HUB</h1></div>
             <div id="btn-sv-slot" class="flex items-center z-10">
-                <button onclick="sCld()" id="btn-sv" data-tr-al="sC" class="relative btn-p rounded-full flex-shrink-0 flex items-center justify-center">
+                <button type="button" data-act="save" id="btn-sv" data-tr-al="sC" class="relative btn-p rounded-full flex-shrink-0 flex items-center justify-center">
                     <i class="fas fa-cloud-arrow-up"></i>
                     <span id="last-saved" class="font-bold uppercase tracking-wide" style="white-space:nowrap;"></span>
                     <span id="uns-dot" class="absolute top-0 right-0 rounded-full bg-white shadow-md border-2 border-black" style="display:none;"></span>
@@ -779,40 +823,40 @@
             <div id="srch-wrap" class="relative flex-1 flex rounded-xl shadow-sm transition-all duration-300 group">
                 <div class="relative flex-1">
                     <i class="fas fa-search absolute text-[var(--theme-accent)] z-10 transition-transform group-hover:scale-110" style="left:10px;top:50%;transform:translateY(-50%);font-size:var(--app-font-size);"></i>
-                    <input type="text" id="srch" oninput="dSrch()" data-p="sP" placeholder="SEARCH..." autocomplete="off" class="theme-card theme-text w-full h-full rounded-l-xl border-0 border-r border-[var(--theme-accent)]/20 uppercase outline-none transition-all group-hover:bg-[var(--theme-accent)]/5" style="padding:8px 20px 8px 28px;font-size:var(--app-font-size);font-weight:700;">
-                    <button id="c-srch" onclick="clrSrch()" class="absolute text-[var(--text-muted)] hover:text-[var(--theme-accent)] hidden transition-transform hover:scale-125 z-20" style="right:8px;top:50%;transform:translateY(-50%);font-size:var(--app-font-size);"><i class="fas fa-times"></i></button>
+                    <input type="text" id="srch" data-p="sP" placeholder="SEARCH..." autocomplete="off" class="theme-card theme-text w-full h-full rounded-l-xl border-0 border-r border-[var(--theme-accent)]/20 uppercase outline-none transition-all group-hover:bg-[var(--theme-accent)]/5" style="padding:8px 20px 8px 28px;font-size:var(--app-font-size);font-weight:700;">
+                    <button type="button" id="c-srch" data-act="clrSrch" class="absolute text-[var(--text-muted)] hover:text-[var(--theme-accent)] hidden transition-transform hover:scale-125 z-20" style="right:8px;top:50%;transform:translateY(-50%);font-size:var(--app-font-size);"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="s-col-wrap" style="position:relative;width:143px;">
-                    <button type="button" id="s-col-btn" onclick="tSCol(event)" aria-haspopup="listbox" aria-expanded="false" class="theme-card theme-text rounded-r-xl uppercase font-bold cursor-pointer border-0 outline-none transition-all w-full flex items-center justify-between" style="padding:8px;font-size:var(--app-font-size);">
+                    <button type="button" id="s-col-btn" data-act="sCol" aria-haspopup="listbox" aria-expanded="false" class="theme-card theme-text rounded-r-xl uppercase font-bold cursor-pointer border-0 outline-none transition-all w-full flex items-center justify-between" style="padding:8px;font-size:var(--app-font-size);">
                         <span id="s-col-label"></span>
                         <i class="fas fa-chevron-down" style="font-size:9px;opacity:.6;flex-shrink:0;margin-left:4px;"></i>
                     </button>
                     <div id="s-col-list" class="s-col-list" role="listbox"></div>
-                    <select id="s-col" onchange="dSrch()" class="hidden" tabindex="-1" aria-hidden="true"></select>
+                    <select id="s-col" class="hidden" tabindex="-1" aria-hidden="true"></select>
                 </div>
             </div>
             <div class="flex gap-2 justify-end">
-                <button onclick="tNxt()" id="nxt-flt" data-tr-al="nO" class="btn-s flex-1 md:flex-none transition-all group" style="padding:8px 19.2px;font-size:13px;">
+                <button type="button" data-act="next" id="nxt-flt" data-tr-al="nO" class="btn-s flex-1 md:flex-none transition-all group" style="padding:8px 19.2px;font-size:13px;">
                     <span class="nxt-txt" data-tr="nO">NEXT</span>
                     <i class="fas fa-angles-right hidden mobile-icon"></i>
                 </button>
-                <button onclick="oMod('add')" id="btn-add-main" data-tr-al="add" class="btn-p flex-none text-sm" style="padding:8px 20px;"><i class="fas fa-plus"></i></button>
+                <button type="button" data-act="add" id="btn-add-main" data-tr-al="add" class="btn-p flex-none text-sm" style="padding:8px 20px;"><i class="fas fa-plus"></i></button>
             </div>
         </div>
         </div>
         <!-- phone-only toolbar (hidden on PC by CSS): filter, sort, table menu and a stats strip -->
         <div id="m-tools">
             <div class="m-tools-row">
-                <button type="button" id="m-f-all" class="m-chip on" onclick="if(STATE.nx) tNxt()" aria-pressed="true"><span data-tr="mAll">All</span></button>
-                <button type="button" id="m-f-nx" class="m-chip" onclick="if(!STATE.nx) tNxt()" aria-pressed="false"><span data-tr="nO">NEXT</span><b id="m-nx-n"></b></button>
+                <button type="button" id="m-f-all" class="m-chip on" data-act="showAll" aria-pressed="true"><span data-tr="mAll">All</span></button>
+                <button type="button" id="m-f-nx" class="m-chip" data-act="onlyNext" aria-pressed="false"><span data-tr="nO">NEXT</span><b id="m-nx-n"></b></button>
                 <span class="m-sp"></span>
-                <button type="button" id="m-sort" class="m-chip" onclick="sortMenu(this)" aria-haspopup="menu"><i class="fas fa-arrow-down-wide-short"></i><span id="m-sort-l"></span></button>
-                <button type="button" id="m-tbl" class="m-ico" onclick="tblMenu(this)" aria-haspopup="menu" data-tr-al="mnuTable"><i class="fas fa-ellipsis-vertical"></i></button>
+                <button type="button" id="m-sort" class="m-chip" data-act="sort" aria-haspopup="menu"><i class="fas fa-arrow-down-wide-short"></i><span id="m-sort-l"></span></button>
+                <button type="button" id="m-tbl" class="m-ico" data-act="tbl" aria-haspopup="menu" data-tr-al="mnuTable"><i class="fas fa-ellipsis-vertical"></i></button>
             </div>
-            <button type="button" id="m-stats" class="m-stats" onclick="tMStats()" aria-expanded="false"></button>
+            <button type="button" id="m-stats" class="m-stats" data-act="stats" aria-expanded="false"></button>
             <div id="m-dist" class="m-dist"></div>
         </div>
-        <button type="button" id="m-fab" class="btn-p" onclick="oMod('add')" data-tr-al="add"><i class="fas fa-plus"></i></button>
+        <button type="button" id="m-fab" class="btn-p" data-act="add" data-tr-al="add"><i class="fas fa-plus"></i></button>
         <div id="tbl-box" class="theme-card rounded-2xl overflow-x-auto shadow-2xl max-w-full"><table class="w-full border-collapse relative"><thead class="theme-card sticky top-0 z-50 font-black uppercase border-b border-[var(--theme-accent)]/20 shadow-sm text-[var(--text-muted)]"><tr id="h-row"></tr></thead><tbody id="b-rows" class="font-bold"></tbody></table></div>
     </div>
     <div id="m-mod" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[2000] p-4"><div id="m-box" role="dialog" aria-modal="true" aria-labelledby="m-ttl" tabindex="-1"></div></div>
@@ -1138,13 +1182,13 @@
         const prefersReducedMotion = () => document.body.classList.contains('force-reduced-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         const DICT = {
-            EN: { sC:"Save Cloud", sP:"SEARCH...", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 DROP/NEXT", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
+            EN: { sC:"Save Cloud", sP:"SEARCH...", noRes:"No results for «{q}»", noNext:"No NEXT titles in this category", clrSrchB:"Clear search", showAll:"Show all", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 DROP/NEXT", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
                 mSv:"Saved!", mF:"Failed!", mSy:"Synced: ", mAd:"Added: ", mDl:"Deleted", mRv:"Reverted", mRs:"Restored", mNt:"Note saved", mEx:"Exported", mIm:"Imported!", mIv:"Invalid file!", mNC:"Sync Cloud first", mAM:"API Key Missing!", mSc:"Scanning...", mSC:"Sync completed", mSF:"Sync failed, showing local data", impW:"Overwrite local data with this file?", tmR:"Multiple matches. Pick one:", del:"DELETE", mTOk:"Connection OK!", mTFail:"Connection failed!",
                 "cNO.":"#", cNO:"#", cNAME:"Title", cGRADE:"Score", cTHEME:"Genres", cGENRE:"Genre", cEXTRA:"Length", cIMDB:"IMDB", cREWATCH:"Rewatches", cNOTE:"Notes", cPOSTER:"Image", cCONTROL:"CONTROL",
                 sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sDr:"DROP", sEp:"Episodes", sTi:"Time",                 mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fAuto:"auto", fHfs:"Header size", hHfs:"Size of the column names. 0 = follows font size.", fFw:"Text weight", hFw:"How bold the text in the table is.", fwN:"Normal", fwB:"Bold", fwK:"Black", fUpper:"Uppercase", hUpper:"Pills and table header in CAPITALS.", fLines:"Row lines", hLines:"The line between rows.", lnNone:"None", lnSoft:"Soft", lnStrong:"Strong", fSticky:"Sticky header", hSticky:"Column names stay on top while scrolling.", fTw:"Table width", hTw:"Full screen, or limited and centred.", twFull:"Full", twLim:"Limited", fPoLock:"Lock 2:3", hPoLock:"Changing the width adjusts the height.", fPoRad:"Corners", hPoRad:"Shape of the poster corners.", rSq:"Square", rRd:"Rounded", rVr:"Very", fBadge:"# badge", hBadge:"Row number on the poster, or off.", bTL:"Top left", bTR:"Top right", bBL:"Bottom left", bBR:"Bottom right", fZoom:"Hover zoom", hZoom:"Enlarged poster when you point at it.", fPillSt:"Pill style", hPillSt:"Filled, outline or text only.", psF:"Filled", psO:"Outline", psT:"Text", fLenFmt:"Length format", hLenFmt:"How seasons and episodes are written.", fImdb:"IMDB button", hImdb:"Full, icon only or hidden.", imF:"Full", imI:"Icon", imH:"Hidden", fRPlus:"R+ pill", hRPlus:"Show R+ wherever you wrote it.", fRMinus:"R- pill", hRMinus:"Show R- wherever you wrote it.", twCus:"Custom", fTwPx:"Custom width", hTwPx:"Maximum table width, in pixels.", fScSt:"Score style", hScSt:"Coloured pill, coloured text or plain.", ssP:"Pill", ssT:"Text", ssN:"Plain", fScFmt:"Score display", hScFmt:"The sheet always keeps the score out of 10.", dgTxt:"Text", hdgTxt:"Size, weight, capitals and alignment.", dgRows:"Rows", hdgRows:"Density, lines, header and width.", dgPo:"Poster", hdgPo:"Size, corners, # badge and zoom.", dgPills:"Pills", hdgPills:"Genres · Length · IMDB.", dgSc:"Score", hdgSc:"How the score looks.", cfOn:"Colour the table", hFs:"Size of the text in table cells.", hWr:"Long text breaks onto new lines.", hHa:"Alignment inside cells, left to right.", hVa:"Alignment inside cells, top to bottom.", fPoFit:"Poster fit", hPoFit:"Fill crops every poster to the same size, Fit shows the whole image.", pfFillS:"Fill", pfFitS:"Fit", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the Image column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead posters", clGrade:"Grades normalised", clGradeSub:"Commas in grades were replaced with dots.", clNone:"Nothing to fix here.", clFix:"Repair", clAdd:"Add", clShow:"Show", clClear:"Clear", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", clPosterDone:"Posters repaired:", hRulB:"Colour a column when it matches. SCORE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuSyncTbl:"Sync whole table", mnuHideHdr:"Hide header", mnuShowHdr:"Show header", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", mSvUnk:"The cloud copy does not show this save - it may not have gone through. Your changes are kept, try again.", mCfgBad:"Some cloud settings were invalid and were skipped", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION", lazyN:"LAZY LOADING", hLazy:"On: rows and posters load as you scroll, fast start. Off: the whole table loads at once.",
                 mNoSave:"Nothing to save: this category is empty", mCfl:"The cloud copy changed since you loaded it (another device?). Overwrite it with this device's data?", mNoBase:"This category was not loaded from the cloud in this session. Saving will REPLACE the cloud copy with local data. Continue?", mSvBad:"Save cancelled",
                 srchAnimeMovie:"Anime films", shkBtn:"SHORTCUTS", instBtn:"INSTALL", instDone:"App installed", instIOS:"On iPhone: tap Share, then Add to Home Screen", shkTtl:"KEYBOARD SHORTCUTS", shkGen:"General", shkTbl:"Table Editing", shkFocus:"Focus search bar", shkAdd:"Add new item", shkUndo:"Undo last change", shkSave:"Save to Cloud", shkEsc:"Close modal / Clear search", shkEnter:"Confirm \"Add New Item\"", shkRow:"Move to previous / next row", shkCol:"Move to previous / next column", shkMove:"Move row up / down", mAll:"All", mSort:"Sort", mTitles:"titles", mDef:"Default order" },
-            RO: { sC:"Salvează", sP:"CAUTĂ...", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
+            RO: { sC:"Salvează", sP:"CAUTĂ...", noRes:"Niciun rezultat pentru «{q}»", noNext:"Niciun titlu NEXT în categoria asta", clrSrchB:"Șterge căutarea", showAll:"Arată tot", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
                 mSv:"Salvat!", mF:"Eroare!", mSy:"Sincronizat: ", mAd:"Adăugat: ", mDl:"Șters", mRv:"Anulat", mRs:"Restaurat", mNt:"Notiță", mEx:"Exportat", mIm:"Importat!", mIv:"Fișier invalid!", mNC:"Sincronizează Cloud întâi", mAM:"Cheie API Lipsă!", mSc:"Se scanează...", mSC:"Sincronizare gata", mSF:"Sincronizare eșuată, date locale", impW:"Suprascrii datele locale cu acest fișier?", tmR:"Mai multe rezultate. Alege:", del:"ȘTERGE", mTOk:"Conexiune reușită!", mTFail:"Conexiune eșuată!",
                 "cNO.":"#", cNO:"#", cNAME:"Titlu", cGRADE:"Notă", cTHEME:"Genuri", cGENRE:"Gen", cEXTRA:"Durată", cIMDB:"IMDB", cREWATCH:"Revizionări", cNOTE:"Notițe", cPOSTER:"Imagine", cCONTROL:"CONTROL",
                 sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sDr:"DROP", sEp:"Episoade", sTi:"Timp",                 mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fAuto:"auto", fHfs:"Mărime antet", hHfs:"Mărimea numelor de coloane. 0 = după mărimea fontului.", fFw:"Grosime text", hFw:"Cât de gros e textul din tabel.", fwN:"Normal", fwB:"Îngroșat", fwK:"Foarte gros", fUpper:"Majuscule", hUpper:"Pastilele și antetul tabelului cu MAJUSCULE.", fLines:"Linii între rânduri", hLines:"Linia dintre rânduri.", lnNone:"Fără", lnSoft:"Discrete", lnStrong:"Vizibile", fSticky:"Antet fix", hSticky:"Numele coloanelor rămân sus la derulare.", fTw:"Lățime tabel", hTw:"Cât ecranul, sau limitată și centrată.", twFull:"Tot ecranul", twLim:"Limitată", fPoLock:"Blochează 2:3", hPoLock:"Când schimbi lățimea, înălțimea se ajustează singură.", fPoRad:"Colțuri", hPoRad:"Forma colțurilor posterului.", rSq:"Drepte", rRd:"Rotunjite", rVr:"Foarte", fBadge:"Insigna #", hBadge:"Numărul rândului pe poster, sau oprit.", bTL:"Stânga sus", bTR:"Dreapta sus", bBL:"Stânga jos", bBR:"Dreapta jos", fZoom:"Zoom la hover", hZoom:"Poster mărit când treci cu mouse-ul peste el.", fPillSt:"Stil pastile", hPillSt:"Pline, doar contur sau doar text.", psF:"Pline", psO:"Contur", psT:"Text", fLenFmt:"Format durată", hLenFmt:"Cum sunt scrise sezoanele și episoadele.", fImdb:"Buton IMDB", hImdb:"Complet, doar iconiță sau ascuns.", imF:"Complet", imI:"Iconiță", imH:"Ascuns", fRPlus:"Pastila R+", hRPlus:"Arată R+ oriunde l-ai scris.", fRMinus:"Pastila R-", hRMinus:"Arată R- oriunde l-ai scris.", twCus:"Personalizat", fTwPx:"Lățime personalizată", hTwPx:"Lățimea maximă a tabelului, în pixeli.", fScSt:"Stil notă", hScSt:"Pastilă colorată, text colorat sau simplu.", ssP:"Pastilă", ssT:"Text", ssN:"Simplu", fScFmt:"Afișare notă", hScFmt:"În sheet nota rămâne mereu din 10.", dgTxt:"Text", hdgTxt:"Mărime, grosime, majuscule și aliniere.", dgRows:"Rânduri", hdgRows:"Densitate, linii, antet și lățime.", dgPo:"Poster", hdgPo:"Mărime, colțuri, insigna # și zoom.", dgPills:"Pastile", hdgPills:"Genuri · Durată · IMDB.", dgSc:"Notă", hdgSc:"Cum arată nota.", cfOn:"Colorează tabelul", hFs:"Mărimea textului din celulele tabelului.", hWr:"Textul lung trece pe rând nou.", hHa:"Alinierea în celule, de la stânga la dreapta.", hVa:"Alinierea în celule, de sus în jos.", fPoFit:"Încadrare poster", hPoFit:"Umple taie toate posterele la aceeași mărime, Încadrează arată toată imaginea.", pfFillS:"Umple", pfFitS:"Încadrează", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana Image.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte", clGrade:"Note normalizate", clGradeSub:"Virgulele din note au fost înlocuite cu punct.", clNone:"Nimic de reparat aici.", clFix:"Repară", clAdd:"Adaugă", clShow:"Arată", clClear:"Golește", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", clPosterDone:"Postere reparate:", hRulB:"Colorează o coloană când se potrivește. SCORE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuSyncTbl:"Sincronizează tot tabelul", mnuHideHdr:"Ascunde antetul", mnuShowHdr:"Arată antetul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", mSvUnk:"Copia din cloud nu arată salvarea - probabil nu a ajuns. Modificările tale sunt păstrate, încearcă din nou.", mCfgBad:"Unele setări din cloud erau invalide și au fost sărite", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
@@ -1284,6 +1328,13 @@
         function rVibUI(){ rSwitch('b-vib','mobile-screen-button','vib','hVib', STATE.vib); rDrwSum(); }
         function vibSv(){ if(STATE.vib && navigator.vibrate) navigator.vibrate(15); }
 
+        const ACT={
+            stg:()=>oMod('stg'), radar:()=>oMod('radar'), save:()=>sCld(), add:()=>oMod('add'),
+            clrSrch:()=>{ clrSrch(); DOM.sr.focus(); }, sCol:()=>tSCol(), sColOpt:o=>selSCol(o.dataset.v), next:()=>tNxt(),
+            showAll:()=>{ if(STATE.nx) tNxt(); }, onlyNext:()=>{ if(!STATE.nx) tNxt(); },
+            sort:b=>sortMenu(b), tbl:b=>tblMenu(b), stats:()=>tMStats(),
+            sortCol:b=>srtT(+b.dataset.col), phTip:b=>tPhTip(b)
+        };
         function onKeydown(e){
             /* Tab stays inside an open dialog */
             if(e.key==='Tab' && DOM.md && DOM.md.classList.contains('open')){
@@ -1361,11 +1412,11 @@
         function sNt(r,c){ if(!STATE.data[r]){cMod();return;} const n=$('i-nt').value; if(STATE.data[r][c]!==n){ STATE.hist.push({t:'E',rowRef:STATE.data[r],c,v:STATE.data[r][c]}); STATE.data[r][c]=n; cmtSt(t("mNt")); } cMod(); }
         function cmtSt(m=null, r=false){ if(r===true)fRdx(); else if(r==='num')fNum(); upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); if(m)sTst(m, m.includes(t("mRv"))||m.includes(t("mRs"))?"info":"success"); }
         function mCol(){ COL={}; if(STATE.hdrs?.length) STATE.hdrs.forEach((h,i)=>{ const raw=String(h).toUpperCase().trim(), k=colKey(h); if(COL[raw]===undefined) COL[raw]=i; if(COL[k]===undefined) COL[k]=i; }); const d=$('s-col'); if(d&&STATE.hdrs?.length){ const cur=d.value; d.innerHTML=STATE.hdrs.map((h,i)=>({h,i})).filter(({h})=>colKey(h)!=='POSTER').map(({h,i})=>`<option value="${i}" style="background:var(--card-bg);color:var(--text-color);">${esc(colLabel(h))}</option>`).join(''); d.value=[...d.options].some(o=>o.value===cur)?cur:(COL.NAME!==undefined?COL.NAME:''); } rSColUI(); }
-        function tSCol(e){ e.stopPropagation(); const list=$('s-col-list'), btn=$('s-col-btn'); if(!list||!btn)return; const open=list.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); }
+        function tSCol(){ const list=$('s-col-list'), btn=$('s-col-btn'); if(!list||!btn)return; const open=list.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); }
         function selSCol(v){ const sel=$('s-col'); if(!sel)return; sel.value=v; sel.dispatchEvent(new Event('change')); rSColUI(); const list=$('s-col-list'), btn=$('s-col-btn'); if(list)list.classList.remove('open'); if(btn)btn.setAttribute('aria-expanded','false'); }
         function rSColUI(){
             const sel=$('s-col'), list=$('s-col-list'), label=$('s-col-label'); if(!sel||!list||!label)return;
-            list.innerHTML=[...sel.options].map(o=>`<div class="s-col-opt${o.value===sel.value?' active':''}" role="option" tabindex="0" aria-selected="${o.value===sel.value}" onclick="selSCol('${o.value}')">${esc(o.textContent)}</div>`).join('');
+            list.innerHTML=[...sel.options].map(o=>`<div class="s-col-opt${o.value===sel.value?' active':''}" role="option" tabindex="0" aria-selected="${o.value===sel.value}" data-act="sColOpt" data-v="${esc(o.value)}">${esc(o.textContent)}</div>`).join('');
             const cur=sel.options[sel.selectedIndex]; label.textContent=cur?cur.textContent:'';
         }
         function aGlSt(){ ['--app-font-size:fs:px','--t-ha:ha:','--t-va:va:','--t-wr:wr:'].forEach(p=>{const[css,st,suf]=p.split(':'); document.documentElement.style.setProperty(css, STATE[st]+(suf||''));}); }
@@ -1578,7 +1629,13 @@
               + sec('wand-magic-sparkles', t('clGrade'), gFix, `<p class="cl-note">${esc(t('clGradeSub'))}</p>`);
         }
         
-        function showSkeleton(n=6){ DOM.hr.innerHTML=''; DOM.br.innerHTML=Array.from({length:n},()=>`<tr class="skeleton-row"><td colspan="99"><div class="skeleton-bar"></div></td></tr>`).join(''); }
+        /* Loading placeholder shaped like the real rows (cards on the phone); the shimmer stops when animations are off */
+        function showSkeleton(n){
+            n=n||(document.body.classList.contains('is-mobile')?5:8);
+            const tw=[190,140,220,170,120,200,155,210];
+            DOM.hr.innerHTML='';
+            DOM.br.innerHTML=Array.from({length:n},(_,i)=>`<tr class="skeleton-row" aria-hidden="true" style="--sk-d:${(i*0.09).toFixed(2)}s"><td colspan="99"><div class="sk"><i class="sk-po"></i><div class="sk-body"><i class="sk-t" style="--sk-w:${tw[i%8]}px"></i><i class="sk-sc"></i><span class="sk-pills"><i></i><i></i><i></i></span><i class="sk-n"></i></div></div></td></tr>`).join('');
+        }
         /* Pads rows shorter than the header count (e.g. hand-edited imports, ragged cloud data) so missing cells read as '' instead of undefined */
         function padRows(hdrs, data){ const n=hdrs?.length||0; const rwIdx=hdrs?.findIndex(h=>colKey(h)==='REWATCH'); (data||[]).forEach(r=>{ while(r.length<n) r.push(''); if(r.length>n) r.length=n; for(let i=0;i<n;i++) r[i]=r[i]==null?'':String(r[i]); if(rwIdx>=0 && r[rwIdx].trim()==='') r[rwIdx]='0'; }); }
         async function lDat(){
@@ -1743,10 +1800,9 @@
             rTab(true);
         }
 
-        function tPhTip(e){
+        function tPhTip(el){
             if(!document.body.classList.contains('is-mobile'))return;
-            e.stopPropagation();
-            const el=e.currentTarget, wasOpen=el.classList.contains('ph-open');
+            const wasOpen=el.classList.contains('ph-open');
             document.querySelectorAll('.ph-hdr.ph-open').forEach(x=>x.classList.remove('ph-open'));
             if(!wasOpen) el.classList.add('ph-open');
         }
@@ -2169,10 +2225,12 @@
             }
         }
 
+        /* One sortable header cell. Click and Enter / Space are handled once, by the shared [data-act] listeners. */
+        const thSort=(c, srt, label, icon)=>`<th scope="col" aria-sort="${srt}" class="cursor-pointer select-none hover:bg-[var(--theme-accent)]/5 transition-colors" data-col="${c}" data-act="sortCol" tabindex="0"><div class="flex items-center justify-center gap-1.5">${label}${ic(icon,'text-xs')}</div></th>`;
         function rHdr(){
             if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return; }
             {
-                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr" onclick="tPhTip(event)"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span><span class="ph-tip"><table><tbody><tr><td>${t('sTot')}</td><td>${pc.tot}</td></tr><tr><td>${t('sAvg')}</td><td>${pc.avg.toFixed(2)}</td></tr><tr><td>${t('sW')}</td><td>${pc.nx}</td></tr><tr><td>${t('sDr')}</td><td>${pc.dp}</td></tr>${pc.ep?`<tr><td>${t('sEp')}</td><td>${pc.ep}</td></tr>`:''}${pc.time?`<tr><td>${t('sTi')}</td><td>${pc.time}</td></tr>`:''}</tbody></table></span></span></th>`); }
+                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr" data-act="phTip"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span><span class="ph-tip"><table><tbody><tr><td>${t('sTot')}</td><td>${pc.tot}</td></tr><tr><td>${t('sAvg')}</td><td>${pc.avg.toFixed(2)}</td></tr><tr><td>${t('sW')}</td><td>${pc.nx}</td></tr><tr><td>${t('sDr')}</td><td>${pc.dp}</td></tr>${pc.ep?`<tr><td>${t('sEp')}</td><td>${pc.ep}</td></tr>`:''}${pc.time?`<tr><td>${t('sTi')}</td><td>${pc.time}</td></tr>`:''}</tbody></table></span></span></th>`); }
                 const ctx=rowCtx(), part=c=>`<span>${esc(colLabel(STATE.hdrs[c]))}</span>`, dot='<span class="th-dot">·</span>';
                 STATE.hdrs.forEach((h,c)=>{
                     if(ctx.hid.has(c))return;
@@ -2184,15 +2242,12 @@
                     else if(c===ctx.infoIn) label=[ctx.genIn!==null?COL.THEME:null, ctx.lenIn!==null?COL.EXTRA:null].filter(x=>x!==null).map(part).join(dot);
                     else if(c===ctx.rnIn) label=[ctx.rwIn!==null?COL.REWATCH:null, ctx.noteIn!==null?COL.NOTE:null].filter(x=>x!==null).map(part).join(dot);
                     if(colKey(h)==='GRADE'){
-                        const gc=gHdrCnts();
-                        const rows=gc.dist.map(d=>`<tr><td>${d.label}</td><td>${d.count}</td></tr>`).join('');
-                        th.push(`<th scope="col" aria-sort="${srt}" class="cursor-pointer select-none hover:bg-[var(--theme-accent)]/5 transition-colors" data-col="${c}" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&event.target===this){event.preventDefault();srtT(${c},true)}" onclick="srtT(${c})"><div class="flex items-center justify-center gap-1.5"><span class="ph-hdr" onclick="tPhTip(event)"><span>${label}</span><span class="ph-count-dot"></span><span class="ph-tip"><table><tbody>${rows}</tbody></table></span></span>${ic(i,'text-xs')}</div></th>`);
-                        return;
-                    }
-                    th.push(`<th scope="col" aria-sort="${srt}" class="cursor-pointer select-none hover:bg-[var(--theme-accent)]/5 transition-colors" data-col="${c}" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&event.target===this){event.preventDefault();srtT(${c},true)}" onclick="srtT(${c})"><div class="flex items-center justify-center gap-1.5"><span>${label}</span>${ic(i,'text-xs')}</div></th>`);
+                        const rows=gHdrCnts().dist.map(d=>`<tr><td>${d.label}</td><td>${d.count}</td></tr>`).join('');
+                        label=`<span class="ph-hdr" data-act="phTip"><span>${label}</span><span class="ph-count-dot"></span><span class="ph-tip"><table><tbody>${rows}</tbody></table></span></span>`;
+                    } else label=`<span>${label}</span>`;
+                    th.push(thSort(c, srt, label, i));
                 });
-                const hdrHid=$('app-header')?.classList.contains('hdr-hidden');
-                let cF=`<button type="button" class="menu-btn" onclick="tblMenu(this)" aria-haspopup="menu" aria-label="${esc(t('mnuTable'))}">${ic('ellipsis-vertical','pointer-events-none')}</button>`;
+                const cF=`<button type="button" class="menu-btn" data-act="tbl" aria-haspopup="menu" aria-label="${esc(t('mnuTable'))}">${ic('ellipsis-vertical','pointer-events-none')}</button>`;
                 if(!isHidden('CONTROL')) th.push(`<th scope="col" class="control-col">${cF}</th>`); DOM.hr.innerHTML=th.join('');
             }
         }
@@ -2249,11 +2304,21 @@
             const rw=String(v??'').trim()===''?0:(parseInt(v,10)||0);
             return `<div class="rw-cell"><button data-a="rwd" data-r="${oi}" data-c="${c}" tabindex="-1" aria-label="-1" class="no-arrow"${rw<=0?' disabled':''}>${ic('minus')}</button><span class="rw-val">${rw}</span><button data-a="rwi" data-r="${oi}" data-c="${c}" tabindex="-1" aria-label="+1" class="no-arrow">${ic('plus')}</button></div>`;
         }
+        /* Note preview: cut at the chosen length, back to the last space when it is close, and mark the cut with "…".
+           The full text shows in #note-tip on hover / keyboard focus (PC only). */
+        function notePreview(v, np){
+            v=v.trim(); if(np<=0 || !v) return '';
+            if(v.length<=np) return v;
+            let cut=v.substring(0,np); const sp=cut.lastIndexOf(' ');
+            if(sp>=np*0.6) cut=cut.substring(0,sp);
+            return cut.replace(/[\s.,;:!?\-–—]+$/,'')+'…';
+        }
         function noteHTML(v, oi, c){
-            v=String(v??''); const np=STATE.note??5;
-            const tx=(np>0&&v.trim())?esc(v.trim().substring(0,np)):'';
-            const i=v.trim()?`${ic('comment-dots','text-[var(--theme-accent)] ml-1')}`:`${ic('pen','text-[var(--text-muted)] opacity-50')}`;
-            return `<button data-a="n" data-r="${oi}" data-c="${c}" aria-label="${esc(t('mN'))}" class="note-btn outline-none hover:opacity-70 transition-opacity font-bold pointer-events-auto" title="${esc(v)}">${tx}${i}</button>`;
+            v=String(v??''); const np=STATE.note??5, full=v.trim();
+            const pv=notePreview(v, np), tx=pv?`<span class="note-tx">${esc(pv)}</span>`:'';
+            const i=full?`${ic('comment-dots','text-[var(--theme-accent)] ml-1')}`:`${ic('pen','text-[var(--text-muted)] opacity-50')}`;
+            const al=full?`${t('mN')}: ${full.length>120?full.substring(0,120)+'…':full}`:t('mN');
+            return `<button data-a="n" data-r="${oi}" data-c="${c}" aria-label="${esc(al)}" class="note-btn outline-none hover:opacity-70 transition-opacity font-bold pointer-events-auto">${tx}${i}</button>`;
         }
         function buildRowHTML(r, oi, idx, q, sc, ctx){
             const {hid, hCt, nCol}=ctx; let rH = '';
@@ -2367,7 +2432,7 @@
             DOM.br.appendChild(fg);
         }
         function rTBr(q='', sc){
-            hideZoom();
+            hideZoom(); hideNoteTip();
             const gen=++RENDER_GEN, ctx=rowCtx(), total=STATE.fDat.length;
             DOM.br.innerHTML='';
             /* a row we are about to scroll to must exist right away */
@@ -2376,8 +2441,19 @@
             if(STATE.hlBatch?.size) first=total;
             const at=Math.min(first,total);
             appendRows(0, at, q, sc, ctx);
+            if(!total) DOM.br.innerHTML=emptyHTML();
             RENDER_PENDING = at<total ? { gen, q, sc, ctx, at, total } : null;
             ensureRowObserver(); placeSentinel();
+        }
+        /* What the table shows when there is nothing to list: an empty category, a search with no match, or NEXT with no NEXT titles */
+        function emptyHTML(){
+            const raw=(DOM.sr?.value||'').trim();
+            const b=(act,icn,lbl,p)=>`<button type="button" data-act="${act}" class="${p?'btn-p':'btn-s'}">${ic(icn)}<span>${esc(lbl)}</span></button>`;
+            let icn, title, sub='', btns;
+            if(!STATE.data.length){ icn='clapperboard'; title=t('blk'); sub=t('blkSub'); btns=b('add','plus',t('add'),true); }
+            else if(raw){ icn='magnifying-glass'; title=t('noRes').replace('{q}',raw); btns=b('clrSrch','xmark',t('clrSrchB'),true)+(STATE.nx?b('showAll','list',t('showAll')):''); }
+            else { icn='filter'; title=t('noNext'); btns=b('showAll','list',t('showAll'),true); }
+            return `<tr class="empty-row"><td colspan="99"><div class="empty-st">${ic(icn,'empty-ic')}<div class="empty-t">${esc(title)}</div>${sub?`<div class="empty-s">${esc(sub)}</div>`:''}<div class="empty-b">${btns}</div></div></td></tr>`;
         }
         /* Finish any pending batches now. Used before anything that needs every row in the DOM
            (keyboard navigation past the loaded rows, focusing a specific row, tests). */
@@ -3182,6 +3258,31 @@
             zp.src=img.dataset.full||img.src; zp.style.width=w+'px'; zp.style.height=h+'px'; zp.style.left=left+'px'; zp.style.top=top+'px'; zp.style.display='block';
         }
         function hideZoom(){ zp.style.display='none'; zoomPinned=null; }
+
+        /* ---- note tooltip (PC): the whole note when you point at it or tab to it; phones tap to open the editor instead ---- */
+        let NT_EL=null, NT_TM=null;
+        const canHover=()=>!document.body.classList.contains('is-mobile') && window.matchMedia('(hover:hover)').matches;
+        function hideNoteTip(){ clearTimeout(NT_TM); NT_TM=null; if(NT_EL) NT_EL.classList.remove('show'); }
+        function showNoteTip(btn){
+            if(!btn.isConnected) return;
+            const v=String(STATE.data[+btn.dataset.r]?.[+btn.dataset.c]??'').trim(); if(!v) return hideNoteTip();
+            if(!NT_EL){ NT_EL=document.createElement('div'); NT_EL.id='note-tip'; NT_EL.setAttribute('role','tooltip'); document.body.appendChild(NT_EL); }
+            NT_EL.textContent=v.length>600?v.substring(0,600)+'…':v;
+            NT_EL.classList.add('show');
+            const b=btn.getBoundingClientRect(), w=NT_EL.offsetWidth, h=NT_EL.offsetHeight;
+            let top=b.top-h-8; if(top<8) top=b.bottom+8;
+            NT_EL.style.left=Math.max(8, Math.min(b.left+b.width/2-w/2, window.innerWidth-w-8))+'px';
+            NT_EL.style.top=Math.max(8, Math.min(top, window.innerHeight-h-8))+'px';
+        }
+        function initNoteTip(){
+            const arm=(btn,d)=>{ clearTimeout(NT_TM); NT_TM=setTimeout(()=>showNoteTip(btn),d); };
+            DOM.br.addEventListener('mouseover',e=>{ const b=e.target.closest('.note-btn'); if(!b||!canHover()||b.contains(e.relatedTarget)) return; arm(b,250); });
+            DOM.br.addEventListener('mouseout',e=>{ const b=e.target.closest('.note-btn'); if(!b||b.contains(e.relatedTarget)) return; hideNoteTip(); });
+            DOM.br.addEventListener('focusin',e=>{ const b=e.target.closest?.('.note-btn'); if(b&&canHover()&&b.matches(':focus-visible')) arm(b,0); });
+            DOM.br.addEventListener('focusout',e=>{ if(e.target.closest?.('.note-btn')) hideNoteTip(); });
+            document.addEventListener('pointerdown',hideNoteTip,true);
+            window.addEventListener('scroll',hideNoteTip,{passive:true,capture:true});
+        }
         
         function uAct(){ 
             if(STATE.hist.length===0)return; 
@@ -3289,6 +3390,7 @@
         const initApp=()=>{
             DOM={ ld:$('ldr'), brs:$('bar'), ts:$('tst-container'), nv:$('nav'), sr:$('srch'), hr:$('h-row'), br:$('b-rows'), md:$('m-mod'), mb:$('m-box') };
             document.addEventListener('keydown', onKeydown);
+            initNoteTip();
 
             /* Pointerdown, not click: the old click handler was swallowed whenever the previous
                focusout re-rendered the table between mousedown and mouseup. The pending edit is
@@ -3357,6 +3459,17 @@
                 const img=e.target.closest('.poster-img'); if(!img||!img.getAttribute('src'))return;
                 if(zoomPinned===img) hideZoom(); else if(showZoom(img)!==false) zoomPinned=img;
             });
+            /* Buttons in the header, search row, phone toolbar, table header and empty state carry data-act; one listener runs them */
+            document.addEventListener('click',e=>{
+                const el=e.target.closest('[data-act]'); if(!el || el.disabled) return;
+                let act=el.dataset.act, tgt=el;
+                /* the stats tip in a header opens only on the phone; on PC a click there sorts the column as before */
+                if(act==='phTip' && !document.body.classList.contains('is-mobile')){ tgt=el.closest('th[data-act]'); if(!tgt) return; act=tgt.dataset.act; }
+                const f=ACT[act]; if(f) f(tgt, e);
+            });
+            $('h-row').addEventListener('keydown',e=>{ const th=e.target.closest('th[data-col]'); if(th && e.target===th && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); srtT(+th.dataset.col, true); } });
+            DOM.sr.addEventListener('input', dSrch);
+            $('s-col')?.addEventListener('change', dSrch);
             document.addEventListener('click',e=>{ if(zoomPinned && !e.target.closest('.poster-img')) hideZoom(); });
             document.addEventListener('click',e=>{ if(!e.target.closest('.ph-hdr')) document.querySelectorAll('.ph-hdr.ph-open').forEach(x=>x.classList.remove('ph-open')); });
             document.addEventListener('click',e=>{ if(!e.target.closest('#s-col-wrap')){ const list=$('s-col-list'), btn=$('s-col-btn'); if(list)list.classList.remove('open'); if(btn)btn.setAttribute('aria-expanded','false'); } });
