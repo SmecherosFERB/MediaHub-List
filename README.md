@@ -115,8 +115,9 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type.
 - **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. Every save is protected:
-  - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten.
-  - **Verified saves:** the app reads the sheet back and only reports success when the data really arrived.
+  - **One request:** with the current backend (v4) a save is a single request. The check and the write happen together on the server, and the answer carries the sheet as written.
+  - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
+  - **Verified saves:** success is only reported when the sheet really shows what you sent.
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two.
 - **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
@@ -136,7 +137,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
    5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection.
 3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
 
-> **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same.
+> **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app also works with the older v3 script (it then reads the sheet before and after each save), so it keeps working until you redeploy.
 
 ---
 

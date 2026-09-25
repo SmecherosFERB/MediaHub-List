@@ -1397,8 +1397,11 @@
         const fetchTo = (url, opts={}, ms=30000) => { if(AbortSignal.timeout) return fetch(url, {...opts, signal:AbortSignal.timeout(ms)}); const c=new AbortController(), id=setTimeout(()=>c.abort(), ms); return fetch(url, {...opts, signal:c.signal}).finally(()=>clearTimeout(id)); };
         /* Cloud safety state (memory only).
            CLOUD_BASE[sheet]   = the raw rows as the cloud had them the last time this session read or wrote that sheet.
+           CLOUD_HASH[sheet]   = the server's fingerprint of that same state (script v4+), sent back with the next save.
+           SRV_V               = the backend version seen in the last answer (0 = v3 or older: the three-request save).
            PENDING_IMPORT      = sheets whose content came from an imported .json and still has to be pushed to the cloud. */
-        let CLOUD_BASE={}, PENDING_IMPORT=new Set(), CFM_DISMISS=null;
+        let CLOUD_BASE={}, CLOUD_HASH={}, SRV_V=0, PENDING_IMPORT=new Set(), CFM_DISMISS=null;
+        function setBase_(sheet, res){ CLOUD_BASE[sheet]=JSON.stringify(res.values||[]); CLOUD_HASH[sheet]=res.hash; }
         /* Promise wrapper around the confirm dialog. Closing it with X / Escape counts as "no" instead of leaving the caller waiting forever. */
         const askYesNo = msg => new Promise(res=>{
             let done=false; const fin=v=>{ if(done) return; done=true; CFM_DISMISS=null; res(v); };
@@ -2115,8 +2118,9 @@
                 try{
                     const r=await fetchTo(`${STATE.url}?action=read&sheet=${encodeURIComponent(targetSheet)}&pass=${encodeURIComponent(STATE.pass)}`), res=await r.json();
                     if(STATE.sheet!==targetSheet) return; /* user switched tabs again before this request resolved; a newer lDat() call already owns the current sheet, so this stale response must be discarded or it would mislabel one sheet's data as another */
+                    SRV_V=res?.v||0;
                     if(res.ok){
-                        CLOUD_BASE[targetSheet]=JSON.stringify(res.values||[]); /* what the cloud held when we loaded it, before padRows/edits touch the rows */
+                        setBase_(targetSheet, res); /* what the cloud held when we loaded it, before padRows/edits touch the rows */
                         STATE.fU=res.fileUrl||''; const rn=renameHdrs(res.values[0]); let migr=rn.changed; STATE.hdrs=rn.h; STATE.data=res.values.slice(1); padRows(STATE.hdrs, STATE.data); upLib(targetSheet, STATE.hdrs, STATE.data);
                         if(res.tabs&&Array.isArray(res.tabs)){STATE.aT=res.tabs; ls('allTabs',JSON.stringify(STATE.aT));}
                         if(res.config && !cfgDirty()){ try{ /* local settings not saved yet win over the cloud copy */
@@ -3220,7 +3224,7 @@
             return true;
         }
         async function chkCloud(url, pass, sheet){
-            try{ const r=await fetchTo(`${url}?action=read&sheet=${encodeURIComponent(sheet)}&pass=${encodeURIComponent(pass)}`); return await r.json(); }
+            try{ const r=await fetchTo(`${url}?action=read&sheet=${encodeURIComponent(sheet)}&pass=${encodeURIComponent(pass)}`), j=await r.json(); if(url===STATE.url && j) SRV_V=j.v||0; return j; }
             catch(e){ return {ok:false, error:null}; }
         }
         async function testConn(){
@@ -3764,6 +3768,104 @@
 
         function radarGradeTag(g){ const s=String(g||'').toUpperCase().trim(); if(s==='NEXT'||s==='HOLD') return s; const n=parseFloat(s.replace(',','.')); return isNaN(n)?'':String(n); }
 
+        /* what a save sends: the table and the settings that travel with the sheet */
+        function savePayload_(sheet){
+            return {action:'write',pass:STATE.pass,sheet,values:[STATE.hdrs,...STATE.data],config:{
+                    FONT_SIZE:STATE.dPc.fs,H_ALIGN:STATE.dPc.ha,V_ALIGN:STATE.dPc.va,T_WRAP:STATE.dPc.wr,HIDDEN_COLS:JSON.stringify(STATE.dPc.hC),
+                    DISPLAY_PC:JSON.stringify(pickDisplay(STATE.dPc)), DISPLAY_MOBILE:JSON.stringify(pickDisplay(STATE.dMb)),
+                    FONT_SIZE_MOBILE:STATE.dMb.fs,H_ALIGN_MOBILE:STATE.dMb.ha,V_ALIGN_MOBILE:STATE.dMb.va,T_WRAP_MOBILE:STATE.dMb.wr,HIDDEN_COLS_MOBILE:JSON.stringify(STATE.dMb.hC),
+                    COLOR_RULES:STATE.cR,COLOR_FORMATTING:STATE.cF,HIDDEN_TABS:JSON.stringify(STATE.hT),LANG:STATE.lang,THEME:STATE.theme,ALL_TABS:JSON.stringify(STATE.aT),VIEW_MODE:STATE.vM,TRACK:STATE.track,REDUCE_MOTION:STATE.reduceMotion
+            }};
+        }
+        /* the cloud shows exactly what was sent */
+        function saveOk_(sheet, res, chg0, cfg0){
+            sTst(t("mSv"));
+            if(CHG_GEN===chg0) setUns(false); if(CFG_GEN===cfg0) ls('cfgDirty',''); /* edits made during the save stay marked as unsaved */
+            STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); vibSv(); setBase_(sheet, res); PENDING_IMPORT.delete(sheet);
+        }
+        /* the server confirmed the write, but the sheet does not read back exactly as sent */
+        function saveUnsure_(sheet, res, cfg0){
+            sTst(t("mSvChk"),"warning"); if(CFG_GEN===cfg0) ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); setBase_(sheet, res);
+        }
+        /* Script v4+: ONE request. It carries the server hash of the sheet as this device last saw it (or 'none' when the
+           category was never loaded here; nothing for an import, which never asked). The server compares and writes under
+           its lock, and answers with the sheet as written, so no read is needed before or after.
+           Returns true / false, or 'legacy' when the answer could not be read and the old path has to take over. */
+        async function saveFast_(sheet, chg0, cfg0){
+            const p=savePayload_(sheet), sent=JSON.parse(JSON.stringify(p.values)); /* frozen: edits made meanwhile must not fail the check */
+            if(CLOUD_HASH[sheet]!==undefined) p.baseHash=CLOUD_HASH[sheet]; else if(!PENDING_IMPORT.has(sheet)) p.baseHash='none';
+            for(let round=0; round<2; round++){
+                let srv=null;
+                try{ const rr=await fetchTo(STATE.url,{method:'POST',body:JSON.stringify(p)},60000); try{ srv=await rr.json(); }catch(_){ srv=null; } }
+                catch(err){ if(err && (err.name==='AbortError'||err.name==='TimeoutError')) throw err; }
+                if(!srv){ /* the answer could not be read (browser block / not JSON): look at the sheet once */
+                    const vd=await chkCloud(STATE.url, STATE.pass, sheet);
+                    if(vd && vd.ok && Array.isArray(vd.values) && cloudMatches(vd.values, sent)){ saveOk_(sheet, vd, chg0, cfg0); return true; }
+                    return 'legacy';
+                }
+                SRV_V=srv.v||0;
+                if(srv.ok && Array.isArray(srv.values)){
+                    if(cloudMatches(srv.values, sent)) saveOk_(sheet, srv, chg0, cfg0); else saveUnsure_(sheet, srv, cfg0);
+                    return true;
+                }
+                if(srv.ok){ /* an older script answered (no sheet in the reply): confirm with a read, as before */
+                    const vd=await chkCloud(STATE.url, STATE.pass, sheet), reached=!!(vd && vd.ok && Array.isArray(vd.values));
+                    if(reached && cloudMatches(vd.values, sent)){ saveOk_(sheet, vd, chg0, cfg0); return true; }
+                    if(reached){ saveUnsure_(sheet, vd, cfg0); return true; }
+                    sTst((vd&&vd.error)||t("mF"),"error"); return false;
+                }
+                if(srv.conflict && round===0){ /* changed on another device / never loaded here: the same question as before */
+                    if(!(await askYesNo(t(srv.conflict==='nobase'?'mNoBase':'mCfl')))){ sTst(t('mSvBad'),'info'); return false; }
+                    delete p.baseHash; p.overwrite=true; continue;
+                }
+                sTst(srv.error||t('mF'),'error'); return false; /* refused: nothing was written */
+            }
+            return false;
+        }
+        /* Script v3 (or a fallback): read the cloud first, ask on a conflict, write, then read back to confirm. */
+        async function saveLegacy_(savedSheet, chg0, cfg0){
+            /* The write replaces the whole sheet, so first look at what the cloud holds NOW. */
+            const pre=await chkCloud(STATE.url, STATE.pass, savedSheet);
+            if(pre && pre.ok && Array.isArray(pre.values)){
+                let msg=null;
+                if(CLOUD_BASE[savedSheet]!==undefined){
+                    let base=[]; try{ base=JSON.parse(CLOUD_BASE[savedSheet]); }catch(e){}
+                    if(!cloudMatches(pre.values, base)) msg=t('mCfl');            /* changed by someone/something else since we loaded it */
+                } else if(!PENDING_IMPORT.has(savedSheet) && pre.values.length>1){
+                    msg=t('mNoBase');                                              /* never loaded from the cloud in this session (load failed / offline start) */
+                }
+                if(msg && !(await askYesNo(msg))){ sTst(t('mSvBad'),'info'); return false; }
+            }
+            const p=savePayload_(savedSheet);
+            /* what was sent, frozen: an edit made while the save runs must not make the read-back look wrong */
+            const sent=JSON.parse(JSON.stringify(p.values));
+            /* Read Apps Script's real answer: a text/plain POST needs no preflight and the web app
+               answers with Access-Control-Allow-Origin:*. Only when the browser still blocks it do we
+               fall back to the old blind no-cors send ("blind": we cannot see a refusal). */
+            let blind=false, srv=null;
+            try{
+                const rr=await fetchTo(STATE.url,{method:'POST',body:JSON.stringify(p)},60000);
+                try{ srv=await rr.json(); }catch(_){ srv=null; }
+            }catch(err){
+                if(err && (err.name==='AbortError'||err.name==='TimeoutError')) throw err; /* a timeout is a failure, not a CORS block */
+                blind=true;
+                await fetchTo(STATE.url,{method:'POST',mode:'no-cors',body:JSON.stringify(p)},60000);
+            }
+            if(srv && srv.ok===false){ sTst(srv.error||t('mF'),'error'); return false; } /* refused: nothing was written */
+            if(!blind && !srv) blind=true; /* answered, but not with JSON: judge by the read-back only */
+            /* poll a few times: the sheet can take a moment to show the write */
+            let vd=null, match=false, reached=false;
+            for(let attempt=0; attempt<3 && !match; attempt++){
+                await new Promise(r=>setTimeout(r, attempt===0?(blind?800:0):1400)); /* confirmed by the server: read back at once */
+                vd=await chkCloud(STATE.url, STATE.pass, savedSheet);
+                if(vd&&vd.ok&&Array.isArray(vd.values)){ reached=true; match=cloudMatches(vd.values, sent); }
+            }
+            if(match){ saveOk_(savedSheet, vd, chg0, cfg0); return true; }
+            if(reached && !blind){ saveUnsure_(savedSheet, vd, cfg0); return true; }
+            if(reached){ sTst(t("mSvUnk"),"error"); setBase_(savedSheet, vd); return false; } /* blind send and the cloud does not show it: NOT saved, the local changes stay */
+            sTst((vd&&vd.error)||t("mF"),"error"); return false;
+        }
+
         async function sCld(){
             flushLib();
             if(!STATE.url) return sTst(t("mNC"),"error"), oMod('stg');
@@ -3772,55 +3874,14 @@
             if(!STATE.hdrs?.length){ sTst(t('mNoSave'),'warning'); return false; }
             setLd(true); b.disabled=true; b.innerHTML=ic('spinner','fa-spin'); lockNav(true);
             const savedSheet=STATE.sheet, chg0=CHG_GEN, cfg0=CFG_GEN;
-            let ok=false; /* true only when the write went out and the cloud could be reached afterwards */
-            try{ WRITE: {
-                /* The write replaces the whole sheet, so first look at what the cloud holds NOW. */
-                const pre=await chkCloud(STATE.url, STATE.pass, savedSheet);
-                if(pre && pre.ok && Array.isArray(pre.values)){
-                    let msg=null;
-                    if(CLOUD_BASE[savedSheet]!==undefined){
-                        let base=[]; try{ base=JSON.parse(CLOUD_BASE[savedSheet]); }catch(e){}
-                        if(!cloudMatches(pre.values, base)) msg=t('mCfl');            /* changed by someone/something else since we loaded it */
-                    } else if(!PENDING_IMPORT.has(savedSheet) && pre.values.length>1){
-                        msg=t('mNoBase');                                              /* never loaded from the cloud in this session (load failed / offline start) */
-                    }
-                    if(msg && !(await askYesNo(msg))){ sTst(t('mSvBad'),'info'); break WRITE; }
-                }
-                const p={action:'write',pass:STATE.pass,sheet:savedSheet,values:[STATE.hdrs,...STATE.data],config:{
-                    FONT_SIZE:STATE.dPc.fs,H_ALIGN:STATE.dPc.ha,V_ALIGN:STATE.dPc.va,T_WRAP:STATE.dPc.wr,HIDDEN_COLS:JSON.stringify(STATE.dPc.hC),
-                    DISPLAY_PC:JSON.stringify(pickDisplay(STATE.dPc)), DISPLAY_MOBILE:JSON.stringify(pickDisplay(STATE.dMb)),
-                    FONT_SIZE_MOBILE:STATE.dMb.fs,H_ALIGN_MOBILE:STATE.dMb.ha,V_ALIGN_MOBILE:STATE.dMb.va,T_WRAP_MOBILE:STATE.dMb.wr,HIDDEN_COLS_MOBILE:JSON.stringify(STATE.dMb.hC),
-                    COLOR_RULES:STATE.cR,COLOR_FORMATTING:STATE.cF,HIDDEN_TABS:JSON.stringify(STATE.hT),LANG:STATE.lang,THEME:STATE.theme,ALL_TABS:JSON.stringify(STATE.aT),VIEW_MODE:STATE.vM,TRACK:STATE.track,REDUCE_MOTION:STATE.reduceMotion
-                }};
-                /* what was sent, frozen: an edit made while the save runs must not make the read-back look wrong */
-                const sent=JSON.parse(JSON.stringify(p.values));
-                /* Read Apps Script's real answer: a text/plain POST needs no preflight and the web app
-                   answers with Access-Control-Allow-Origin:*. Only when the browser still blocks it do we
-                   fall back to the old blind no-cors send ("blind": we cannot see a refusal). */
-                let blind=false, srv=null;
-                try{
-                    const rr=await fetchTo(STATE.url,{method:'POST',body:JSON.stringify(p)},60000);
-                    try{ srv=await rr.json(); }catch(_){ srv=null; }
-                }catch(err){
-                    if(err && (err.name==='AbortError'||err.name==='TimeoutError')) throw err; /* a timeout is a failure, not a CORS block */
-                    blind=true;
-                    await fetchTo(STATE.url,{method:'POST',mode:'no-cors',body:JSON.stringify(p)},60000);
-                }
-                if(srv && srv.ok===false){ sTst(srv.error||t('mF'),'error'); break WRITE; } /* refused: nothing was written */
-                if(!blind && !srv) blind=true; /* answered, but not with JSON: judge by the read-back only */
-                /* poll a few times: the sheet can take a moment to show the write */
-                let vd=null, match=false, reached=false;
-                for(let attempt=0; attempt<3 && !match; attempt++){
-                    await new Promise(r=>setTimeout(r, attempt===0?(blind?800:0):1400)); /* confirmed by the server: read back at once */
-                    vd=await chkCloud(STATE.url, STATE.pass, savedSheet);
-                    if(vd&&vd.ok&&Array.isArray(vd.values)){ reached=true; match=cloudMatches(vd.values, sent); }
-                }
-                const clean=()=>{ if(CHG_GEN===chg0) setUns(false); if(CFG_GEN===cfg0) ls('cfgDirty',''); }; /* edits made during the save stay marked as unsaved */
-                if(match){ sTst(t("mSv")); clean(); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); vibSv(); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); PENDING_IMPORT.delete(savedSheet); ok=true; }
-                else if(reached && !blind){ sTst(t("mSvChk"),"warning"); if(CFG_GEN===cfg0) ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); ok=true; }
-                else if(reached){ sTst(t("mSvUnk"),"error"); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); } /* blind send and the cloud does not show it: NOT saved, the local changes stay */
-                else { sTst((vd&&vd.error)||t("mF"),"error"); }
-            } }catch(e){sTst(t("mF"),"error");}
+            let ok=false; /* true only when the write went out and the cloud confirmed it */
+            try{
+                /* script v4+: one request, the server checks for a conflict and writes under its lock.
+                   Otherwise (v3, or a sheet whose server hash we do not know yet) the three-request save. */
+                let r='legacy';
+                if(SRV_V>=4 && (CLOUD_HASH[savedSheet]!==undefined || CLOUD_BASE[savedSheet]===undefined)) r=await saveFast_(savedSheet, chg0, cfg0);
+                ok = r==='legacy' ? await saveLegacy_(savedSheet, chg0, cfg0) : r;
+            }catch(e){sTst(t("mF"),"error");}
             /* rebuild the full button, #last-saved included - the old version dropped that span
                for good, so the "saved N min ago" label vanished after the first save */
             b.disabled=false; b.innerHTML=`${ic('cloud-arrow-up')} <span id="last-saved" class="font-bold uppercase tracking-wide" style="white-space:nowrap;"></span> <span id="uns-dot" class="absolute top-0 right-0 rounded-full bg-white shadow-md border-2 border-black" style="display:${STATE.uns?'flex':'none'};"></span>`;
