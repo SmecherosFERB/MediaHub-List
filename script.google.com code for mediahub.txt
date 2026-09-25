@@ -1,8 +1,11 @@
 /**
- * MEDIA HUB — Google Apps Script backend  (v3, for the client with cloud-conflict checks)
+ * MEDIA HUB — Google Apps Script backend  (v4)
  *
- * Drop-in replacement: same GET read, same POST write, same response shape.
- * Nothing has to change in MEDIA HUB.
+ * v4: a save is ONE request. The app sends the fingerprint (hash) of the sheet as it last saw it;
+ * the check against the current sheet and the write happen together under the lock, so a save
+ * from another device can never be overwritten without asking. The answer carries the sheet as
+ * written, so the app needs no extra read to confirm it.
+ * Drop-in replacement: older MEDIA HUB versions (no hash sent) keep working exactly as with v3.
  *
  * SETUP (once):
  *   1. Put your password in ACCESS_KEY just below (the same one you type in MEDIA HUB).
@@ -18,6 +21,7 @@
 const ACCESS_KEY = 'SECRET';   // <-- your MEDIA HUB cloud password
 
 // ============================== SETTINGS ==============================
+const API_VERSION        = 4;    // sent with every answer; MEDIA HUB 5.4+ uses the one-request save when it sees 4
 const BACKUP_KEEP_RECENT = 10;   // the newest N backups of each category are always kept
 const BACKUP_KEEP_DAYS   = 7;    // plus the last backup of each of the N most recent days
 const MAX_SHEET_NAME     = 80;
@@ -33,6 +37,7 @@ const HEADER_ALIASES     = { '#': 'NO', 'TITLE': 'NAME', 'SCORE': 'GRADE', 'GENR
 
 // ============================== BASICS ==============================
 function jsonResponse(data) {
+  data.v = API_VERSION;
   return ContentService.createTextOutput(JSON.stringify(data))
                        .setMimeType(ContentService.MimeType.JSON);
 }
@@ -271,9 +276,11 @@ function doGet(e) {
     const sh = ss.getSheetByName(name);
     if (!sh) return jsonResponse({ ok: false, error: 'Target sheet does not exist' });
 
+    const values = sh.getDataRange().getDisplayValues();
     return jsonResponse({
       ok: true,
-      values: sh.getDataRange().getDisplayValues(),
+      values: values,
+      hash: tableHash_(values),          // the app sends it back with its next save (conflict check)
       config: readConfig_(ss),
       tabs: listTabs_(ss),
       fileUrl: ss.getUrl()
@@ -310,11 +317,24 @@ function doPost(e) {
     if (values) {
       let sh = ss.getSheetByName(name);
       const isNew = !sh;
-      if (isNew) sh = ss.insertSheet(name);
       const oldRows = isNew ? 0 : sh.getLastRow();
       const oldCols = isNew ? 0 : sh.getLastColumn();
       const current = (!isNew && oldRows > 0) ? sh.getDataRange().getDisplayValues() : null;
       const curHash = current ? tableHash_(current) : null;
+      const curData = current ? Math.max(0, current.length - 1) : 0;
+
+      // Conflict check, done here under the lock so nothing can slip in between check and write.
+      //   baseHash = the fingerprint of the sheet when this device last read or saved it
+      //   'none'   = this device never loaded the category: only an empty or new sheet may be written
+      //   missing  = older app or an import: no check (same as v3)
+      if (d.overwrite !== true && typeof d.baseHash === 'string') {
+        if (d.baseHash === 'none' ? curData > 0 : d.baseHash !== curHash) {
+          return jsonResponse({ ok: false, conflict: d.baseHash === 'none' ? 'nobase' : 'changed', hash: curHash, rows: curData,
+                                error: d.baseHash === 'none' ? 'This category was not loaded on this device and the cloud has data.'
+                                                             : 'The cloud copy changed since this device loaded it.' });
+        }
+      }
+      if (isNew) sh = ss.insertSheet(name);
       changed = curHash !== tableHash_(values);
 
       if (changed) {
@@ -332,7 +352,16 @@ function doPost(e) {
 
     const configChanged = config ? writeConfig_(ss, config) : false;
 
-    return jsonResponse({ ok: true, changed: changed, configChanged: configChanged, rows: values ? values.length : 0, backup: backup });
+    // The sheet as it is now, read back after the write: the app checks it against what it sent,
+    // so it does not have to read the sheet again.
+    let saved = null, savedHash = null;
+    if (values) {
+      SpreadsheetApp.flush();
+      saved = ss.getSheetByName(name).getDataRange().getDisplayValues();
+      savedHash = tableHash_(saved);
+    }
+
+    return jsonResponse({ ok: true, changed: changed, configChanged: configChanged, rows: values ? values.length : 0, backup: backup, values: saved, hash: savedHash });
   } catch (err) {
     console.error(err);
     return jsonResponse({ ok: false, error: err.message });
