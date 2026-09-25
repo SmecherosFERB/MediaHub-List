@@ -23,8 +23,10 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <!-- Loaded without blocking: a stylesheet in <head> holds back the app script until it arrives, so a slow
          CDN used to delay the whole table. Icons keep their box until the font lands (i.fas rule below). -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" media="print" data-async-css>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" media="print" data-async-css>
+    <script>/* the two stylesheets load without blocking the page; they switch on when ready (no inline onload) */
+        document.querySelectorAll('link[data-async-css]').forEach(l=>{ const on=()=>{ l.media='all'; }; if(l.sheet) on(); else l.addEventListener('load', on); });</script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
     <style>
         :root {
@@ -252,7 +254,7 @@
         body.no-rplus #b-rows .tp-rplus, body.no-rminus #b-rows .tp-rminus { display:none !important; }
         body.score-text #b-rows .grade-pill { background:transparent !important; padding-left:2px !important; padding-right:2px !important; }
         body.score-plain #b-rows .grade-pill { background:transparent !important; color:var(--text-color) !important; padding-left:2px !important; padding-right:2px !important; }
-        body.score-plain #b-rows .grade-next, body.score-plain #b-rows .grade-drop { color:var(--text-color) !important; }
+        body.score-plain #b-rows .grade-next, body.score-plain #b-rows .grade-hold, body.score-plain #b-rows .grade-drop { color:var(--text-color) !important; }
         .grade-fmt { cursor:text; white-space:nowrap; }
 
         /* ---- merged cells: # + Title, Genres + Length + IMDB, Rewatches + Notes ---- */
@@ -281,6 +283,7 @@
         .grade-cell { max-width:5ch; width:5ch; white-space:nowrap; }
         .grade-next { color:#00ff88!important; font-weight:900; }
         .grade-drop { color:#ff4444!important; font-weight:900; }
+        .grade-hold { color:#f0a020!important; font-weight:900; }
         /* ---- density: poster, padding and pill count move together ---- */
         .dens-compact  { --dens-pad:4px 8px;  --dens-tp:2px 7px; }
         .dens-normal   { --dens-pad:9px 10px; --dens-tp:3px 9px; }
@@ -428,7 +431,7 @@
 
         /* grade as a badge */
         .grade-pill { display:inline-flex !important; align-items:center; justify-content:center; min-width:3.2ch; padding:3px 10px; border-radius:999px; font-weight:900 !important; background:color-mix(in srgb, var(--gp, var(--text-muted)) 20%, transparent); color:var(--gp, var(--text-color)) !important; }
-        .grade-next.grade-pill { --gp:#12b981; } .grade-drop.grade-pill { --gp:#e0342c; }
+        .grade-next.grade-pill { --gp:#12b981; } .grade-hold.grade-pill { --gp:#f0a020; } .grade-drop.grade-pill { --gp:#e0342c; }
 
         /* lighter grid: rows separate, columns do not */
         #tbl-box table { border-collapse:separate; border-spacing:0; }
@@ -615,6 +618,9 @@
         .tab-fade { animation: tabFadeIn .25s ease-out; }
 
         /* MODAL OPEN/CLOSE TRANSITION */
+        /* native <dialog>: full-screen layer that keeps the old look (dim + blur live on #m-mod itself) */
+        dialog#m-mod { width:100%; height:100%; max-width:none; max-height:none; margin:0; border:0; color:inherit; overflow:visible; }
+        dialog#m-mod::backdrop { background:transparent; }
         #m-mod { opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease, visibility 0s linear .25s; }
         #m-mod.open { opacity:1; visibility:visible; pointer-events:auto; transition:opacity .25s ease, visibility 0s linear 0s; }
         #m-box { transform:scale(.92) translateY(16px); opacity:0; filter:blur(6px); transition:transform .35s cubic-bezier(0.16, 1, 0.3, 1), opacity .3s ease, filter .3s ease; }
@@ -674,6 +680,9 @@
         @media (max-width:360px) { body.is-mobile #hdr-title { font-size:16px; } body.is-mobile #last-saved { display:none; } }
 
         body.is-mobile #nav { border-bottom:0; margin:0 calc(-1 * var(--m-gut)) 8px !important; padding:2px 30px 4px var(--m-gut); gap:8px; overscroll-behavior-x:contain; -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 26px), transparent); mask-image:linear-gradient(to right, #000 calc(100% - 26px), transparent); }
+        /* header hidden on the phone: settings, radar and save stay pinned at the right of the category row */
+        body.is-mobile.hdr-off #nav { -webkit-mask-image:none; mask-image:none; padding-right:0; }
+        body.is-mobile.hdr-off #nav-extra { position:sticky; right:0; z-index:2; margin-left:auto; padding:0 var(--m-gut) 0 14px; background:linear-gradient(to right, transparent, var(--bg-color) 14px); }
         body.is-mobile #nav button[data-tab] { min-height:40px; padding:0 16px; font-size:13px; letter-spacing:.02em; border-radius:999px; background:var(--card-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 22%, transparent); color:var(--text-muted); white-space:nowrap; }
         body.is-mobile #nav button[data-tab].active-tab { background:var(--theme-accent); border-color:var(--theme-accent); color:#fff; box-shadow:0 4px 14px color-mix(in srgb, var(--theme-accent) 40%, transparent); }
 
@@ -894,13 +903,13 @@
         <button type="button" id="m-fab" class="btn-p" data-act="add" data-tr-al="add"><i class="fas fa-plus"></i></button>
         <div id="tbl-box" class="theme-card rounded-2xl overflow-x-auto shadow-2xl max-w-full"><table class="w-full border-collapse relative"><thead class="theme-card sticky top-0 z-50 font-black uppercase border-b border-[var(--theme-accent)]/20 shadow-sm text-[var(--text-muted)]"><tr id="h-row"></tr></thead><tbody id="b-rows" class="font-bold"></tbody></table></div>
     </div>
-    <div id="m-mod" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[2000] p-4"><div id="m-box" role="dialog" aria-modal="true" aria-labelledby="m-ttl" tabindex="-1"></div></div>
+    <dialog id="m-mod" aria-labelledby="m-ttl" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[2000] p-4"><div id="m-box" tabindex="-1"></div></dialog>
 
-    <template id="tpl-uns"><p data-tr="mUD" class="text-[11px] text-[var(--text-muted)] mb-6 uppercase font-bold">Unsaved changes. Action?</p><div class="flex gap-3"><button onclick="dSwt()" data-tr="cD" class="flex-1 btn-s">DISCARD</button><button onclick="sSwt()" data-tr="sv" class="flex-1 btn-p">SAVE</button></div></template>
+    <template id="tpl-uns"><p data-tr="mUD" class="text-[11px] text-[var(--text-muted)] mb-6 uppercase font-bold">Unsaved changes. Action?</p><div class="flex gap-3"><button data-fn="dSwt" data-tr="cD" class="flex-1 btn-s">DISCARD</button><button data-fn="sSwt" data-tr="sv" class="flex-1 btn-p">SAVE</button></div></template>
     <template id="tpl-stg">
-        <div class="stg-tiles grid gap-1.5 md:gap-2 mb-8" style="grid-template-columns:repeat(6,minmax(0,1fr));"><button onclick="oMod('cst')" class="btn btn-i"><i class="fas fa-sliders-h text-sm"></i> <span data-tr="cus">CUSTOM</span></button><button onclick="oMod('loc')" class="btn btn-i"><i class="fas fa-server text-sm"></i> <span data-tr="loc">LOCAL</span></button><button onclick="STATE.fU?window.open(STATE.fU,'_blank','noopener'):sTst(t('mNC'),'warning');" class="btn btn-i"><i class="fab fa-google-drive text-sm"></i> <span data-tr="drv">DRIVE</span></button><button onclick="window.open('https://gist.githubusercontent.com/SmecherosFERB/a7b8fd79373cfa886ec1282f4bbe7835/raw/HELP.TXT','_blank','noopener')" class="btn btn-i"><i class="fas fa-circle-question text-sm"></i> <span data-tr="hlp">HELP</span></button><button onclick="oMod('shk')" class="btn btn-i"><i class="fas fa-keyboard text-sm"></i> <span data-tr="shkBtn">SHORTCUTS</span></button><button onclick="clnDb()" class="btn btn-i"><i class="fas fa-broom text-sm"></i> <span data-tr="cln">CLEAN</span></button></div>
-        <div class="space-y-4 mb-8 text-left"><div><div class="flex items-center" style="margin:0 0 .25rem .25rem;gap:.35rem;"><label for="i-url" data-tr="sU" class="lbl" style="margin:0;">App Script URL</label><button type="button" id="btn-test-conn" onclick="testConn()" title="Test Connection" data-tr-al="tC" class="text-[var(--theme-accent)] hover:opacity-70 transition-opacity" style="font-size:13px;"><i class="fas fa-plug"></i></button></div><div class="sec-wrap"><input type="password" id="i-url" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-url" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div><div><label for="i-pas" data-tr="cP" class="lbl">Cloud Pass</label><div class="sec-wrap"><input type="password" id="i-pas" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-pas" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div><div><div class="flex items-center" style="margin:0 0 .25rem .25rem;gap:.35rem;"><label for="i-tmd" data-tr="tK" class="lbl" style="margin:0;">TMDB Key</label><button type="button" id="btn-test-tmdb" onclick="testTmdb()" title="Test TMDB Key" data-tr-al="tTK" class="text-[var(--theme-accent)] hover:opacity-70 transition-opacity" style="font-size:13px;"><i class="fas fa-key"></i></button></div><div class="sec-wrap"><input type="password" id="i-tmd" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-tmd" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div></div>
-        <div class="flex justify-center gap-4 pt-4 border-t border-[var(--theme-accent)]/20"><button onclick="cMod()" data-tr="cn" class="w-32 btn-s">CANCEL</button><button onclick="sDb()" data-tr="sv" class="w-32 btn-p">SAVE</button></div>
+        <div class="stg-tiles grid gap-1.5 md:gap-2 mb-8" style="grid-template-columns:repeat(6,minmax(0,1fr));"><button data-fn="oMod" data-fn-args='["cst"]' class="btn btn-i"><i class="fas fa-sliders-h text-sm"></i> <span data-tr="cus">CUSTOM</span></button><button data-fn="oMod" data-fn-args='["loc"]' class="btn btn-i"><i class="fas fa-server text-sm"></i> <span data-tr="loc">LOCAL</span></button><button data-fn="openDrive" class="btn btn-i"><i class="fab fa-google-drive text-sm"></i> <span data-tr="drv">DRIVE</span></button><button data-fn="openHelp" class="btn btn-i"><i class="fas fa-circle-question text-sm"></i> <span data-tr="hlp">HELP</span></button><button data-fn="oMod" data-fn-args='["shk"]' class="btn btn-i"><i class="fas fa-keyboard text-sm"></i> <span data-tr="shkBtn">SHORTCUTS</span></button><button data-fn="clnDb" class="btn btn-i"><i class="fas fa-broom text-sm"></i> <span data-tr="cln">CLEAN</span></button></div>
+        <div class="space-y-4 mb-8 text-left"><div><div class="flex items-center" style="margin:0 0 .25rem .25rem;gap:.35rem;"><label for="i-url" data-tr="sU" class="lbl" style="margin:0;">App Script URL</label><button type="button" id="btn-test-conn" data-fn="testConn" title="Test Connection" data-tr-al="tC" class="text-[var(--theme-accent)] hover:opacity-70 transition-opacity" style="font-size:13px;"><i class="fas fa-plug"></i></button></div><div class="sec-wrap"><input type="password" id="i-url" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-url" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div><div><label for="i-pas" data-tr="cP" class="lbl">Cloud Pass</label><div class="sec-wrap"><input type="password" id="i-pas" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-pas" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div><div><div class="flex items-center" style="margin:0 0 .25rem .25rem;gap:.35rem;"><label for="i-tmd" data-tr="tK" class="lbl" style="margin:0;">TMDB Key</label><button type="button" id="btn-test-tmdb" data-fn="testTmdb" title="Test TMDB Key" data-tr-al="tTK" class="text-[var(--theme-accent)] hover:opacity-70 transition-opacity" style="font-size:13px;"><i class="fas fa-key"></i></button></div><div class="sec-wrap"><input type="password" id="i-tmd" class="inp sec-inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore><button type="button" class="sec-eye" data-act="secEye" data-t="i-tmd" aria-pressed="false" data-tr-al="secShow"><i class="fas fa-eye"></i></button></div></div></div>
+        <div class="flex justify-center gap-4 pt-4 border-t border-[var(--theme-accent)]/20"><button data-fn="cMod" data-tr="cn" class="w-32 btn-s">CANCEL</button><button data-fn="sDb" data-tr="sv" class="w-32 btn-p">SAVE</button></div>
     </template>
     <template id="tpl-cst"><div class="text-left">
 
@@ -908,9 +917,9 @@
             <div class="set-hd"><i class="fas fa-circle-half-stroke"></i><span class="set-ttl" data-tr="sTheme">Theme</span></div>
             <p class="set-hint" data-tr="hTheme">Pick a fixed look, or let the app follow your system setting.</p>
             <div class="seg" role="group">
-                <button type="button" id="b-thm-auto" onclick="sThm('auto')" class="seg-btn"><i class="fas fa-wand-magic-sparkles"></i><span data-tr="thA">AUTO</span></button>
-                <button type="button" id="b-thm-light" onclick="sThm('light')" class="seg-btn"><i class="fas fa-sun"></i><span data-tr="thL">LIGHT</span></button>
-                <button type="button" id="b-thm-dark" onclick="sThm('dark')" class="seg-btn"><i class="fas fa-moon"></i><span data-tr="thD">DARK</span></button>
+                <button type="button" id="b-thm-auto" data-fn="sThm" data-fn-args='["auto"]' class="seg-btn"><i class="fas fa-wand-magic-sparkles"></i><span data-tr="thA">AUTO</span></button>
+                <button type="button" id="b-thm-light" data-fn="sThm" data-fn-args='["light"]' class="seg-btn"><i class="fas fa-sun"></i><span data-tr="thL">LIGHT</span></button>
+                <button type="button" id="b-thm-dark" data-fn="sThm" data-fn-args='["dark"]' class="seg-btn"><i class="fas fa-moon"></i><span data-tr="thD">DARK</span></button>
             </div>
         </div>
 
@@ -918,9 +927,9 @@
             <div class="set-hd"><i class="fas fa-display"></i><span class="set-ttl" data-tr="vM">View mode</span></div>
             <p class="set-hint" data-tr="hVm">Chooses which layout profile you are editing right now.</p>
             <div class="seg" role="group">
-                <button type="button" id="b-vm-auto" onclick="sVM('auto')" class="seg-btn"><i class="fas fa-wand-magic-sparkles"></i><span>AUTO</span></button>
-                <button type="button" id="b-vm-pc" onclick="sVM('pc')" class="seg-btn"><i class="fas fa-desktop"></i><span>PC</span></button>
-                <button type="button" id="b-vm-mobile" onclick="sVM('mobile')" class="seg-btn"><i class="fas fa-mobile-screen-button"></i><span>MOBILE</span></button>
+                <button type="button" id="b-vm-auto" data-fn="sVM" data-fn-args='["auto"]' class="seg-btn"><i class="fas fa-wand-magic-sparkles"></i><span>AUTO</span></button>
+                <button type="button" id="b-vm-pc" data-fn="sVM" data-fn-args='["pc"]' class="seg-btn"><i class="fas fa-desktop"></i><span>PC</span></button>
+                <button type="button" id="b-vm-mobile" data-fn="sVM" data-fn-args='["mobile"]' class="seg-btn"><i class="fas fa-mobile-screen-button"></i><span>MOBILE</span></button>
             </div>
             <span id="disp-prof-txt" class="set-badge"></span>
         </div>
@@ -928,23 +937,23 @@
         <!-- drawers: closed by default, a summary on the bar, the arrow opens them -->
         <div class="set-sec">
             <div class="drw" data-drw="beh">
-                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-beh" onclick="tDrw('beh')">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-beh" data-fn="tDrw" data-fn-args='["beh"]'>
                     <span class="sw-ico"><i class="fas fa-sliders"></i></span>
                     <span class="sw-txt"><span class="sw-name" data-tr="beh">Behaviour</span><span class="sw-sub" data-tr="hEx">Small comfort options. Each one applies instantly.</span></span>
                     <span class="drw-sum" id="drw-sum-beh"></span>
                     <span class="act-go drw-chev"><i class="fas fa-chevron-down"></i></span>
                 </button>
                 <div class="drw-body" id="drw-b-beh">
-                    <button type="button" id="b-trk" onclick="tTrk()" class="sw-row" role="switch" aria-checked="false"></button>
-                    <button type="button" id="b-rm" onclick="tRM()" class="sw-row" role="switch" aria-checked="false"></button>
-                    <button type="button" id="b-vib" onclick="tVib()" class="sw-row" role="switch" aria-checked="false"></button>
-                    <button type="button" id="b-lazy" onclick="tLazy()" class="sw-row" role="switch" aria-checked="false"></button>
-                    <button type="button" id="b-hdr" onclick="tHdr()" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-trk" data-fn="tTrk" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-rm" data-fn="tRM" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-vib" data-fn="tVib" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-lazy" data-fn="tLazy" class="sw-row" role="switch" aria-checked="false"></button>
+                    <button type="button" id="b-hdr" data-fn="tHdr" class="sw-row" role="switch" aria-checked="false"></button>
                 </div>
             </div>
 
             <div class="drw" data-drw="tabs">
-                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-tabs" onclick="tDrw('tabs')">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-tabs" data-fn="tDrw" data-fn-args='["tabs"]'>
                     <span class="sw-ico"><i class="fas fa-folder-open"></i></span>
                     <span class="sw-txt"><span class="sw-name" data-tr="vT">Visible categories</span><span class="sw-sub" data-tr="hTb">Categories shown in the top bar. Hidden ones keep their data.</span></span>
                     <span class="drw-sum" id="drw-sum-tabs"></span>
@@ -954,7 +963,7 @@
             </div>
 
             <div class="drw" data-drw="cols">
-                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-cols" onclick="tDrw('cols')">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-cols" data-fn="tDrw" data-fn-args='["cols"]'>
                     <span class="sw-ico"><i class="fas fa-table-columns"></i></span>
                     <span class="sw-txt"><span class="sw-name" data-tr="vC">Visible columns</span><span class="sw-sub" data-tr="hCl">Columns shown in the table. Saved per layout profile.</span></span>
                     <span class="drw-sum" id="drw-sum-cols"></span>
@@ -964,13 +973,13 @@
             </div>
         </div>
 
-        <button type="button" class="act-row" onclick="openFine()" style="margin-top:.5rem;">
+        <button type="button" class="act-row" data-fn="openFine" style="margin-top:.5rem;">
             <span class="sw-ico"><i class="fas fa-sliders"></i></span>
             <span class="sw-txt"><span class="sw-name" data-tr="sFine">Fine tuning</span><span class="sw-sub" data-tr="hFineEntry">Colours, table text and exact sizes.</span></span>
             <span class="act-go"><i class="fas fa-chevron-right"></i></span>
         </button>
 
-        </div><button onclick="sCst()" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
+        </div><button data-fn="sCst" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
     </template>
     <template id="tpl-fine"><div class="text-left">
 
@@ -979,14 +988,14 @@
             <div class="set-hd"><i class="fas fa-palette"></i><span class="set-ttl" data-tr="sColF">Color formatting</span></div>
             <p class="set-hint" data-tr="hColF">Accent colour for the app and colour rules for the table.</p>
             <div class="dp-list">
-                <button type="button" id="b-cf" onclick="tCF()" class="sw-row" role="switch" aria-checked="false"></button>
+                <button type="button" id="b-cf" data-fn="tCF" class="sw-row" role="switch" aria-checked="false"></button>
                 <div class="stp-row dp-row">
                     <span class="sw-ico"><i class="fas fa-droplet"></i></span>
                     <span class="sw-txt"><span class="sw-name" data-tr="acC">Accent colour</span><span class="sw-sub" data-tr="hAc">Used for buttons, links and highlights across the app.</span></span>
-                    <div class="dp-ctl"><span id="ac-val" class="ac-hex"></span><input type="color" id="i-ac" class="ac-pick" aria-label="Accent colour" oninput="$('ac-val').textContent=this.value.toUpperCase(); setAccent(this.value);"></div>
+                    <div class="dp-ctl"><span id="ac-val" class="ac-hex"></span><input type="color" id="i-ac" class="ac-pick" aria-label="Accent colour" data-in="onAccentInput" data-in-args='["$val"]'></div>
                 </div>
                 <div class="drw" data-drw="rules">
-                    <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-rules" onclick="tDrw('rules')">
+                    <button type="button" class="drw-hd act-row" aria-expanded="false" aria-controls="drw-b-rules" data-fn="tDrw" data-fn-args='["rules"]'>
                         <span class="sw-ico"><i class="fas fa-list-check"></i></span>
                         <span class="sw-txt"><span class="sw-name" data-tr="uR">Rules</span><span class="sw-sub" data-tr="hRulB">Colour a column when it matches. SCORE takes a number or a range like 8-10.</span></span>
                         <span id="cr-count" class="drw-sum"></span>
@@ -994,11 +1003,11 @@
                     </button>
                     <div class="drw-body" id="drw-b-rules">
                         <div id="cr-list"></div>
-                        <button type="button" class="cr-add" onclick="addRule()"><i class="fas fa-plus"></i><span data-tr="crAdd">Add rule</span></button>
+                        <button type="button" class="cr-add" data-fn="addRule"><i class="fas fa-plus"></i><span data-tr="crAdd">Add rule</span></button>
                         <div id="cr-raw-wrap" style="margin-top:.75rem;">
-                            <button type="button" id="cr-raw-btn" onclick="tRawRules()" aria-expanded="false"><i id="cr-raw-chev" class="fas fa-chevron-down"></i><span data-tr="crRaw">Edit as text</span></button>
+                            <button type="button" id="cr-raw-btn" data-fn="tRawRules" aria-expanded="false"><i id="cr-raw-chev" class="fas fa-chevron-down"></i><span data-tr="crRaw">Edit as text</span></button>
                             <div class="cr-raw-body">
-                                <textarea id="i-cr" class="inp font-mono h-32" style="border-radius:1rem;" oninput="onRawRules()" onfocus="RAW_FOCUS=true" onblur="onRawBlur()" placeholder="SCORE 1-4 #810B38&#10;GENRES Action #23a05b"></textarea>
+                                <textarea id="i-cr" class="inp font-mono h-32" style="border-radius:1rem;" data-in="onRawRules" data-foc="onRawFocus" data-blur="onRawBlur" placeholder="SCORE 1-4 #810B38&#10;GENRES Action #23a05b"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1013,10 +1022,10 @@
             <div class="dp-srch"><i class="fas fa-magnifying-glass"></i><input type="search" id="dp-q" data-p="dpSrch" placeholder="Search options..." autocomplete="off" spellcheck="false" aria-label="Search options"><button type="button" class="dp-clr" data-act="dpClr" data-tr-al="clrSrchB"><i class="fas fa-xmark"></i></button></div>
             <p id="dp-none" class="dp-none"></p>
             <div id="c-depth" class="dp-list"></div>
-            <button type="button" class="fine-reset" onclick="resetFine()"><i class="fas fa-rotate-left"></i><span data-tr="fReset">Reset to defaults</span></button>
+            <button type="button" class="fine-reset" data-fn="resetFine"><i class="fas fa-rotate-left"></i><span data-tr="fReset">Reset to defaults</span></button>
         </div>
 
-        </div><button onclick="sCst()" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
+        </div><button data-fn="sCst" data-tr="aS" class="mt-4 w-full btn-p btn-pill">APPLY</button>
     </template>
     <template id="tpl-loc"><div class="text-left">
 
@@ -1033,12 +1042,12 @@
         <div class="set-sec">
             <div class="set-hd"><i class="fas fa-box-archive"></i><span class="set-ttl" data-tr="sBk">Full backup</span></div>
             <p class="set-hint" data-tr="hBk">Every category in a single .json file. Use it to move to another device.</p>
-            <button type="button" class="act-row" onclick="$('i-imp').click()">
+            <button type="button" class="act-row" data-fn="clickEl" data-fn-args='["i-imp"]'>
                 <span class="sw-ico"><i class="fas fa-file-import"></i></span>
                 <span class="sw-txt"><span class="sw-name" data-tr="sImpJ">Import .JSON</span><span class="sw-sub" data-tr="hImpJ">Replaces your whole local library.</span></span>
                 <span class="act-go"><i class="fas fa-chevron-right"></i></span>
             </button>
-            <button type="button" class="act-row" onclick="eLib()">
+            <button type="button" class="act-row" data-fn="eLib">
                 <span class="sw-ico"><i class="fas fa-file-export"></i></span>
                 <span class="sw-txt"><span class="sw-name" data-tr="sExpJ">Export .JSON</span><span class="sw-sub" data-tr="hExpJ">Downloads every category at once.</span></span>
                 <span class="act-go"><i class="fas fa-arrow-down"></i></span>
@@ -1049,25 +1058,25 @@
             <div class="set-hd"><i class="fas fa-file-csv"></i><span class="set-ttl" data-tr="sCsv">Spreadsheet</span></div>
             <p class="set-hint" style="margin-bottom:.375rem;" data-tr="hCsv">Only the category you have open. Opens in Excel or Google Sheets.</p>
             <span id="loc-cat-badge" class="set-badge" style="margin:0 0 .75rem 1.625rem;"></span>
-            <button type="button" class="act-row" onclick="$('i-imp-csv').click()">
+            <button type="button" class="act-row" data-fn="clickEl" data-fn-args='["i-imp-csv"]'>
                 <span class="sw-ico"><i class="fas fa-file-import"></i></span>
                 <span class="sw-txt"><span class="sw-name" data-tr="sImpC">Import .CSV</span><span class="sw-sub" data-tr="hImpC">Replaces the rows of the current category.</span></span>
                 <span class="act-go"><i class="fas fa-chevron-right"></i></span>
             </button>
-            <button type="button" class="act-row" onclick="eCsv()">
+            <button type="button" class="act-row" data-fn="eCsv">
                 <span class="sw-ico"><i class="fas fa-file-export"></i></span>
                 <span class="sw-txt"><span class="sw-name" data-tr="sExpC">Export .CSV</span><span class="sw-sub" data-tr="hExpC">Downloads the current category only.</span></span>
                 <span class="act-go"><i class="fas fa-arrow-down"></i></span>
             </button>
         </div>
 
-        <input type="file" id="i-imp" class="hidden" accept=".json" onchange="iLib(event)">
-        <input type="file" id="i-imp-csv" class="hidden" accept=".csv" onchange="iCsv(event)">
+        <input type="file" id="i-imp" class="hidden" accept=".json" data-chg="iLib" data-chg-args='["$ev"]'>
+        <input type="file" id="i-imp-csv" class="hidden" accept=".csv" data-chg="iCsv" data-chg-args='["$ev"]'>
 
         <div class="set-sec set-card danger" style="margin-bottom:0;">
             <div class="set-hd"><i class="fas fa-triangle-exclamation"></i><span class="set-ttl" data-tr="dz">Danger</span></div>
             <p class="set-hint" style="margin-bottom:.875rem;" data-tr="hDz">Wipes settings and the local copy of your library in this browser only.</p>
-            <button type="button" onclick="cAll()" class="btn-danger"><i class="fas fa-trash-can"></i><span data-tr="cC">CLEAR MEMORY</span></button>
+            <button type="button" data-fn="cAll" class="btn-danger"><i class="fas fa-trash-can"></i><span data-tr="cC">CLEAR MEMORY</span></button>
         </div>
 
     </div></template>
@@ -1086,16 +1095,16 @@
             <div class="flex items-center justify-between rounded-xl border border-[var(--theme-accent)]/20 bg-[var(--input-bg)]" style="padding:.75rem;"><span class="text-xs font-bold theme-text" data-tr="shkMove">Move row up / down</span><span class="text-[11px] font-black text-[var(--theme-accent)] font-mono">SHIFT + &uarr; / &darr;</span></div>
         </div></div>
     </div></template>
-    <template id="tpl-add"><input type="text" id="i-an" data-p="tN" placeholder="NAME" class="inp mb-4 text-center"><input type="text" id="i-ag" data-p="gD" placeholder="GRADE" class="inp mb-8 text-center"><div class="flex gap-2"><button onclick="sAdd()" data-tr="add" class="flex-1 btn-p">ADD</button><button onclick="cMod()" data-tr="cn" class="flex-1 btn-s">CANCEL</button></div></template>
-    <template id="tpl-nte"><textarea id="i-nt" class="inp h-48 resize-none mb-6"></textarea><div class="flex gap-3"><button onclick="cMod()" data-tr="cn" class="flex-1 btn-s">CANCEL</button><button id="b-sn" data-tr="sN" class="flex-1 btn-p">SAVE</button></div></template>
-    <template id="tpl-cln"><div id="cl-rp" class="text-left overflow-y-auto" style="max-height:56vh;"></div><button onclick="cMod()" data-tr="cls" class="mt-6 w-full btn-s">CLOSE</button></template>
+    <template id="tpl-add"><input type="text" id="i-an" data-p="tN" placeholder="NAME" class="inp mb-4 text-center"><input type="text" id="i-ag" data-p="gD" placeholder="GRADE" class="inp mb-8 text-center"><div class="flex gap-2"><button data-fn="sAdd" data-tr="add" class="flex-1 btn-p">ADD</button><button data-fn="cMod" data-tr="cn" class="flex-1 btn-s">CANCEL</button></div></template>
+    <template id="tpl-nte"><textarea id="i-nt" class="inp h-48 resize-none mb-6"></textarea><div class="flex gap-3"><button data-fn="cMod" data-tr="cn" class="flex-1 btn-s">CANCEL</button><button id="b-sn" data-tr="sN" class="flex-1 btn-p">SAVE</button></div></template>
+    <template id="tpl-cln"><div id="cl-rp" class="text-left overflow-y-auto" style="max-height:56vh;"></div><button data-fn="cMod" data-tr="cls" class="mt-6 w-full btn-s">CLOSE</button></template>
     <template id="tpl-cfm"><p id="cfm-msg" class="text-[11px] text-[var(--text-muted)] mb-6 uppercase font-bold"></p><div class="flex gap-3"><button id="b-cfm-no" data-tr="cn" class="flex-1 btn-s">CANCEL</button><button id="b-cfm-yes" data-tr="yes" class="flex-1 btn-p">YES</button></div></template>
-    <template id="tpl-lnk"><input type="text" id="i-lk" class="inp mb-6"><div class="flex gap-3"><button onclick="cMod()" data-tr="cn" class="flex-1 btn-s">CANCEL</button><button id="b-lk-sv" data-tr="sv" class="flex-1 btn-p">SAVE</button></div></template>
-    <template id="tpl-tmr"><div id="tmr-list" class="flex flex-col gap-2 text-left max-h-[50vh] overflow-y-auto mb-4"></div><button onclick="cMod()" data-tr="cn" class="w-full btn-s">CANCEL</button></template>
+    <template id="tpl-lnk"><input type="text" id="i-lk" class="inp mb-6"><div class="flex gap-3"><button data-fn="cMod" data-tr="cn" class="flex-1 btn-s">CANCEL</button><button id="b-lk-sv" data-tr="sv" class="flex-1 btn-p">SAVE</button></div></template>
+    <template id="tpl-tmr"><div id="tmr-list" class="flex flex-col gap-2 text-left max-h-[50vh] overflow-y-auto mb-4"></div><button data-fn="cMod" data-tr="cn" class="w-full btn-s">CANCEL</button></template>
     <template id="tpl-radar">
         <div id="rdr-tabbar" class="seg" style="margin-bottom:1rem;">
-            <button type="button" class="seg-btn" data-tab="updates" onclick="setRdrTab('updates')"><i class="fas fa-satellite-dish"></i><span data-tr="rdrTabUpd">UPDATES</span></button>
-            <button type="button" class="seg-btn" data-tab="search" onclick="setRdrTab('search')"><i class="fas fa-magnifying-glass"></i><span data-tr="rdrTabSrch">SEARCH</span></button>
+            <button type="button" class="seg-btn" data-tab="updates" data-fn="setRdrTab" data-fn-args='["updates"]'><i class="fas fa-satellite-dish"></i><span data-tr="rdrTabUpd">UPDATES</span></button>
+            <button type="button" class="seg-btn" data-tab="search" data-fn="setRdrTab" data-fn-args='["search"]'><i class="fas fa-magnifying-glass"></i><span data-tr="rdrTabSrch">SEARCH</span></button>
         </div>
 
         <div id="rdr-pane-upd" class="text-left">
@@ -1109,23 +1118,23 @@
                     <div class="act-row" style="cursor:default;">
                         <span class="sw-ico"><i class="fas fa-star"></i></span>
                         <span class="sw-txt"><span class="sw-name" data-tr="rdrGradeRange">Grade range</span><span class="sw-sub" id="rdr-range-hint"></span></span>
-                        <input type="text" id="rdr-range-input" class="range-inp" oninput="onRdrRange()" placeholder="8-10" aria-label="Grade range" autocomplete="off">
-                        <button type="button" id="rdr-grade-btn" onclick="tRdrGrade(event)" aria-haspopup="listbox" aria-expanded="false" class="act-go" aria-label="Presets"><i class="fas fa-chevron-down"></i></button>
+                        <input type="text" id="rdr-range-input" class="range-inp" data-in="onRdrRange" placeholder="8-10" aria-label="Grade range" autocomplete="off">
+                        <button type="button" id="rdr-grade-btn" data-fn="tRdrGrade" data-fn-args='["$ev"]' aria-haspopup="listbox" aria-expanded="false" class="act-go" aria-label="Presets"><i class="fas fa-chevron-down"></i></button>
                     </div>
                     <div id="rdr-grade-list" class="s-col-list" role="listbox"></div>
                 </div>
-                <button type="button" id="rdr-next-row" onclick="tRdrNext()" class="sw-row" role="switch" aria-checked="false">
+                <button type="button" id="rdr-next-row" data-fn="tRdrNext" class="sw-row" role="switch" aria-checked="false">
                     <span class="sw-ico"><i class="fas fa-bookmark"></i></span>
                     <span class="sw-txt"><span class="sw-name" data-tr="rdrInclNext">Include NEXT</span><span class="sw-sub" data-tr="rdrHNext">Also scan titles you have not started yet.</span></span>
                     <span class="sw-tgl"></span>
                 </button>
                 <div id="rdr-year-row" class="sw-row" role="switch" aria-checked="false" style="cursor:default;">
-                    <span class="sw-ico" onclick="tRdrYearEnabled(event)" style="cursor:pointer;"><i class="fas fa-calendar"></i></span>
-                    <span class="sw-txt" onclick="tRdrYearEnabled(event)" style="cursor:pointer;"><span class="sw-name" data-tr="rdrFromYear">From year</span><span class="sw-sub" data-tr="rdrHYear">Hide anything older than this year.</span></span>
-                    <input type="number" id="rdr-year-input" oninput="onRdrYearInput()" aria-label="Year" class="range-inp" style="width:3.6rem;">
-                    <span class="sw-tgl" onclick="tRdrYearEnabled(event)" style="cursor:pointer;"></span>
+                    <span class="sw-ico" data-fn="tRdrYearEnabled" data-fn-args='["$ev"]' style="cursor:pointer;"><i class="fas fa-calendar"></i></span>
+                    <span class="sw-txt" data-fn="tRdrYearEnabled" data-fn-args='["$ev"]' style="cursor:pointer;"><span class="sw-name" data-tr="rdrFromYear">From year</span><span class="sw-sub" data-tr="rdrHYear">Hide anything older than this year.</span></span>
+                    <input type="number" id="rdr-year-input" data-in="onRdrYearInput" aria-label="Year" class="range-inp" style="width:3.6rem;">
+                    <span class="sw-tgl" data-fn="tRdrYearEnabled" data-fn-args='["$ev"]' style="cursor:pointer;"></span>
                 </div>
-                <button type="button" id="btn-radar-scan" onclick="runRadar()" data-tr-al="rdrScan" class="rdr-scan" style="margin-top:.875rem;"><i class="fas fa-satellite-dish"></i><span data-tr="rdrScan">SCAN</span></button>
+                <button type="button" id="btn-radar-scan" data-fn="runRadar" data-tr-al="rdrScan" class="rdr-scan" style="margin-top:.875rem;"><i class="fas fa-satellite-dish"></i><span data-tr="rdrScan">SCAN</span></button>
             </div>
 
             <div id="rdr-prog" class="rdr-prog hidden">
@@ -1136,8 +1145,8 @@
             <div id="rdr-results-bar" class="hidden">
                 <div id="rdr-tabs" class="rdr-tabs"></div>
                 <div class="flex items-center gap-2 mb-3">
-                    <div class="rdr-search"><i class="fas fa-search"></i><input type="text" id="rdr-search" oninput="filterRdrResults()" data-p="sP" placeholder="SEARCH..." autocomplete="off"></div>
-                    <button type="button" onclick="rdrBack()" data-tr-al="rdrBack" class="act-go" style="width:2.25rem;height:2.25rem;flex-shrink:0;"><i class="fas fa-rotate-left"></i></button>
+                    <div class="rdr-search"><i class="fas fa-search"></i><input type="text" id="rdr-search" data-in="filterRdrResults" data-p="sP" placeholder="SEARCH..." autocomplete="off"></div>
+                    <button type="button" data-fn="rdrBack" data-tr-al="rdrBack" class="act-go" style="width:2.25rem;height:2.25rem;flex-shrink:0;"><i class="fas fa-rotate-left"></i></button>
                 </div>
             </div>
 
@@ -1148,16 +1157,16 @@
         <div id="rdr-pane-srch" class="hidden text-left">
             <p class="set-hint" style="margin:0 0 .75rem 0;" data-tr="hSrch">Find new titles on TMDB by genre and rating, then add them straight to this category.</p>
             <div id="srch-type" class="seg" style="margin-bottom:.75rem;">
-                <button type="button" class="seg-btn" data-st="movie" onclick="setSrchType('movie')"><i class="fas fa-film"></i><span data-tr="srchMovies">MOVIES</span></button>
-                <button type="button" class="seg-btn" data-st="tv" onclick="setSrchType('tv')"><i class="fas fa-tv"></i><span data-tr="srchSeries">SERIES</span></button>
-                <button type="button" class="seg-btn" data-st="anime" onclick="setSrchType('anime')"><i class="fas fa-dragon"></i><span data-tr="srchAnime">ANIME</span></button>
-                <button type="button" class="seg-btn" data-st="animemovie" onclick="setSrchType('animemovie')"><i class="fas fa-clapperboard"></i><span data-tr="srchAnimeMovie">Anime films</span></button>
+                <button type="button" class="seg-btn" data-st="movie" data-fn="setSrchType" data-fn-args='["movie"]'><i class="fas fa-film"></i><span data-tr="srchMovies">MOVIES</span></button>
+                <button type="button" class="seg-btn" data-st="tv" data-fn="setSrchType" data-fn-args='["tv"]'><i class="fas fa-tv"></i><span data-tr="srchSeries">SERIES</span></button>
+                <button type="button" class="seg-btn" data-st="anime" data-fn="setSrchType" data-fn-args='["anime"]'><i class="fas fa-dragon"></i><span data-tr="srchAnime">ANIME</span></button>
+                <button type="button" class="seg-btn" data-st="animemovie" data-fn="setSrchType" data-fn-args='["animemovie"]'><i class="fas fa-clapperboard"></i><span data-tr="srchAnimeMovie">Anime films</span></button>
             </div>
 
             <div class="act-row" style="cursor:default;margin-bottom:.5rem;">
                 <span class="sw-ico"><i class="fas fa-star"></i></span>
                 <span class="sw-txt"><span class="sw-name" data-tr="srchRating">TMDB rating</span><span class="sw-sub" id="srch-rating-hint"></span></span>
-                <input type="text" id="srch-rating" class="range-inp" oninput="onSrchRating()" placeholder="7+" aria-label="Rating" autocomplete="off">
+                <input type="text" id="srch-rating" class="range-inp" data-in="onSrchRating" placeholder="7+" aria-label="Rating" autocomplete="off">
             </div>
             <div class="act-row" style="cursor:default;margin-bottom:.875rem;">
                 <span class="sw-ico"><i class="fas fa-calendar"></i></span>
@@ -1169,12 +1178,36 @@
             <p class="set-hint" data-tr="hSrchGenres">Pick one or more. Leave all off to search every genre.</p>
             <div id="srch-genres" class="pill-wrap" style="margin-bottom:1rem;"></div>
 
-            <button type="button" id="btn-srch" onclick="runSearch()" class="rdr-scan"><i class="fas fa-magnifying-glass"></i><span data-tr="srchBtn">SEARCH</span></button>
+            <button type="button" id="btn-srch" data-fn="runSearch" class="rdr-scan"><i class="fas fa-magnifying-glass"></i><span data-tr="srchBtn">SEARCH</span></button>
             <div id="srch-results" class="text-left overflow-y-auto" style="max-height:44vh;margin-top:1rem;"></div>
         </div>
     </template>
 
     <script>
+        /* ===== declarative events: no inline on...="" attributes anywhere =====
+           data-fn / data-in / data-chg / data-foc / data-blur name a global function; data-*-args holds its
+           arguments as JSON, where "$el" is the element, "$ev" the event and "$val" the element's value. */
+        function runFn(el, e, k){
+            const f=window[el.dataset[k]]; if(typeof f!=='function') return;
+            let a=[]; const raw=el.dataset[k+'Args'];
+            if(raw){ try{ a=JSON.parse(raw); }catch(_){ return; } }
+            return f(...a.map(x=>x==='$el'?el:(x==='$ev'?e:(x==='$val'?el.value:x))));
+        }
+        document.addEventListener('input',   e=>{ const el=e.target; if(el?.dataset?.in)   runFn(el,e,'in'); });
+        document.addEventListener('change',  e=>{ const el=e.target; if(el?.dataset?.chg)  runFn(el,e,'chg'); });
+        document.addEventListener('focusin', e=>{ const el=e.target; if(el?.dataset?.foc)  runFn(el,e,'foc'); });
+        document.addEventListener('focusout',e=>{ const el=e.target; if(el?.dataset?.blur) runFn(el,e,'blur'); });
+        /* a poster that fails to load falls back once: the table to the full-size link, the radar to the TMDB poster */
+        document.addEventListener('error', e=>{
+            const img=e.target; if(!(img instanceof HTMLImageElement) || img.dataset.fbDone) return;
+            const alt=img.classList.contains('poster-img') ? img.dataset.full : img.dataset.fb;
+            if(alt && img.src!==alt){ img.dataset.fbDone='1'; img.src=alt; }
+        }, true);
+        function openDrive(){ STATE.fU ? window.open(STATE.fU,'_blank','noopener') : sTst(t('mNC'),'warning'); }
+        function openHelp(){ window.open('https://gist.githubusercontent.com/SmecherosFERB/a7b8fd79373cfa886ec1282f4bbe7835/raw/HELP.TXT','_blank','noopener'); }
+        function onAccentInput(v){ const l=$('ac-val'); if(l) l.textContent=String(v).toUpperCase(); setAccent(v); }
+        function onRawFocus(){ RAW_FOCUS=true; }
+        function clickEl(id){ $(id)?.click(); }
         const $ = id => document.getElementById(id);
         const ls = (k, v) => { if(v===undefined){ try{ return localStorage.getItem('tk_'+k); }catch(e){ return null; } } try{ localStorage.setItem('tk_'+k, v); return true; }catch(e){ sTst(t(e&&e.name==='QuotaExceededError'?'lsFull':'lsErr'),'error'); return false; } };
         const debounce = (fn, ms) => { let tm; return (...a) => { clearTimeout(tm); tm=setTimeout(()=>fn(...a), ms); }; };
@@ -1220,16 +1253,16 @@
         const prefersReducedMotion = () => document.body.classList.contains('force-reduced-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         const DICT = {
-            EN: { sC:"Save Cloud", sP:"SEARCH...", dpSrch:"Search options...", dpNone:"No option matches «{q}»", secShow:"Show", secHide:"Hide", clProb:"problems", clManualN:"{n} need you", clManual1:"edit it yourself", clAll:"Fix all", clStop:"STOP", clStopped:"Stopped", clSure:"Sure?", clDel:"Delete", clLink:"Link", clRepl:"All posters from TMDB", hClRepl:"Replaces every poster that is not on image.tmdb.org, even ones that work.", clNoKey:"No TMDB key: only the local fixes were done.", clFixedN:"Fixed: {n}", clNoTitle:"(no title)", clEmptyRow:"empty row", clEmpty:"empty", clDeadS:"dead", clImdbOk:"IMDB link found", clImdbFail:"No IMDB link found on TMDB", clGBad:"Invalid grades", clLen:"Length formats", clGen:"Genres", clTxt:"Text cleanup", hClDup:"Same title more than once. Show it or delete one.", hClImdb:"Found on TMDB by title.", hClPo:"Replaced with the TMDB poster.", hClGrade:"Any mark between digits becomes a dot: 9,10 → 9.10.", hClGBad:"Not 1-10, NEXT or DROP. Clear cases are fixed, the rest you edit.", hClLen:"One format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"One spelling, no repeats: Sci-Fi, Action.", hClTxt:"Extra spaces, Rewatches as a number, empty rows.", noRes:"No results for «{q}»", noNext:"No NEXT titles in this category", clrSrchB:"Clear search", showAll:"Show all", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 DROP/NEXT", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
+            EN: { sC:"Save Cloud", sP:"SEARCH...", dpSrch:"Search options...", dpNone:"No option matches «{q}»", secShow:"Show", secHide:"Hide", clProb:"problems", clManualN:"{n} need you", clManual1:"edit it yourself", clAll:"Fix all", clStop:"STOP", clStopped:"Stopped", clSure:"Sure?", clDel:"Delete", clLink:"Link", clRepl:"All posters from TMDB", hClRepl:"Replaces every poster that is not on image.tmdb.org, even ones that work.", clNoKey:"No TMDB key: only the local fixes were done.", clFixedN:"Fixed: {n}", clNoTitle:"(no title)", clEmptyRow:"empty row", clEmpty:"empty", clDeadS:"dead", clImdbOk:"IMDB link found", clImdbFail:"No IMDB link found on TMDB", clGBad:"Invalid grades", clLen:"Length formats", clGen:"Genres", clTxt:"Text cleanup", hClDup:"Same title more than once. Show it or delete one.", hClImdb:"Found on TMDB by title.", hClPo:"Replaced with the TMDB poster.", hClGrade:"Any mark between digits becomes a dot: 9,10 → 9.10.", hClGBad:"Not 1-10, NEXT, HOLD or DROP. Clear cases are fixed, the rest you edit.", hClLen:"One format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"One spelling, no repeats: Sci-Fi, Action.", hClTxt:"Extra spaces, Rewatches as a number, empty rows.", noRes:"No results for «{q}»", noNext:"No NEXT titles in this category", clrSrchB:"Clear search", showAll:"Show all", nO:"NEXT", add:"ADD", cus:"CUSTOM", loc:"LOCAL", drv:"DRIVE", hlp:"HELP", cln:"CLEAN", cn:"CANCEL", sv:"SAVE", vT:"Visible Tabs", vC:"Visible Columns", cF:"COLOR FORMATTING", uR:"Rules", fS:"Font Size", aS:"Apply", dz:"DANGER", cC:"CLEAR MEMORY", tN:"TITLE", gD:"1-10 NEXT/HOLD/DROP", sN:"SAVE NOTE", cls:"CLOSE", un:"UNDO", cD:"DISCARD", l:"LEFT", c:"CENTER", r:"RIGHT", t:"TOP", m:"MIDDLE", b:"BOTTOM", nW:"NO WRAP", w:"WRAP", mUD:"Change category without saving?", blk:"Blank Slate.", dup:"Duplicate. Add?", dC:"Delete item?", cCf:"Clear local data?", dSW:"AUTO-COMPLETE WILL SCAN THE WHOLE CURRENT CATEGORY!", sU:"App Script URL", cP:"Cloud Pass", tK:"TMDB Key", vM:"VIEW MODE", tC:"Test Connection", tTK:"Test TMDB Key",
                 mSv:"Saved!", mF:"Failed!", mSy:"Synced: ", mAd:"Added: ", mDl:"Deleted", mRv:"Reverted", mRs:"Restored", mNt:"Note saved", mEx:"Exported", mIm:"Imported!", mIv:"Invalid file!", mNC:"Sync Cloud first", mAM:"API Key Missing!", mSc:"Scanning...", mSC:"Sync completed", mSF:"Sync failed, showing local data", impW:"Overwrite local data with this file?", tmR:"Multiple matches. Pick one:", del:"DELETE", mTOk:"Connection OK!", mTFail:"Connection failed!",
                 "cNO.":"#", cNO:"#", cNAME:"Title", cGRADE:"Score", cTHEME:"Genres", cGENRE:"Genre", cEXTRA:"Length", cIMDB:"IMDB", cREWATCH:"Rewatches", cNOTE:"Notes", cPOSTER:"Image", cCONTROL:"CONTROL",
-                sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sDr:"DROP", sEp:"Episodes", sTi:"Time",                 mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fAuto:"auto", fHfs:"Header size", hHfs:"Size of the column names. 0 = follows font size.", fFw:"Text weight", hFw:"How bold the text in the table is.", fwN:"Normal", fwB:"Bold", fwK:"Black", fUpper:"Uppercase", hUpper:"Pills and table header in CAPITALS.", fLines:"Row lines", hLines:"The line between rows.", lnNone:"None", lnSoft:"Soft", lnStrong:"Strong", fSticky:"Sticky header", hSticky:"Column names stay on top while scrolling.", fTw:"Table width", hTw:"Full screen, or limited and centred.", twFull:"Full", twLim:"Limited", fPoLock:"Lock 2:3", hPoLock:"Changing the width adjusts the height.", fPoRad:"Corners", hPoRad:"Shape of the poster corners.", rSq:"Square", rRd:"Rounded", rVr:"Very", fBadge:"# badge", hBadge:"Row number on the poster, or off.", bTL:"Top left", bTR:"Top right", bBL:"Bottom left", bBR:"Bottom right", fZoom:"Hover zoom", hZoom:"Enlarged poster when you point at it.", fPillSt:"Pill style", hPillSt:"Filled, outline or text only.", psF:"Filled", psO:"Outline", psT:"Text", fLenFmt:"Length format", hLenFmt:"How seasons and episodes are written.", fImdb:"IMDB button", hImdb:"Full, icon only or hidden.", imF:"Full", imI:"Icon", imH:"Hidden", fRPlus:"R+ pill", hRPlus:"Show R+ wherever you wrote it.", fRMinus:"R- pill", hRMinus:"Show R- wherever you wrote it.", twCus:"Custom", fTwPx:"Custom width", hTwPx:"Maximum table width, in pixels.", fScSt:"Score style", hScSt:"Coloured pill, coloured text or plain.", ssP:"Pill", ssT:"Text", ssN:"Plain", fScFmt:"Score display", hScFmt:"The sheet always keeps the score out of 10.", dgTxt:"Text", hdgTxt:"Size, weight, capitals and alignment.", dgRows:"Rows", hdgRows:"Density, lines, header and width.", dgPo:"Poster", hdgPo:"Size, corners, # badge and zoom.", dgPills:"Pills", hdgPills:"Genres · Length · IMDB.", dgSc:"Score", hdgSc:"How the score looks.", cfOn:"Colour the table", hFs:"Size of the text in table cells.", hWr:"Long text breaks onto new lines.", hHa:"Alignment inside cells, left to right.", hVa:"Alignment inside cells, top to bottom.", fPoFit:"Poster fit", hPoFit:"Fill crops every poster to the same size, Fit shows the whole image.", pfFillS:"Fill", pfFitS:"Fit", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the Image column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead or empty posters", clGrade:"Grades normalised", clNone:"Nothing to fix here.", clFix:"Repair", clShow:"Show", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", hRulB:"Colour a column when it matches. SCORE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuSyncTbl:"Sync whole table", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", mSvUnk:"The cloud copy does not show this save - it may not have gone through. Your changes are kept, try again.", mCfgBad:"Some cloud settings were invalid and were skipped", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION", lazyN:"LAZY LOADING", hdrN:"HIDE MEDIA HUB HEADER", hHdr:"Separate for PC and mobile, now: {d}. Settings, radar and save move next to the categories.", hLazy:"On: rows and posters load as you scroll, fast start. Off: the whole table loads at once.",
+                sTot:"Total Items", sAvg:"Avg Score", sW:"NEXT", sHd:"HOLD", sDr:"DROP", sEp:"Episodes", sTi:"Time",                 mSe:"SETTINGS", mC:"UI CUSTOMIZATION", mL:"LOCAL STORAGE", mA:"ADD NEW ITEM", mN:"EDIT NOTE", mCl:"CLEAN REPORT", mU:"UNSAVED PROGRESS", mCf:"CONFIRM", mLk:"EDIT LINK", yes:"YES", trk:"MOVING", on:"ON", off:"OFF", acC:"Accent Color", mvU:"Move up", mvD:"Move down", lsErr:"Local storage unavailable!", svN:"NOW", svA:"{m}-min", thA:"AUTO", thL:"LIGHT", thD:"DARK", blkSub:"Click the + button to add your first title", dspP:"Cols, size & align below save separately for", mQd:"Saving… will switch tab automatically when done", mot:"ANIMATIONS", lpHint:"Press and hold to edit", hFineEntry:"Colours, table text and exact sizes.", sFine:"Fine tuning", hFine:"Table text and exact sizes. Saved per layout profile.", sColF:"Color formatting", hColF:"Accent colour for the app and colour rules for the table.", sDepth:"Depth Customization", fAuto:"auto", fHfs:"Header size", hHfs:"Size of the column names. 0 = follows font size.", fFw:"Text weight", hFw:"How bold the text in the table is.", fwN:"Normal", fwB:"Bold", fwK:"Black", fUpper:"Uppercase", hUpper:"Pills and table header in CAPITALS.", fLines:"Row lines", hLines:"The line between rows.", lnNone:"None", lnSoft:"Soft", lnStrong:"Strong", fSticky:"Sticky header", hSticky:"Column names stay on top while scrolling.", fTw:"Table width", hTw:"Full screen, or limited and centred.", twFull:"Full", twLim:"Limited", fPoLock:"Lock 2:3", hPoLock:"Changing the width adjusts the height.", fPoRad:"Corners", hPoRad:"Shape of the poster corners.", rSq:"Square", rRd:"Rounded", rVr:"Very", fBadge:"# badge", hBadge:"Row number on the poster, or off.", bTL:"Top left", bTR:"Top right", bBL:"Bottom left", bBR:"Bottom right", fZoom:"Hover zoom", hZoom:"Enlarged poster when you point at it.", fPillSt:"Pill style", hPillSt:"Filled, outline or text only.", psF:"Filled", psO:"Outline", psT:"Text", fLenFmt:"Length format", hLenFmt:"How seasons and episodes are written.", fImdb:"IMDB button", hImdb:"Full, icon only or hidden.", imF:"Full", imI:"Icon", imH:"Hidden", fRPlus:"R+ pill", hRPlus:"Show R+ wherever you wrote it.", fRMinus:"R- pill", hRMinus:"Show R- wherever you wrote it.", twCus:"Custom", fTwPx:"Custom width", hTwPx:"Maximum table width, in pixels.", fScSt:"Score style", hScSt:"Coloured pill, coloured text or plain.", ssP:"Pill", ssT:"Text", ssN:"Plain", fScFmt:"Score display", hScFmt:"The sheet always keeps the score out of 10.", dgTxt:"Text", hdgTxt:"Size, weight, capitals and alignment.", dgRows:"Rows", hdgRows:"Density, lines, header and width.", dgPo:"Poster", hdgPo:"Size, corners, # badge and zoom.", dgPills:"Pills", hdgPills:"Genres · Length · IMDB.", dgSc:"Score", hdgSc:"How the score looks.", cfOn:"Colour the table", hFs:"Size of the text in table cells.", hWr:"Long text breaks onto new lines.", hHa:"Alignment inside cells, left to right.", hVa:"Alignment inside cells, top to bottom.", fPoFit:"Poster fit", hPoFit:"Fill crops every poster to the same size, Fit shows the whole image.", pfFillS:"Fill", pfFitS:"Fit", fDens:"Density", hDensN:"Space inside every cell. Lower = more rows on screen.", fPoW:"Poster width", hPoW:"How wide the image in the Image column is.", fPoH:"Poster height", hPoH:"How tall it is. Row height follows this.", fWords:"Words per line", hWords:"Break the text onto a new line after this many words. 0 = let it flow.", fPills:"Genre pills shown", hPills:"How many genres before the +N chip. 0 = default (2).", fNote:"Note preview", hNote:"Characters of the note shown in the cell. 0 = icon only.", fReset:"Reset to defaults", fOff:"off", clDup:"Possible duplicates", clNoImdb:"Missing IMDB link", clDead:"Dead or empty posters", clGrade:"Grades normalised", clNone:"Nothing to fix here.", clFix:"Repair", clShow:"Show", clFixAll:"Repair all from TMDB", clPosterOk:"Poster replaced from TMDB", clPosterFail:"No poster found on TMDB", hRulB:"Colour a column when it matches. SCORE takes a number or a range like 8-10.", crAdd:"Add rule", crRaw:"Edit as text", crNone:"No rules yet. Add one to colour your table.", crCol:"Column", crVal:"Value", crValPh:"text to match", crColor:"Colour", crStyle:"Style", crSize:"Size", crSBOLD:"Bold", crSITALIC:"Italic", crSUNDERLINE:"Underline", rdrTabUpd:"Updates", rdrTabSrch:"Search", rdrGradeRange:"Grade range", hGradeRange:"Type 8-10 for a range, or 7+ for 7 and above. Now: {r}", rdrBadRange:"Use 8-10 or 7+", hSrch:"Find new titles on TMDB by genre and rating, then add them straight to this category.", srchMovies:"Movies", srchSeries:"Series", srchAnime:"Anime", srchRating:"TMDB rating", hSrchRating:"Type 7 and it searches 7 to 10. A range like 7-8 works too. Now: {r}", srchYear:"From year", hSrchYear:"Leave empty for any year.", srchGenres:"Genres", hSrchGenres:"Pick one or more. Leave all off to search every genre.", srchBtn:"Search", srchBusy:"Searching", srchLoading:"Loading genres...", srchNoGenres:"No genres available", srchNone:"Nothing found", srchNoneSub:"Widen the rating range or pick fewer genres.", srchAdd:"Add to list", srchAdded:"In your list", srchAdding:"Adding...", mnuActions:"Row actions", mnuTable:"Table actions", mnuSyncRow:"Sync this row", mnuSyncTbl:"Sync whole table", addLink:"Add link", clickEdit:"Click to edit", abbrSeason:"SEA", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"All", rdrFSeason:"Seasons", rdrFAiring:"Airing", rdrFMovie:"Films", rdrFSoon:"Soon", rdrAnyGrade:"Any grade", rdrToScan:"to scan", rdrLimited:"rate limited, slowing down", rdrErrors:"failed", rdrStop:"STOP", rdrBack:"New scan", rdrDetails:"Details", rdrKSeason:"New season", rdrKAiring:"Airing now", rdrKEnded:"Season complete", rdrKMovie:"New film", rdrKSoon:"Announced", rdrYouHave:"you have", rdrSeason:"Season", rdrSeasons:"seasons", rdrToday:"today", rdrTomorrow:"tomorrow", rdrIn:"in", rdrDays:"days", rdrTBA:"date TBA", rdrNoneSub:"Nothing new for the titles that passed your filters. Try a lower grade or turn the year filter off.", rdrNoFilter:"No result matches this filter", rdrInclNext:"Include NEXT", rdrHNext:"Also scan titles you have not started yet.", rdrFromYear:"From year", rdrHYear:"Hide anything older than this year.", sTheme:"Theme", hTheme:"Pick a fixed look, or let the app follow your system setting.", hVm:"Chooses which layout profile you are editing right now.", beh:"Behaviour", hEx:"Small comfort options. Each one applies instantly.", hTrk:"Scroll to a row automatically after it changes.", hRm:"Transitions, fades and the highlight pulse.", hVib:"Short buzz when a save finishes (phones only).", hTb:"Categories shown in the top bar. Hidden ones keep their data.", hCl:"Columns shown in the table. Saved per layout profile.", hCf:"Paint grades and text using the rules below.", hAc:"Used for buttons, links and highlights across the app.", hzA:"Horizontal", vrA:"Vertical", txW:"Text wrap", sBk:"Full backup", hBk:"Every category in a single .json file. Use it to move to another device.", sCsv:"Spreadsheet", hCsv:"Only the category you have open. Opens in Excel or Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Replaces your whole local library.", sExpJ:"Export .JSON", hExpJ:"Downloads every category at once.", sImpC:"Import .CSV", hImpC:"Replaces the rows of the current category.", sExpC:"Export .CSV", hExpC:"Downloads the current category only.", sUse:"Space used", hUse:"Browser storage for this app. Export a backup well before it fills up.", uOf:"of", hDz:"Wipes settings and the local copy of your library in this browser only. Your cloud sheet is untouched, but anything not synced yet is lost.", mSvChk:"Saved, but the cloud copy differs - check the sheet", mSvUnk:"The cloud copy does not show this save - it may not have gone through. Your changes are kept, try again.", mCfgBad:"Some cloud settings were invalid and were skipped", svH:"{n}h", svD:"{n}d", lsFull:"Local storage is full - export a backup!", mRd:"RADAR", rdrB:"Radar", rdrScan:"SCAN FOR UPDATES", rdrScanning:"Scanning...", rdrNone:"No new seasons or movies found.", rdrNoKey:"Add a TMDB key in Settings first.", rdrDesc:"Scan the current category for new releases", rdrNext:"NEXT EPISODE ->", vib:"VIBRATION", lazyN:"LAZY LOADING", hdrN:"HIDE MEDIA HUB HEADER", hHdr:"Separate for PC and mobile, now: {d}. Settings, radar and save move next to the categories.", hLazy:"On: rows and posters load as you scroll, fast start. Off: the whole table loads at once.",
                 mNoSave:"Nothing to save: this category is empty", mCfl:"The cloud copy changed since you loaded it (another device?). Overwrite it with this device's data?", mNoBase:"This category was not loaded from the cloud in this session. Saving will REPLACE the cloud copy with local data. Continue?", mSvBad:"Save cancelled",
                 srchAnimeMovie:"Anime films", shkBtn:"SHORTCUTS", shkTtl:"KEYBOARD SHORTCUTS", shkGen:"General", shkTbl:"Table Editing", shkFocus:"Focus search bar", shkAdd:"Add new item", shkUndo:"Undo last change", shkSave:"Save to Cloud", shkEsc:"Close modal / Clear search", shkEnter:"Confirm \"Add New Item\"", shkRow:"Move to previous / next row", shkCol:"Move to previous / next column", shkMove:"Move row up / down", mAll:"All", mSort:"Sort", mTitles:"titles", mDef:"Default order" },
-            RO: { sC:"Salvează", sP:"CAUTĂ...", dpSrch:"Caută opțiuni...", dpNone:"Nicio opțiune pentru «{q}»", secShow:"Arată", secHide:"Ascunde", clProb:"probleme", clManualN:"{n} cer atenția ta", clManual1:"editează-l tu", clAll:"Repară tot", clStop:"STOP", clStopped:"Oprit", clSure:"Sigur?", clDel:"Șterge", clLink:"Link", clRepl:"Toate posterele din TMDB", hClRepl:"Înlocuiește orice poster care nu e pe image.tmdb.org, chiar și pe cele care merg.", clNoKey:"Fără cheie TMDB: s-au făcut doar reparările locale.", clFixedN:"Reparate: {n}", clNoTitle:"(fără titlu)", clEmptyRow:"rând gol", clEmpty:"gol", clDeadS:"mort", clImdbOk:"Link IMDB găsit", clImdbFail:"Niciun link IMDB găsit pe TMDB", clGBad:"Note invalide", clLen:"Formate Length", clGen:"Genuri", clTxt:"Curățenie text", hClDup:"Același titlu de mai multe ori. Arată-l sau șterge unul.", hClImdb:"Găsit pe TMDB după titlu.", hClPo:"Înlocuit cu posterul din TMDB.", hClGrade:"Orice semn între cifre devine punct: 9,10 → 9.10.", hClGBad:"Nu e 1-10, NEXT sau DROP. Cazurile clare se repară, restul le editezi tu.", hClLen:"Un singur format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"O singură scriere, fără repetări: Sci-Fi, Action.", hClTxt:"Spații în plus, Rewatches ca număr, rânduri goale.", noRes:"Niciun rezultat pentru «{q}»", noNext:"Niciun titlu NEXT în categoria asta", clrSrchB:"Șterge căutarea", showAll:"Arată tot", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 DROP/NEXT", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hdrN:"ASCUNDE ANTETUL MEDIA HUB", hHdr:"Separat pentru PC și mobil, acum: {d}. Setările, radarul și salvarea se mută lângă categorii.", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
+            RO: { sC:"Salvează", sP:"CAUTĂ...", dpSrch:"Caută opțiuni...", dpNone:"Nicio opțiune pentru «{q}»", secShow:"Arată", secHide:"Ascunde", clProb:"probleme", clManualN:"{n} cer atenția ta", clManual1:"editează-l tu", clAll:"Repară tot", clStop:"STOP", clStopped:"Oprit", clSure:"Sigur?", clDel:"Șterge", clLink:"Link", clRepl:"Toate posterele din TMDB", hClRepl:"Înlocuiește orice poster care nu e pe image.tmdb.org, chiar și pe cele care merg.", clNoKey:"Fără cheie TMDB: s-au făcut doar reparările locale.", clFixedN:"Reparate: {n}", clNoTitle:"(fără titlu)", clEmptyRow:"rând gol", clEmpty:"gol", clDeadS:"mort", clImdbOk:"Link IMDB găsit", clImdbFail:"Niciun link IMDB găsit pe TMDB", clGBad:"Note invalide", clLen:"Formate Length", clGen:"Genuri", clTxt:"Curățenie text", hClDup:"Același titlu de mai multe ori. Arată-l sau șterge unul.", hClImdb:"Găsit pe TMDB după titlu.", hClPo:"Înlocuit cu posterul din TMDB.", hClGrade:"Orice semn între cifre devine punct: 9,10 → 9.10.", hClGBad:"Nu e 1-10, NEXT, HOLD sau DROP. Cazurile clare se repară, restul le editezi tu.", hClLen:"Un singur format: 4 Seasons | 89 Episodes, 148 min.", hClGen:"O singură scriere, fără repetări: Sci-Fi, Action.", hClTxt:"Spații în plus, Rewatches ca număr, rânduri goale.", noRes:"Niciun rezultat pentru «{q}»", noNext:"Niciun titlu NEXT în categoria asta", clrSrchB:"Șterge căutarea", showAll:"Arată tot", nO:"NEXT", add:"ADAUGĂ", cus:"ASPECT", loc:"MEMORIE", drv:"DRIVE", hlp:"AJUTOR", cln:"CURĂȚĂ", cn:"ANULEAZĂ", sv:"SALVEAZĂ", vT:"Categorii", vC:"Coloane", cF:"CULORI", uR:"Reguli", fS:"Mărime Font", aS:"Aplică", dz:"PERICOL", cC:"ȘTERGE MEMORIA", tN:"NUME", gD:"1-10 NEXT/HOLD/DROP", sN:"SALVEAZĂ NOTIȚĂ", cls:"ÎNCHIDE", un:"ANULEAZĂ", cD:"PIERDE", l:"STÂNGA", c:"CENTRU", r:"DREAPTA", t:"SUS", m:"MIJLOC", b:"JOS", nW:"FĂRĂ TĂIERE", w:"TĂIERE", mUD:"Schimbi categoria fără salvare?", blk:"Tabel gol.", dup:"Duplicat. Adaugi?", dC:"Ștergi?", cCf:"Ștergi datele locale?", dSW:"AUTO-COMPLETAREA SCANEAZĂ TOATĂ CATEGORIA CURENTĂ!", sU:"URL App Script", cP:"Parolă Cloud", tK:"Cheie TMDB", vM:"MOD AFIȘARE", tC:"Testează Conexiunea", tTK:"Testează Cheia TMDB", mRd:"RADAR", rdrB:"Radar", rdrScan:"CAUTĂ NOUTĂȚI", rdrScanning:"Se scanează...", rdrNone:"Niciun sezon sau film nou găsit.", rdrNoKey:"Adaugă o cheie TMDB în Settings mai întâi.", rdrDesc:"Scanează categoria curentă pentru noutăți", rdrNext:"URMĂTORUL EPISOD ->", vib:"VIBRAȚIE", lazyN:"ÎNCĂRCARE TREPTATĂ", hdrN:"ASCUNDE ANTETUL MEDIA HUB", hHdr:"Separat pentru PC și mobil, acum: {d}. Setările, radarul și salvarea se mută lângă categorii.", hLazy:"Pornit: rândurile și posterele se încarcă pe măsură ce derulezi, pornire rapidă. Oprit: tot tabelul se încarcă deodată.",
                 mSv:"Salvat!", mF:"Eroare!", mSy:"Sincronizat: ", mAd:"Adăugat: ", mDl:"Șters", mRv:"Anulat", mRs:"Restaurat", mNt:"Notiță", mEx:"Exportat", mIm:"Importat!", mIv:"Fișier invalid!", mNC:"Sincronizează Cloud întâi", mAM:"Cheie API Lipsă!", mSc:"Se scanează...", mSC:"Sincronizare gata", mSF:"Sincronizare eșuată, date locale", impW:"Suprascrii datele locale cu acest fișier?", tmR:"Mai multe rezultate. Alege:", del:"ȘTERGE", mTOk:"Conexiune reușită!", mTFail:"Conexiune eșuată!",
                 "cNO.":"#", cNO:"#", cNAME:"Titlu", cGRADE:"Notă", cTHEME:"Genuri", cGENRE:"Gen", cEXTRA:"Durată", cIMDB:"IMDB", cREWATCH:"Revizionări", cNOTE:"Notițe", cPOSTER:"Imagine", cCONTROL:"CONTROL",
-                sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sDr:"DROP", sEp:"Episoade", sTi:"Timp",                 mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fAuto:"auto", fHfs:"Mărime antet", hHfs:"Mărimea numelor de coloane. 0 = după mărimea fontului.", fFw:"Grosime text", hFw:"Cât de gros e textul din tabel.", fwN:"Normal", fwB:"Îngroșat", fwK:"Foarte gros", fUpper:"Majuscule", hUpper:"Pastilele și antetul tabelului cu MAJUSCULE.", fLines:"Linii între rânduri", hLines:"Linia dintre rânduri.", lnNone:"Fără", lnSoft:"Discrete", lnStrong:"Vizibile", fSticky:"Antet fix", hSticky:"Numele coloanelor rămân sus la derulare.", fTw:"Lățime tabel", hTw:"Cât ecranul, sau limitată și centrată.", twFull:"Tot ecranul", twLim:"Limitată", fPoLock:"Blochează 2:3", hPoLock:"Când schimbi lățimea, înălțimea se ajustează singură.", fPoRad:"Colțuri", hPoRad:"Forma colțurilor posterului.", rSq:"Drepte", rRd:"Rotunjite", rVr:"Foarte", fBadge:"Insigna #", hBadge:"Numărul rândului pe poster, sau oprit.", bTL:"Stânga sus", bTR:"Dreapta sus", bBL:"Stânga jos", bBR:"Dreapta jos", fZoom:"Zoom la hover", hZoom:"Poster mărit când treci cu mouse-ul peste el.", fPillSt:"Stil pastile", hPillSt:"Pline, doar contur sau doar text.", psF:"Pline", psO:"Contur", psT:"Text", fLenFmt:"Format durată", hLenFmt:"Cum sunt scrise sezoanele și episoadele.", fImdb:"Buton IMDB", hImdb:"Complet, doar iconiță sau ascuns.", imF:"Complet", imI:"Iconiță", imH:"Ascuns", fRPlus:"Pastila R+", hRPlus:"Arată R+ oriunde l-ai scris.", fRMinus:"Pastila R-", hRMinus:"Arată R- oriunde l-ai scris.", twCus:"Personalizat", fTwPx:"Lățime personalizată", hTwPx:"Lățimea maximă a tabelului, în pixeli.", fScSt:"Stil notă", hScSt:"Pastilă colorată, text colorat sau simplu.", ssP:"Pastilă", ssT:"Text", ssN:"Simplu", fScFmt:"Afișare notă", hScFmt:"În sheet nota rămâne mereu din 10.", dgTxt:"Text", hdgTxt:"Mărime, grosime, majuscule și aliniere.", dgRows:"Rânduri", hdgRows:"Densitate, linii, antet și lățime.", dgPo:"Poster", hdgPo:"Mărime, colțuri, insigna # și zoom.", dgPills:"Pastile", hdgPills:"Genuri · Durată · IMDB.", dgSc:"Notă", hdgSc:"Cum arată nota.", cfOn:"Colorează tabelul", hFs:"Mărimea textului din celulele tabelului.", hWr:"Textul lung trece pe rând nou.", hHa:"Alinierea în celule, de la stânga la dreapta.", hVa:"Alinierea în celule, de sus în jos.", fPoFit:"Încadrare poster", hPoFit:"Umple taie toate posterele la aceeași mărime, Încadrează arată toată imaginea.", pfFillS:"Umple", pfFitS:"Încadrează", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana Image.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte sau goale", clGrade:"Note normalizate", clNone:"Nimic de reparat aici.", clFix:"Repară", clShow:"Arată", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", hRulB:"Colorează o coloană când se potrivește. SCORE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuSyncTbl:"Sincronizează tot tabelul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", mSvUnk:"Copia din cloud nu arată salvarea - probabil nu a ajuns. Modificările tale sunt păstrate, încearcă din nou.", mCfgBad:"Unele setări din cloud erau invalide și au fost sărite", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
+                sTot:"Total Elemente", sAvg:"Notă Medie", sW:"NEXT", sHd:"HOLD", sDr:"DROP", sEp:"Episoade", sTi:"Timp",                 mSe:"SETĂRI", mC:"PERSONALIZARE ASPECT", mL:"STOCARE LOCALĂ", mA:"ADAUGĂ ELEMENT NOU", mN:"EDITEAZĂ NOTIȚĂ", mCl:"RAPORT CURĂȚARE", mU:"PROGRES NESALVAT", mCf:"CONFIRMARE", mLk:"EDITEAZĂ LINK", yes:"DA", trk:"MOVING", on:"PORNIT", off:"OPRIT", acC:"Culoare Accent", mvU:"Mută mai sus", mvD:"Mută mai jos", lsErr:"Stocare locală indisponibilă!", svN:"ACUM", svA:"{m}-min", thA:"AUTO", thL:"DESCHIS", thD:"ÎNCHIS", blkSub:"Apasă butonul + pentru a adăuga primul titlu", dspP:"Coloanele, mărimea și alinierea de mai jos se salvează separat pentru", mQd:"Se salvează… se comută automat pe tab-ul ales imediat ce termin", mot:"ANIMAȚII", lpHint:"Ține apăsat ca să editezi", hFineEntry:"Culori, textul tabelului și dimensiuni exacte.", sFine:"Reglaj fin", hFine:"Textul tabelului și dimensiuni exacte. Se salvează pe fiecare profil.", sColF:"Formatare culori", hColF:"Culoarea de accent a aplicației și regulile de culoare din tabel.", sDepth:"Personalizare detaliată", fAuto:"auto", fHfs:"Mărime antet", hHfs:"Mărimea numelor de coloane. 0 = după mărimea fontului.", fFw:"Grosime text", hFw:"Cât de gros e textul din tabel.", fwN:"Normal", fwB:"Îngroșat", fwK:"Foarte gros", fUpper:"Majuscule", hUpper:"Pastilele și antetul tabelului cu MAJUSCULE.", fLines:"Linii între rânduri", hLines:"Linia dintre rânduri.", lnNone:"Fără", lnSoft:"Discrete", lnStrong:"Vizibile", fSticky:"Antet fix", hSticky:"Numele coloanelor rămân sus la derulare.", fTw:"Lățime tabel", hTw:"Cât ecranul, sau limitată și centrată.", twFull:"Tot ecranul", twLim:"Limitată", fPoLock:"Blochează 2:3", hPoLock:"Când schimbi lățimea, înălțimea se ajustează singură.", fPoRad:"Colțuri", hPoRad:"Forma colțurilor posterului.", rSq:"Drepte", rRd:"Rotunjite", rVr:"Foarte", fBadge:"Insigna #", hBadge:"Numărul rândului pe poster, sau oprit.", bTL:"Stânga sus", bTR:"Dreapta sus", bBL:"Stânga jos", bBR:"Dreapta jos", fZoom:"Zoom la hover", hZoom:"Poster mărit când treci cu mouse-ul peste el.", fPillSt:"Stil pastile", hPillSt:"Pline, doar contur sau doar text.", psF:"Pline", psO:"Contur", psT:"Text", fLenFmt:"Format durată", hLenFmt:"Cum sunt scrise sezoanele și episoadele.", fImdb:"Buton IMDB", hImdb:"Complet, doar iconiță sau ascuns.", imF:"Complet", imI:"Iconiță", imH:"Ascuns", fRPlus:"Pastila R+", hRPlus:"Arată R+ oriunde l-ai scris.", fRMinus:"Pastila R-", hRMinus:"Arată R- oriunde l-ai scris.", twCus:"Personalizat", fTwPx:"Lățime personalizată", hTwPx:"Lățimea maximă a tabelului, în pixeli.", fScSt:"Stil notă", hScSt:"Pastilă colorată, text colorat sau simplu.", ssP:"Pastilă", ssT:"Text", ssN:"Simplu", fScFmt:"Afișare notă", hScFmt:"În sheet nota rămâne mereu din 10.", dgTxt:"Text", hdgTxt:"Mărime, grosime, majuscule și aliniere.", dgRows:"Rânduri", hdgRows:"Densitate, linii, antet și lățime.", dgPo:"Poster", hdgPo:"Mărime, colțuri, insigna # și zoom.", dgPills:"Pastile", hdgPills:"Genuri · Durată · IMDB.", dgSc:"Notă", hdgSc:"Cum arată nota.", cfOn:"Colorează tabelul", hFs:"Mărimea textului din celulele tabelului.", hWr:"Textul lung trece pe rând nou.", hHa:"Alinierea în celule, de la stânga la dreapta.", hVa:"Alinierea în celule, de sus în jos.", fPoFit:"Încadrare poster", hPoFit:"Umple taie toate posterele la aceeași mărime, Încadrează arată toată imaginea.", pfFillS:"Umple", pfFitS:"Încadrează", fDens:"Densitate", hDensN:"Spațiul din fiecare celulă. Mai mic = mai multe rânduri pe ecran.", fPoW:"Lățime poster", hPoW:"Cât de lată e imaginea din coloana Image.", fPoH:"Înălțime poster", hPoH:"Cât de înaltă e. Înălțimea rândului o urmează.", fWords:"Cuvinte pe rând", hWords:"Trece textul pe rând nou după atâtea cuvinte. 0 = îl lasă să curgă.", fPills:"Pastile de gen afișate", hPills:"Câte genuri înainte de chipul +N. 0 = implicit (2).", fNote:"Previzualizare notiță", hNote:"Câte caractere din notiță apar în celulă. 0 = doar iconița.", fReset:"Revino la valorile implicite", fOff:"oprit", clDup:"Posibile duplicate", clNoImdb:"Link IMDB lipsă", clDead:"Postere moarte sau goale", clGrade:"Note normalizate", clNone:"Nimic de reparat aici.", clFix:"Repară", clShow:"Arată", clFixAll:"Repară tot din TMDB", clPosterOk:"Poster înlocuit din TMDB", clPosterFail:"Niciun poster găsit pe TMDB", hRulB:"Colorează o coloană când se potrivește. SCORE acceptă un număr sau un interval ca 8-10.", crAdd:"Adaugă regulă", crRaw:"Editează ca text", crNone:"Nicio regulă încă. Adaugă una ca să colorezi tabelul.", crCol:"Coloană", crVal:"Valoare", crValPh:"text de căutat", crColor:"Culoare", crStyle:"Stil", crSize:"Mărime", crSBOLD:"Îngroșat", crSITALIC:"Italic", crSUNDERLINE:"Subliniat", rdrTabUpd:"Noutăți", rdrTabSrch:"Căutare", rdrGradeRange:"Interval note", hGradeRange:"Scrie 8-10 pentru interval, sau 7+ pentru 7 în sus. Acum: {r}", rdrBadRange:"Folosește 8-10 sau 7+", hSrch:"Găsește titluri noi pe TMDB după gen și notă, apoi adaugă-le direct în categoria asta.", srchMovies:"Filme", srchSeries:"Seriale", srchAnime:"Anime", srchRating:"Notă TMDB", hSrchRating:"Scrii 7 și caută de la 7 până la 10. Merge și un interval ca 7-8. Acum: {r}", srchYear:"Din anul", hSrchYear:"Lasă gol pentru orice an.", srchGenres:"Genuri", hSrchGenres:"Alege unul sau mai multe. Lasă-le toate stinse ca să cauți în toate.", srchBtn:"Caută", srchBusy:"Se caută", srchLoading:"Se încarcă genurile...", srchNoGenres:"Niciun gen disponibil", srchNone:"Nimic găsit", srchNoneSub:"Lărgește intervalul de notă sau alege mai puține genuri.", srchAdd:"Adaugă în listă", srchAdded:"E în listă", srchAdding:"Se adaugă...", mnuActions:"Acțiuni rând", mnuTable:"Acțiuni tabel", mnuSyncRow:"Sincronizează rândul", mnuSyncTbl:"Sincronizează tot tabelul", addLink:"Adaugă link", clickEdit:"Click pentru editare", abbrSeason:"SEZ", abbrEp:"EP", abbrMin:"MIN", rdrFAll:"Toate", rdrFSeason:"Sezoane", rdrFAiring:"În difuzare", rdrFMovie:"Filme", rdrFSoon:"Curând", rdrAnyGrade:"Orice notă", rdrToScan:"de scanat", rdrLimited:"limită atinsă, încetinesc", rdrErrors:"eșuate", rdrStop:"STOP", rdrBack:"Scanare nouă", rdrDetails:"Detalii", rdrKSeason:"Sezon nou", rdrKAiring:"Se difuzează", rdrKEnded:"Sezon complet", rdrKMovie:"Film nou", rdrKSoon:"Anunțat", rdrYouHave:"ai", rdrSeason:"Sezonul", rdrSeasons:"sezoane", rdrToday:"azi", rdrTomorrow:"mâine", rdrIn:"în", rdrDays:"zile", rdrTBA:"dată neanunțată", rdrNoneSub:"Nimic nou pentru titlurile care au trecut de filtre. Încearcă o notă mai mică sau oprește filtrul de an.", rdrNoFilter:"Niciun rezultat pentru acest filtru", rdrInclNext:"Include NEXT", rdrHNext:"Scanează și titlurile nedeschise încă.", rdrFromYear:"Din anul", rdrHYear:"Ascunde tot ce e mai vechi de anul acesta.", sTheme:"Temă", hTheme:"Alege un aspect fix sau lasă aplicația să urmeze setarea sistemului.", hVm:"Stabilește ce profil de afișare editezi acum.", beh:"Comportament", hEx:"Opțiuni mici de confort. Fiecare se aplică instant.", hTrk:"Derulează automat la un rând după ce se modifică.", hRm:"Tranziții, estompări și efectul de evidențiere.", hVib:"Vibrație scurtă la finalul salvării (doar telefon).", hTb:"Categoriile afișate în bara de sus. Cele ascunse își păstrează datele.", hCl:"Coloanele afișate în tabel. Se salvează pe fiecare profil.", hCf:"Colorează notele și textul după regulile de mai jos.", hAc:"Folosită pentru butoane, linkuri și evidențieri în toată aplicația.", hzA:"Orizontal", vrA:"Vertical", txW:"Tăiere text", sBk:"Backup complet", hBk:"Toate categoriile într-un singur fișier .json. Folosește-l ca să muți datele pe alt dispozitiv.", sCsv:"Foaie de calcul", hCsv:"Doar categoria deschisă acum. Se deschide în Excel sau Google Sheets.", sImpJ:"Import .JSON", hImpJ:"Înlocuiește toată biblioteca locală.", sExpJ:"Export .JSON", hExpJ:"Descarcă toate categoriile deodată.", sImpC:"Import .CSV", hImpC:"Înlocuiește rândurile categoriei curente.", sExpC:"Export .CSV", hExpC:"Descarcă doar categoria curentă.", sUse:"Spațiu folosit", hUse:"Memoria browserului pentru această aplicație. Exportă un backup din timp, înainte să se umple.", uOf:"din", hDz:"Șterge setările și copia locală a bibliotecii, doar din acest browser. Sheet-ul din cloud rămâne intact, dar tot ce nu e sincronizat se pierde.", mSvChk:"Salvat, dar copia din cloud diferă - verifică sheet-ul", mSvUnk:"Copia din cloud nu arată salvarea - probabil nu a ajuns. Modificările tale sunt păstrate, încearcă din nou.", mCfgBad:"Unele setări din cloud erau invalide și au fost sărite", svH:"{n}h", svD:"{n}z", lsFull:"Memoria locală e plină - exportă un backup!",
                 mNoSave:"Nimic de salvat: categoria e goală", mCfl:"Copia din cloud s-a schimbat de când ai încărcat-o (alt dispozitiv?). O suprascrii cu datele de pe acest dispozitiv?", mNoBase:"Categoria asta nu a fost încărcată din cloud în această sesiune. Salvarea va ÎNLOCUI copia din cloud cu datele locale. Continui?", mSvBad:"Salvare anulată",
                 srchAnimeMovie:"Filme anime", shkBtn:"SCURTĂTURI", shkTtl:"SCURTĂTURI TASTATURĂ", shkGen:"General", shkTbl:"Editare tabel", shkFocus:"Focus pe bara de căutare", shkAdd:"Adaugă element nou", shkUndo:"Anulează ultima modificare", shkSave:"Salvează în Cloud", shkEsc:"Închide fereastra / Golește căutarea", shkEnter:"Confirmă „Adaugă element nou”", shkRow:"Rândul anterior / următor", shkCol:"Coloana anterioară / următoare", shkMove:"Mută rândul sus / jos", mAll:"Toate", mSort:"Sortare", mTitles:"titluri", mDef:"Ordine implicită" }
         };
@@ -1286,10 +1319,12 @@
         function appTr() { document.documentElement.lang=(STATE.lang||'EN').toLowerCase(); document.querySelectorAll('[data-tr]').forEach(e=>e.textContent=t(e.getAttribute('data-tr'))); document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.getAttribute('data-p'))); document.querySelectorAll('[data-tr-al]').forEach(e=>e.setAttribute('aria-label',t(e.getAttribute('data-tr-al')))); mCol(); rTab(); if($('b-trk'))rTrkUI(); if($('b-rm'))rRMUI(); if($('b-vib'))rVibUI(); if($('b-lazy'))rLazyUI(); if($('b-cf'))rCFUI(); if($('c-tb'))rTg(); if($('ls-fill'))rLsUI(); const dp=$('disp-prof-txt'); if(dp) dp.innerHTML=`${ic(curDev()==='mobile'?'mobile-screen-button':'desktop')}<span>${esc(t('dspP'))}: ${curDev()==='mobile'?'MOBILE':'PC'}</span>`; }
         /* isData=false marks a cosmetic/setting change: it still lights the dot (so the user knows
            to sync) but it must NOT trigger the "unsaved progress" gate on tab switch or page unload. */
-        function setUns(is, isData=true) { STATE.uns=is; if(!is) STATE.unsData=false; else if(isData) STATE.unsData=true; const d=$('uns-dot'); if(d) d.style.display=is?'flex':'none'; }
+        function setUns(is, isData=true) { if(is) CHG_GEN++; STATE.uns=is; if(!is) STATE.unsData=false; else if(isData) STATE.unsData=true; const d=$('uns-dot'); if(d) d.style.display=is?'flex':'none'; }
         /* Settings changed here and not saved yet must not be overwritten by the cloud CONFIG on the next
            tab load. The flag survives a reload and is cleared by a successful save. */
-        const markCfg=()=>ls('cfgDirty','1');
+        /* every change bumps a counter, so a save can tell whether something new was edited while it ran */
+        let CHG_GEN=0, CFG_GEN=0;
+        const markCfg=()=>{ CFG_GEN++; ls('cfgDirty','1'); };
         const cfgDirty=()=>ls('cfgDirty')==='1';
         function tCF() { STATE.cF=!STATE.cF; ls('colorFormatting',STATE.cF); markCfg(); setUns(true,false); rTab(); rCFUI(); }
         function rCFUI(){ if($('b-cf')) rSwitch('b-cf','fill-drip','cfOn','hCf', STATE.cF); }
@@ -1389,17 +1424,6 @@
         }
         function onKeydown(e){
             if(e.key==='Escape' && e.target?.id==='dp-q' && e.target.value){ e.preventDefault(); e.target.value=''; dpFilter(); return; } /* Esc clears the Depth search first, the dialog stays open */
-            /* Tab stays inside an open dialog */
-            if(e.key==='Tab' && DOM.md && DOM.md.classList.contains('open')){
-                const f=[...DOM.mb.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
-                if(f.length){
-                    const first=f[0], last=f[f.length-1], a=document.activeElement;
-                    if(!DOM.mb.contains(a)){ e.preventDefault(); first.focus(); }
-                    else if(e.shiftKey && (a===first||a===DOM.mb)){ e.preventDefault(); last.focus(); }
-                    else if(!e.shiftKey && a===last){ e.preventDefault(); first.focus(); }
-                }
-                return;
-            }
             const opt=e.target&&e.target.classList&&e.target.classList.contains('s-col-opt');
             if(opt&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); e.target.click(); return; }
             if(e.key==='Escape'&&MENU_EL){ closeMenu(); return; }
@@ -1437,8 +1461,10 @@
             const m=MODS[id], compact=id==='radar';
             if(!DOM.md.classList.contains('open')) MOD_RETURN=document.activeElement;
             DOM.mb.className=`theme-card ${compact?'p-5 md:p-6':'p-8 md:p-10'} rounded-2xl w-full ${m.w} text-center overflow-y-auto max-h-[95vh]${compact?' radar-modal-h':''} relative shadow-2xl m-${id}`;
-            DOM.mb.innerHTML=`${id==='cst'?`<button onclick="tLng()" id="lang-mini" aria-label="Toggle language" class="absolute top-4 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 rounded-full px-3 py-1 text-[11px] font-black uppercase hover:bg-[var(--theme-accent)]/10 transition-all z-[100]" style="left:1.25rem;">${STATE.lang}</button>`:''}<button onclick="${id==='fine'?'backToCst()':(m.b?`oMod('${m.b}')`:'cMod()')}" aria-label="${esc(t('cls'))}" class="absolute top-4 right-5 text-[var(--theme-accent)] hover:opacity-70 text-2xl z-[100]"${compact?' style="top:.6rem;right:.75rem;"':''}>${ic('times')}</button><div class="flex flex-col items-center justify-center ${compact?'mb-3 pb-2':'mb-6 pb-4 mt-2'} border-b border-[var(--theme-accent)]/20"><h2 id="m-ttl" class="font-black uppercase theme-text ${compact?'text-base':'text-xl'} flex items-center gap-2"><i class="fas ${m.i}"></i> ${t(m.t)||m.t}</h2></div><div id="m-cnt"></div>`;
-            $('m-cnt').appendChild($(`tpl-${id}`).content.cloneNode(true)); DOM.md.classList.add('open');
+            DOM.mb.innerHTML=`${id==='cst'?`<button data-fn="tLng" id="lang-mini" aria-label="Toggle language" class="absolute top-4 text-[var(--theme-accent)] border border-[var(--theme-accent)]/30 rounded-full px-3 py-1 text-[11px] font-black uppercase hover:bg-[var(--theme-accent)]/10 transition-all z-[100]" style="left:1.25rem;">${STATE.lang}</button>`:''}<button data-fn="${id==='fine'?'backToCst':(m.b?'oMod':'cMod')}"${id!=='fine'&&m.b?` data-fn-args='["${m.b}"]'`:''} aria-label="${esc(t('cls'))}" class="absolute top-4 right-5 text-[var(--theme-accent)] hover:opacity-70 text-2xl z-[100]"${compact?' style="top:.6rem;right:.75rem;"':''}>${ic('times')}</button><div class="flex flex-col items-center justify-center ${compact?'mb-3 pb-2':'mb-6 pb-4 mt-2'} border-b border-[var(--theme-accent)]/20"><h2 id="m-ttl" class="font-black uppercase theme-text ${compact?'text-base':'text-xl'} flex items-center gap-2"><i class="fas ${m.i}"></i> ${t(m.t)||m.t}</h2></div><div id="m-cnt"></div>`;
+            $('m-cnt').appendChild($(`tpl-${id}`).content.cloneNode(true));
+            if(!DOM.md.open){ DOM.md.showModal(); DOM.mb.focus({preventScroll:true}); } /* top layer: the page behind is inert, Tab stays inside */
+            DOM.md.classList.add('open'); floatIn();
             /* keyboard users land inside the dialog (inputs that autofocus win because they run at 50ms) */
             setTimeout(()=>{ if(DOM.md.classList.contains('open') && !DOM.mb.contains(document.activeElement)) DOM.mb.focus({preventScroll:true}); }, 80);
             if(id==='stg'){ aThUI(); $('i-url').value=STATE.url; $('i-pas').value=STATE.pass; $('i-tmd').value=STATE.tmdbKey; }
@@ -1459,7 +1485,11 @@
                 if(RDR_RESULTS.length && RDR_SHEET===STATE.sheet) renderRadar(); else rdrBack(); }
             appTr();
         }
-        function cMod(){ if(CFM_DISMISS){ const d=CFM_DISMISS; CFM_DISMISS=null; d(); } CST_DRAFT=false; DOM.md.classList.remove('open'); PEND_STG=null; P_TAB=''; if(MOD_RETURN&&MOD_RETURN.focus&&document.contains(MOD_RETURN)){ try{ MOD_RETURN.focus({preventScroll:true}); }catch(e){} } MOD_RETURN=null; setTimeout(()=>{ if(!DOM.md.classList.contains('open')) DOM.mb.innerHTML=''; }, 300); }
+        /* toasts and pop-up menus are moved into the open <dialog> (the top layer) so they show above it */
+        function floatIn(){ if(DOM.ts && DOM.ts.parentElement!==DOM.md) DOM.md.appendChild(DOM.ts); }
+        function floatOut(){ if(DOM.ts && DOM.ts.parentElement!==document.body) document.body.appendChild(DOM.ts); }
+        const floatHost=()=>DOM.md?.open ? DOM.md : document.body;
+        function cMod(){ if(CFM_DISMISS){ const d=CFM_DISMISS; CFM_DISMISS=null; d(); } CST_DRAFT=false; DOM.md.classList.remove('open'); if(DOM.md.open) DOM.md.close(); floatOut(); PEND_STG=null; P_TAB=''; if(MOD_RETURN&&MOD_RETURN.focus&&document.contains(MOD_RETURN)){ try{ MOD_RETURN.focus({preventScroll:true}); }catch(e){} } MOD_RETURN=null; setTimeout(()=>{ if(!DOM.md.classList.contains('open')) DOM.mb.innerHTML=''; }, 300); }
         function cfmM(msg, onYes, onCancel){ oMod('cfm'); $('cfm-msg').innerText=msg; $('b-cfm-yes').onclick=()=>{ cMod(); onYes&&onYes(); }; $('b-cfm-no').onclick=()=>{ cMod(); onCancel&&onCancel(); }; }
         function oNt(r,c){ if(!STATE.data[r])return; oMod('nte'); const v=STATE.data[r][c], txt=$('i-nt'); txt.value=v; $('b-sn').onclick=()=>sNt(r,c); setTimeout(()=>txt.focus(),50); }
         function sNt(r,c){ if(!STATE.data[r]){cMod();return;} const n=$('i-nt').value; if(STATE.data[r][c]!==n){ STATE.hist.push({t:'E',rowRef:STATE.data[r],c,v:STATE.data[r][c]}); STATE.data[r][c]=n; cmtSt(t("mNt")); } cMod(); }
@@ -1606,16 +1636,17 @@
         ];
         const clName=r=>String(r[COL.NAME]??'').trim()||t('clNoTitle');
         /* grades: any mark between digits becomes a dot (9,10 -> 9.10, 9..10 -> 9.10); next/drop in capitals */
-        const GRADE_OK=v=>/^(NEXT|DROP)$/.test(v) || (/^\d+(\.\d+)?$/.test(v) && +v>=1 && +v<=10);
+        const GRADE_OK=v=>/^(NEXT|HOLD|DROP)$/.test(v) || (/^\d+(\.\d+)?$/.test(v) && +v>=1 && +v<=10);
         function clGradeSep(v){
             const s=String(v??'').trim(), u=s.toUpperCase();
             if(u==='DROPPED') return 'DROP';
-            if(/^(NEXT|DROP)$/.test(u)) return u!==s?u:null;
+            if(/^(ON[\s-]*HOLD|PAUSED)$/.test(u)) return 'HOLD';
+            if(/^(NEXT|HOLD|DROP)$/.test(u)) return u!==s?u:null;
             if(s.includes('/')) return null;
             const n=s.replace(/(\d)\s*[.,;:·][\s.,;:·]*(?=\d)/g,'$1.');
             return n!==s?n:null;
         }
-        /* not 1-10 / NEXT / DROP: fixed only when the intent is clear (10/10, 9.5., 8+), otherwise left to the user */
+        /* not 1-10 / NEXT / HOLD / DROP: fixed only when the intent is clear (10/10, 9.5., 8+), otherwise left to the user */
         function clGradeBad(v){
             const s=String(v??'').trim(); if(!s || GRADE_OK(s)) return null;
             let m=s.match(/^(\d+(?:\.\d+)?)\s*\/\s*10$/), to=null;
@@ -2005,14 +2036,14 @@
                     const hdrs=renameHdrs(rows[0]).h, data=rows.slice(1);
                     padRows(hdrs, data);
                     cfmM(t('impW'), ()=>{
-                        STATE.hdrs=hdrs; STATE.data=data; mCol(); upLib(STATE.sheet, STATE.hdrs, STATE.data); fRdx(); rTab(); appTr(); setUns(true); sTst(t("mIm"));
+                        STATE.hdrs=hdrs; STATE.data=data; STATE.hist=[]; /* undo steps point at the old rows */ mCol(); upLib(STATE.sheet, STATE.hdrs, STATE.data); fRdx(); rTab(); appTr(); setUns(true); sTst(t("mIm"));
                     }, ()=>oMod('loc'));
                 }catch(err){ sTst(t("mIv"),"error"); }
             };
             r.readAsText(f); e.target.value='';
         }
-        /* NEXT (still to watch) now ranks above DROP (abandoned); both stay under any numeric grade. */
-        function fSort(){ if(!STATE.hdrs?.length||COL.GRADE===undefined)return; const gr=v=>{const u=String(v??'').toUpperCase().trim(); return u==='NEXT'?0.2:(u==='DROP'?0.1:(parseFloat(u.replace(',','.'))||0));}; STATE.data.sort((a,b)=>gr(b[COL.GRADE])-gr(a[COL.GRADE])); }
+        /* Order under the numeric grades: NEXT (still to watch), HOLD (paused), DROP (abandoned). */
+        function fSort(){ if(!STATE.hdrs?.length||COL.GRADE===undefined)return; const gr=v=>{const u=String(v??'').toUpperCase().trim(); return u==='NEXT'?0.2:(u==='HOLD'?0.15:(u==='DROP'?0.1:(parseFloat(u.replace(',','.'))||0)));}; STATE.data.sort((a,b)=>gr(b[COL.GRADE])-gr(a[COL.GRADE])); }
         function numCol(){ return COL['NO.']??COL.NO??COL.ID??COL['NR.']??COL.NR; }
         function fNum(){ if(!STATE.hdrs?.length)return; const nI=numCol(); if(nI!==undefined)STATE.data.forEach((r,i)=>r[nI]=String(i+1)); }
         function fRdx(){ fSort(); fNum(); }
@@ -2051,6 +2082,7 @@
             $('m-sort').firstElementChild.className='fas fa-'+(sorted&&STATE.sD==='asc'?'arrow-up-short-wide':'arrow-down-wide-short');
             $('m-stats').innerHTML=`<span>${pc.tot} ${esc(t('mTitles'))}</span>`
                 +(pc.avg?`<span>${ic('star')} ${pc.avg.toFixed(1)}</span>`:'')
+                +(pc.hd?`<span>${pc.hd} ${esc(t('sHd'))}</span>`:'')
                 +(pc.dp?`<span>${pc.dp} ${esc(t('sDr'))}</span>`:'')
                 +(pc.ep?`<span>${pc.ep} ${esc(t('abbrEp'))}</span>`:'')
                 +(pc.time?`<span>${esc(pc.time)}</span>`:'')
@@ -2076,11 +2108,11 @@
         let STATS=null;
         const pHdrCnts=()=>((STATS||(STATS={})).p||(STATS.p=calcPCnts()));
         const gHdrCnts=()=>((STATS||(STATS={})).g||(STATS.g=calcGCnts()));
-        function calcPCnts(){ let nx=0, dp=0, rS=0, rC=0, tE=0, tM=0; (STATE.data||[]).forEach(r=>{const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT')nx++; else if(v==='DROP')dp++; else if(v!==''&&!isNaN(parseFloat(v.replace(',','.')))){rS+=parseFloat(v.replace(',','.')); rC++;} const o=parseOwned(COL.EXTRA!==undefined?r[COL.EXTRA]:''); if(o.episodes!=null)tE+=o.episodes; if(o.runtime!=null)tM+=o.runtime;}); return {tot:(STATE.data||[]).length, nx, dp, avg:rC>0?(rS/rC):0, ep:tE, mins:tM, time:fmtMins(tM)}; }
+        function calcPCnts(){ let nx=0, hd=0, dp=0, rS=0, rC=0, tE=0, tM=0; (STATE.data||[]).forEach(r=>{const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT')nx++; else if(v==='HOLD')hd++; else if(v==='DROP')dp++; else if(v!==''&&!isNaN(parseFloat(v.replace(',','.')))){rS+=parseFloat(v.replace(',','.')); rC++;} const o=parseOwned(COL.EXTRA!==undefined?r[COL.EXTRA]:''); if(o.episodes!=null)tE+=o.episodes; if(o.runtime!=null)tM+=o.runtime;}); return {tot:(STATE.data||[]).length, nx, hd, dp, avg:rC>0?(rS/rC):0, ep:tE, mins:tM, time:fmtMins(tM)}; }
         /* "0h" for a category with 4425 episodes reads like a bug; show real units, or nothing. */
         function fmtMins(m){ if(!m) return ''; const d=Math.floor(m/1440), h=Math.floor((m%1440)/60), mm=m%60;
             if(d) return `${d}d ${h}h`; if(h) return `${h}h ${mm}m`; return `${mm}m`; }
-        function calcGCnts(){ const buckets={}; let rated=0, nx=0, dp=0; (STATE.data||[]).forEach(r=>{ const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT'){nx++;return;} if(v==='DROP'){dp++;return;} if(v===''||isNaN(parseFloat(v.replace(',','.'))))return; const key=Math.min(10,Math.max(1,Math.round(parseFloat(v.replace(',','.'))))); buckets[key]=(buckets[key]||0)+1; rated++; }); const dist=[]; for(let g=10;g>=1;g--){ if(buckets[g]) dist.push({label:String(g), count:buckets[g]}); } if(nx) dist.push({label:t('sW'), count:nx}); if(dp) dist.push({label:t('sDr'), count:dp}); return {rated, dist}; }
+        function calcGCnts(){ const buckets={}; let rated=0, nx=0, hd=0, dp=0; (STATE.data||[]).forEach(r=>{ const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT'){nx++;return;} if(v==='HOLD'){hd++;return;} if(v==='DROP'){dp++;return;} if(v===''||isNaN(parseFloat(v.replace(',','.'))))return; const key=Math.min(10,Math.max(1,Math.round(parseFloat(v.replace(',','.'))))); buckets[key]=(buckets[key]||0)+1; rated++; }); const dist=[]; for(let g=10;g>=1;g--){ if(buckets[g]) dist.push({label:String(g), count:buckets[g]}); } if(nx) dist.push({label:t('sW'), count:nx}); if(hd) dist.push({label:t('sHd'), count:hd}); if(dp) dist.push({label:t('sDr'), count:dp}); return {rated, dist}; }
         /* A content rating ("R - 17+", "PG-13") is not a genre, so it gets its own pill. */
         const RATE_RX=/(^|\s)(R\s*[-\u2013\u2014]?\s*17\+|R\s*[+-]|PG-?13|TV-?MA|TV-?14|NC-?17|PG|G)(?![A-Za-z0-9])|17\+/i; /* not \b: after "R+" both sides are non-word, so \b never matched */
         function splitTheme(v){
@@ -2154,9 +2186,9 @@
                 <span class="sw-ico">${ic(s.icon)}</span>
                 <span class="sw-txt"><span class="sw-name">${esc(t(s.name))}</span><span class="sw-sub">${esc(t(s.hint))}</span></span>
                 <div class="stp">
-                    <button type="button" class="stp-btn" onclick="stepVal('${k}',-1)" aria-label="-"${v<=s.min?' disabled':''}>${ic('minus')}</button>
-                    <input type="number" class="stp-val" value="${v}" min="${s.min}" max="${s.max}" oninput="onStepInput('${k}',this.value)" onblur="rSteppers()" aria-label="${esc(t(s.name))}">
-                    <button type="button" class="stp-btn" onclick="stepVal('${k}',1)" aria-label="+"${v>=s.max?' disabled':''}>${ic('plus')}</button>
+                    <button type="button" class="stp-btn" data-fn="stepVal" data-fn-args='["${k}",-1]' aria-label="-"${v<=s.min?' disabled':''}>${ic('minus')}</button>
+                    <input type="number" class="stp-val" value="${v}" min="${s.min}" max="${s.max}" data-in="onStepInput" data-in-args='["${k}","$val"]' data-blur="rSteppers" aria-label="${esc(t(s.name))}">
+                    <button type="button" class="stp-btn" data-fn="stepVal" data-fn-args='["${k}",1]' aria-label="+"${v>=s.max?' disabled':''}>${ic('plus')}</button>
                 </div>
                 <span class="stp-unit">${off?esc(t(k==='hfs'?'fAuto':'fOff')):esc(s.unit)}</span>
             </div>`;
@@ -2196,7 +2228,7 @@
             const btns=d.opts.map(([v,lbl,icn])=>{
                 const txt=typeof lbl==='object' ? (lbl.fn?lbl.fn():lbl.raw) : t(lbl);
                 const al=typeof lbl==='object' && lbl.al ? t(lbl.al) : (icn?t(lbl):'');
-                return `<button type="button" class="seg-btn${cur===v?' on':''}" aria-pressed="${cur===v}" onclick="setSeg('${k}','${v}')"${al?` aria-label="${esc(al)}" title="${esc(al)}"`:''}>${icn?ic(icn):`<span>${esc(txt)}</span>`}</button>`;
+                return `<button type="button" class="seg-btn${cur===v?' on':''}" aria-pressed="${cur===v}" data-fn="setSeg" data-fn-args='["${k}","${v}"]'${al?` aria-label="${esc(al)}" title="${esc(al)}"`:''}>${icn?ic(icn):`<span>${esc(txt)}</span>`}</button>`;
             }).join('');
             return `<div class="stp-row dp-row">
                 <span class="sw-ico">${ic(d.icon)}</span>
@@ -2206,7 +2238,7 @@
         }
         function swRowHTML(k){
             const d=DEPTH_SW[k], on=!!tLook[k];
-            return `<button type="button" class="sw-row dp-row${on?' on':''}" role="switch" aria-checked="${on}" onclick="tLookSw('${k}')">
+            return `<button type="button" class="sw-row dp-row${on?' on':''}" role="switch" aria-checked="${on}" data-fn="tLookSw" data-fn-args='["${k}"]'>
                 <span class="sw-ico">${ic(d.icon)}</span>
                 <span class="sw-txt"><span class="sw-name">${esc(t(d.name))}</span><span class="sw-sub">${esc(t(d.hint))}</span></span>
                 <span class="sw-state">${esc(t(on?'on':'off'))}</span><span class="sw-tgl"></span>
@@ -2254,7 +2286,7 @@
         function rSteppers(){
             const box=$('c-depth'); if(!box) return;
             box.innerHTML=DEPTH_GROUPS.map(g=>`<div class="drw" data-drw="dp-${g.id}">
-                <button type="button" class="drw-hd act-row" aria-expanded="false" onclick="tDrw('dp-${g.id}')">
+                <button type="button" class="drw-hd act-row" aria-expanded="false" data-fn="tDrw" data-fn-args='["dp-${g.id}"]'>
                     <span class="sw-ico">${ic(g.icon)}</span>
                     <span class="sw-txt"><span class="sw-name">${esc(t(g.name))}</span><span class="sw-sub">${esc(t(g.hint))}</span></span>
                     <span class="drw-sum">${g.keys.filter(depthShown).length}</span><span class="act-go drw-chev">${ic('chevron-down')}</span>
@@ -2385,20 +2417,20 @@
             if(!tRules.length){ box.innerHTML=`<p class="set-hint" style="margin:0;">${esc(t('crNone'))}</p>`; syncRulesFromDraft(); return; }
             const cols=ruleColumns();
             box.innerHTML=tRules.map((r,i)=>{
-                if(r.bad) return `<div class="cr-row cr-bad"><span class="cr-warn">${ic('triangle-exclamation')}</span><code class="cr-raw">${esc(r.raw)}</code><button type="button" class="cr-del" onclick="delRule(${i})" aria-label="${esc(t('del'))}">${ic('xmark')}</button></div>`;
+                if(r.bad) return `<div class="cr-row cr-bad"><span class="cr-warn">${ic('triangle-exclamation')}</span><code class="cr-raw">${esc(r.raw)}</code><button type="button" class="cr-del" data-fn="delRule" data-fn-args='[${i}]' aria-label="${esc(t('del'))}">${ic('xmark')}</button></div>`;
                 const isG=r.col==='GRADE' && /^\d+(?:[.,]\d+)?(?:-\d+(?:[.,]\d+)?)?$/.test(r.val);
                 return `<div class="cr-row">
                     <span class="cr-dot" style="background:${esc(r.color)}"></span>
-                    <select class="cr-col" onchange="editRule(${i},'col',this.value)" aria-label="${esc(t('crCol'))}">
+                    <select class="cr-col" data-chg="editRule" data-chg-args='[${i},"col","$val"]' aria-label="${esc(t('crCol'))}">
                         ${cols.map(c=>`<option value="${esc(c)}"${c===r.col?' selected':''}>${esc(colLabel(c))}</option>`).join('')}
                     </select>
-                    <input type="text" class="cr-val" value="${esc(r.val)}" oninput="editRule(${i},'val',this.value)" placeholder="${esc(isG?'8-10':t('crValPh'))}" aria-label="${esc(t('crVal'))}">
-                    <input type="color" class="cr-color" value="${esc(/^#[0-9a-fA-F]{6}$/.test(r.color)?r.color:'#e50914')}" oninput="editRule(${i},'color',this.value)" aria-label="${esc(t('crColor'))}">
-                    <select class="cr-style" onchange="editRule(${i},'style',this.value)" aria-label="${esc(t('crStyle'))}">
+                    <input type="text" class="cr-val" value="${esc(r.val)}" data-in="editRule" data-in-args='[${i},"val","$val"]' placeholder="${esc(isG?'8-10':t('crValPh'))}" aria-label="${esc(t('crVal'))}">
+                    <input type="color" class="cr-color" value="${esc(/^#[0-9a-fA-F]{6}$/.test(r.color)?r.color:'#e50914')}" data-in="editRule" data-in-args='[${i},"color","$val"]' aria-label="${esc(t('crColor'))}">
+                    <select class="cr-style" data-chg="editRule" data-chg-args='[${i},"style","$val"]' aria-label="${esc(t('crStyle'))}">
                         ${['BOLD','ITALIC','UNDERLINE'].map(s=>`<option value="${s}"${s===(r.style||'BOLD')?' selected':''}>${esc(t('crS'+s))}</option>`).join('')}
                     </select>
-                    <input type="number" class="cr-size" value="${esc(r.size||'')}" min="6" max="40" oninput="editRule(${i},'size',this.value)" placeholder="—" aria-label="${esc(t('crSize'))}">
-                    <button type="button" class="cr-del" onclick="delRule(${i})" aria-label="${esc(t('del'))}">${ic('xmark')}</button>
+                    <input type="number" class="cr-size" value="${esc(r.size||'')}" min="6" max="40" data-in="editRule" data-in-args='[${i},"size","$val"]' placeholder="—" aria-label="${esc(t('crSize'))}">
+                    <button type="button" class="cr-del" data-fn="delRule" data-fn-args='[${i}]' aria-label="${esc(t('del'))}">${ic('xmark')}</button>
                 </div>`;
             }).join('');
             syncRulesFromDraft();
@@ -2488,7 +2520,7 @@
         function rHdr(){
             if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return; }
             {
-                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr" data-act="phTip"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span><span class="ph-tip"><table><tbody><tr><td>${t('sTot')}</td><td>${pc.tot}</td></tr><tr><td>${t('sAvg')}</td><td>${pc.avg.toFixed(2)}</td></tr><tr><td>${t('sW')}</td><td>${pc.nx}</td></tr><tr><td>${t('sDr')}</td><td>${pc.dp}</td></tr>${pc.ep?`<tr><td>${t('sEp')}</td><td>${pc.ep}</td></tr>`:''}${pc.time?`<tr><td>${t('sTi')}</td><td>${pc.time}</td></tr>`:''}</tbody></table></span></span></th>`); }
+                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr" data-act="phTip"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span><span class="ph-tip"><table><tbody><tr><td>${t('sTot')}</td><td>${pc.tot}</td></tr><tr><td>${t('sAvg')}</td><td>${pc.avg.toFixed(2)}</td></tr><tr><td>${t('sW')}</td><td>${pc.nx}</td></tr>${pc.hd?`<tr><td>${t('sHd')}</td><td>${pc.hd}</td></tr>`:''}<tr><td>${t('sDr')}</td><td>${pc.dp}</td></tr>${pc.ep?`<tr><td>${t('sEp')}</td><td>${pc.ep}</td></tr>`:''}${pc.time?`<tr><td>${t('sTi')}</td><td>${pc.time}</td></tr>`:''}</tbody></table></span></span></th>`); }
                 const ctx=rowCtx(), part=c=>`<span>${esc(colLabel(STATE.hdrs[c]))}</span>`, dot='<span class="th-dot">·</span>';
                 STATE.hdrs.forEach((h,c)=>{
                     if(ctx.hid.has(c))return;
@@ -2542,7 +2574,7 @@
         function genresGroupHTML(v, oi, c){
             const {genres,rate}=splitTheme(v), mx=pillMax();
             const gp=genres.map((g,i)=>`<span class="tp tp-gen${i>=mx?' xtra':''}">${esc(g)}</span>`).join('');
-            const more=genres.length>mx?`<button type="button" class="tp tp-more" data-a="pm" onclick="pillsMore(this)">+${genres.length-mx}</button>`:'';
+            const more=genres.length>mx?`<button type="button" class="tp tp-more" data-a="pm" data-fn="pillsMore" data-fn-args='["$el"]'>+${genres.length-mx}</button>`:'';
             const rp=rate.map(x=>`<span class="tp tp-rate${rateCls(x)}">${esc(x)}</span>`).join('');
             const inner=gp+more+rp;
             return { rate:rate.map(x=>x.replace(/\s+/g,'').toUpperCase()),
@@ -2580,7 +2612,7 @@
         }
         function buildRowHTML(r, oi, idx, q, sc, ctx){
             const {hid, hCt, nCol}=ctx; let rH = '';
-            if(ctx.poster) rH+=`<td data-k="POSTER"><div class="poster-container mx-auto">${r[COL.POSTER]?`<img src="${esc(posterSrc(r[COL.POSTER]))}" data-full="${esc(r[COL.POSTER])}" class="poster-img" loading="${STATE.lazy?'lazy':'eager'}" decoding="async" alt="${esc(r[COL.NAME]||'')}" onerror="if(this.src!==this.dataset.full){this.src=this.dataset.full;}">`:`${ic('image','opacity-10')}`}${ctx.noPo?noCellHTML(r, oi, idx, nCol, ' po-no'):''}</div></td>`;
+            if(ctx.poster) rH+=`<td data-k="POSTER"><div class="poster-container mx-auto">${r[COL.POSTER]?`<img src="${esc(posterSrc(r[COL.POSTER]))}" data-full="${esc(r[COL.POSTER])}" class="poster-img" loading="${STATE.lazy?'lazy':'eager'}" decoding="async" alt="${esc(r[COL.NAME]||'')}">`:`${ic('image','opacity-10')}`}${ctx.noPo?noCellHTML(r, oi, idx, nCol, ' po-no'):''}</div></td>`;
             r.forEach((v,c)=>{
                 if(hid.has(c))return; const h=colKey(STATE.hdrs[c]); let val=esc(v), cls=c===COL.NAME?"name-cell theme-text":(c===COL.GRADE?"grade-cell theme-text":"theme-text"), ed=true, eCl="outline-none", sty="";
                 if(q && c===sc && fold(v).includes(q)) cls+=" search-hl";
@@ -2606,7 +2638,7 @@
                 if(c===COL.GRADE){
                     eCl+=' grade-pill';
                     if(sty){ const mc=sty.match(/color:([^!;]+)/); sty=mc?`--gp:${mc[1].trim()};`:''; }
-                    if(!sty){ const gU=v.trim().toUpperCase(); cls=gU==='NEXT'?"grade-cell grade-next":(gU==='DROP'?"grade-cell grade-drop":cls); }
+                    if(!sty){ const gU=v.trim().toUpperCase(); cls=gU==='NEXT'?"grade-cell grade-next":(gU==='HOLD'?"grade-cell grade-hold":(gU==='DROP'?"grade-cell grade-drop":cls)); }
                     /* 9.50 / stars / 95: shown formatted, clicked -> the raw value is edited (never the stars) */
                     const fs=fmtScore(v);
                     if(fs!==null){
@@ -2759,7 +2791,7 @@
             $('tmr-list').innerHTML = results.slice(0,6).map((res,idx)=>{
                 const title=res.title||res.name||'?', year=(res.release_date||res.first_air_date||'').slice(0,4);
                 const poster=res.poster_path?`https://image.tmdb.org/t/p/w92${res.poster_path}`:'';
-                return `<button onclick="tmrPick(${idx})" class="flex items-center gap-3 p-2 rounded-xl border border-[var(--theme-accent)]/20 hover:bg-[var(--theme-accent)]/10 text-left transition-colors w-full">
+                return `<button data-fn="tmrPick" data-fn-args='[${idx}]' class="flex items-center gap-3 p-2 rounded-xl border border-[var(--theme-accent)]/20 hover:bg-[var(--theme-accent)]/10 text-left transition-colors w-full">
                     <div class="poster-container" style="width:36px;height:52px;flex-shrink:0;">${poster?`<img src="${esc(poster)}" class="poster-img" style="cursor:default;">`:ic('image','opacity-10')}</div>
                     <span class="text-xs font-bold theme-text">${esc(title)} ${year?`<span class="text-[var(--text-muted)]">(${year})</span>`:''}</span>
                 </button>`;
@@ -2783,8 +2815,8 @@
             }
             const u=tmdbUrl(`search/${iM?'movie':'tv'}`,{query:n, language:lng});
             try{
-                const rs=await fetch(u); if(!rs.ok){ if(!isB) sTst(`TMDB Err: ${rs.status}`,"error"); return false; }
-                const d=await rs.json();
+                const d=await tmdbGet(u, 3, f); /* retries on 429 and times out, like the rest of the app */
+                if(!d){ if(!isB) sTst(t('mF'),"error"); return false; }
                 if(!d.results||d.results.length===0){ if(!isB) sTst(`Fail: ${n}`,"warning"); return false; }
                 const applyPick=async(picked)=>{
                     const du=tmdbUrl(`${iM?'movie':'tv'}/${picked.id}`,{language:lng, append_to_response:'external_ids'});
@@ -2849,7 +2881,7 @@
             if(!key) return sTst(t("mAM"),"error");
             if(btn){ btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML=ic('spinner','fa-spin'); }
             try{
-                const r=await fetch(`https://api.themoviedb.org/3/authentication?api_key=${encodeURIComponent(key)}`), d=await r.json();
+                const r=await fetchTo(`https://api.themoviedb.org/3/authentication?api_key=${encodeURIComponent(key)}`,{},15000), d=await r.json();
                 sTst(d.success?t("mTOk"):(d.status_message||t("mTFail")), d.success?"success":"error");
             }catch(e){ sTst(t("mTFail"),"error"); }
             if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset.orig; }
@@ -2879,13 +2911,22 @@
            fresh=true (a forced row sync) skips the cache but refreshes it. */
         const TMDB_TTL=30*60*1000;
         const cacheSet=(url,v)=>RDR_CACHE.set(url,{t:Date.now(), v});
+        /* every TMDB request gives up after 15 s (a hung request used to keep Radar / Clean / Sync busy forever);
+           the user's STOP still cancels at once */
+        let TMDB_TIMEOUT=15000;
+        function tmdbSignal(){
+            const sigs=[RDR_ABORT?.signal, AbortSignal.timeout ? AbortSignal.timeout(TMDB_TIMEOUT) : null].filter(Boolean);
+            if(!sigs.length) return undefined;
+            if(sigs.length===1 || !AbortSignal.any) return sigs[0];
+            return AbortSignal.any(sigs);
+        }
         async function tmdbGet(url, tries=3, fresh=false){
             const hit=RDR_CACHE.get(url);
             if(!fresh && hit && Date.now()-hit.t<TMDB_TTL) return hit.v;
             for(let i=0;i<tries;i++){
                 if(RDR_ABORT?.signal?.aborted) return null;
                 try{
-                    const r=await fetch(url, RDR_ABORT?{signal:RDR_ABORT.signal}:undefined);
+                    const sig=tmdbSignal(), r=await fetch(url, sig?{signal:sig}:undefined);
                     if(r.status===429){
                         RDR_STATS.limited++;
                         const wait=(parseInt(r.headers.get('retry-after'),10)||1)*1000;
@@ -2895,8 +2936,8 @@
                     if(!r.ok){ RDR_STATS.errors++; return null; }
                     const j=await r.json(); cacheSet(url,j); return j;
                 }catch(e){
-                    if(e&&e.name==='AbortError') return null;
-                    if(i===tries-1){ RDR_STATS.errors++; return null; }
+                    if(e&&e.name==='AbortError' && RDR_ABORT?.signal?.aborted) return null; /* STOP */
+                    if(i===tries-1){ RDR_STATS.errors++; return null; } /* a timeout counts as an error and is retried */
                     await sleep(400*(i+1));
                 }
             }
@@ -3027,7 +3068,7 @@
             if(hint) hint.textContent = r===null ? t('rdrBadRange') : t('hGradeRange').replace('{r}', fmtRange(r));
             if(!list)return;
             const opts=['','9+','8+','7+','6+','5+','8-10','7-9','5-7'];
-            list.innerHTML=opts.map(v=>`<div class="s-col-opt${v===RDR_RANGE_STR?' active':''}" role="option" tabindex="0" aria-selected="${v===RDR_RANGE_STR}" onclick="selRdrGrade('${v}')">${esc(v===''?t('rdrAnyGrade'):v)}</div>`).join('');
+            list.innerHTML=opts.map(v=>`<div class="s-col-opt${v===RDR_RANGE_STR?' active':''}" role="option" tabindex="0" aria-selected="${v===RDR_RANGE_STR}" data-fn="selRdrGrade" data-fn-args='["${v}"]'>${esc(v===''?t('rdrAnyGrade'):v)}</div>`).join('');
         }
         function tRdrNext(){ RDR_INCLUDE_NEXT=!RDR_INCLUDE_NEXT; ls('rdrNext',RDR_INCLUDE_NEXT); rRdrNextUI(); rRdrCount(); }
         function rRdrNextUI(){ const row=$('rdr-next-row'); if(!row)return; row.classList.toggle('on', RDR_INCLUDE_NEXT); row.setAttribute('aria-checked', RDR_INCLUDE_NEXT?'true':'false'); }
@@ -3038,6 +3079,7 @@
                 const g=String(r[COL.GRADE]||'').toUpperCase().trim();
                 if(g==='DROP') return false;
                 if(g==='NEXT') return RDR_INCLUDE_NEXT;
+                if(g==='HOLD') return true; /* paused, not given up: a new season still matters */
                 if(range.min>0||range.max<10){ const num=pfNum(g); if(isNaN(num)||num<range.min||num>range.max) return false; }
                 return true;
             });
@@ -3199,7 +3241,7 @@
             $('rdr-setup')?.classList.add('hidden');
             if(!list.length){ c.innerHTML=`<div class="rdr-nofilter">${ic('filter-circle-xmark')}<span>${esc(t('rdrNoFilter'))}</span></div>`; return; }
             c.innerHTML=list.map((r,i)=>{
-                const poster=(r.poster||r.tmdbPoster)?`<img src="${esc(r.poster||r.tmdbPoster)}" class="rdr-poster" loading="lazy" alt="" data-fb="${esc(r.tmdbPoster||'')}" onerror="this.onerror=null;if(this.dataset.fb)this.src=this.dataset.fb">`:`<div class="rdr-poster rdr-poster-ph">${ic('image')}</div>`;
+                const poster=(r.poster||r.tmdbPoster)?`<img src="${esc(r.poster||r.tmdbPoster)}" class="rdr-poster" loading="lazy" alt="" data-fb="${esc(r.tmdbPoster||'')}">`:`<div class="rdr-poster rdr-poster-ph">${ic('image')}</div>`;
                 const grade=radarGradeTag(r.grade);
                 const details=(r.overview||r.type==='movie')?`<div class="rdr-details">${r.overview?`<p>${esc(r.overview)}</p>`:''}${rdrMovieList(r)}<a class="rdr-link" href="https://www.themoviedb.org/${r.type}/${r.tmdbId}" target="_blank" rel="noopener noreferrer">${ic('arrow-up-right-from-square')} TMDB</a>${r.imdbId?`<a class="rdr-link" href="https://www.imdb.com/title/${esc(r.imdbId)}" target="_blank" rel="noopener noreferrer">${ic('arrow-up-right-from-square')} IMDB</a>`:''}</div>`:'';
                 return `<div class="rdr-card" data-i="${i}" data-kind="${esc(r.kind)}">
@@ -3211,7 +3253,7 @@
                         ${rdrSeasonBar(r)}
                         ${rdrNextLine(r)}
                         ${rdrMeta(r)}
-                        ${details?`<button type="button" class="rdr-more" onclick="rdrToggle(${i})">${ic('chevron-down')}<span>${esc(t('rdrDetails'))}</span></button>${details}`:''}
+                        ${details?`<button type="button" class="rdr-more" data-fn="rdrToggle" data-fn-args='[${i}]'>${ic('chevron-down')}<span>${esc(t('rdrDetails'))}</span></button>${details}`:''}
                     </div>
                 </div>`;
             }).join('');
@@ -3221,7 +3263,7 @@
             const counts={all:RDR_RESULTS.length};
             RDR_KINDS.forEach(([k])=>{ if(k!=='all') counts[k]=RDR_RESULTS.filter(r=>r.kind===k||(k==='airing'&&r.kind==='ended')).length; });
             el.innerHTML=RDR_KINDS.filter(([k])=>k==='all'||counts[k]>0)
-                .map(([k,lbl,icn])=>`<button type="button" class="pill ${RDR_VIEW===k?'on':'off'}" onclick="setRdrView('${k}')" aria-pressed="${RDR_VIEW===k}">${ic(icn)}<span>${esc(t(lbl))} ${counts[k]}</span></button>`).join('');
+                .map(([k,lbl,icn])=>`<button type="button" class="pill ${RDR_VIEW===k?'on':'off'}" data-fn="setRdrView" data-fn-args='["${k}"]' aria-pressed="${RDR_VIEW===k}">${ic(icn)}<span>${esc(t(lbl))} ${counts[k]}</span></button>`).join('');
         }
         /* ---------- grade range: "8-10", "7+", "7", "6.5-9" ---------- */
         const pfNum = x => parseFloat(String(x).replace(',','.'));
@@ -3275,7 +3317,7 @@
             const box=$('srch-genres'); if(!box) return;
             const list=GENRE_CACHE[srchApi()]||[];
             if(!list.length){ box.innerHTML=`<span class="set-hint" style="margin:0;">${esc(t('srchNoGenres'))}</span>`; return; }
-            box.innerHTML=list.map(g=>`<button type="button" class="pill ${SRCH_GENRES.includes(g.id)?'on':'off'}" onclick="tSrchGenre(${g.id})" aria-pressed="${SRCH_GENRES.includes(g.id)}">${esc(g.name)}</button>`).join('');
+            box.innerHTML=list.map(g=>`<button type="button" class="pill ${SRCH_GENRES.includes(g.id)?'on':'off'}" data-fn="tSrchGenre" data-fn-args='[${g.id}]' aria-pressed="${SRCH_GENRES.includes(g.id)}">${esc(g.name)}</button>`).join('');
         }
         function tSrchGenre(id){
             SRCH_GENRES.includes(id) ? SRCH_GENRES=SRCH_GENRES.filter(x=>x!==id) : SRCH_GENRES.push(id);
@@ -3336,7 +3378,7 @@
                         <div class="cell-pills" style="justify-content:flex-start;cursor:default;">${r.genres.slice(0,3).map(g=>`<span class="tp tp-gen">${esc(g)}</span>`).join('')}<span class="tp tp-ep">${ic('star')} ${r.vote.toFixed(1)}</span></div>
                         ${r.overview?`<p class="srch-ov">${esc(r.overview)}</p>`:''}
                         <div class="flex items-center gap-2" style="margin-top:.5rem;flex-wrap:wrap;">
-                            <button type="button" class="rdr-more" onclick="addFromSearch(${i},this)"${added?' disabled':''}>${ic(added?'check':'plus')}<span>${esc(t(added?'srchAdded':'srchAdd'))}</span></button>
+                            <button type="button" class="rdr-more" data-fn="addFromSearch" data-fn-args='[${i},"$el"]'${added?' disabled':''}>${ic(added?'check':'plus')}<span>${esc(t(added?'srchAdded':'srchAdd'))}</span></button>
                             <a class="rdr-link" href="https://www.themoviedb.org/${r.type}/${r.id}" target="_blank" rel="noopener noreferrer">${ic('arrow-up-right-from-square')} TMDB</a>
                         </div>
                     </div>
@@ -3365,7 +3407,7 @@
             renderSearch();
         }
 
-        function radarGradeTag(g){ const s=String(g||'').toUpperCase().trim(); if(s==='NEXT') return 'NEXT'; const n=parseFloat(s.replace(',','.')); return isNaN(n)?'':String(n); }
+        function radarGradeTag(g){ const s=String(g||'').toUpperCase().trim(); if(s==='NEXT'||s==='HOLD') return s; const n=parseFloat(s.replace(',','.')); return isNaN(n)?'':String(n); }
 
         async function sCld(){
             flushLib();
@@ -3374,7 +3416,7 @@
             /* never push an empty sheet: this is what a failed first load looks like, and it would wipe the cloud copy */
             if(!STATE.hdrs?.length){ sTst(t('mNoSave'),'warning'); return false; }
             setLd(true); b.disabled=true; b.innerHTML=ic('spinner','fa-spin'); lockNav(true);
-            const savedSheet=STATE.sheet;
+            const savedSheet=STATE.sheet, chg0=CHG_GEN, cfg0=CFG_GEN;
             let ok=false; /* true only when the write went out and the cloud could be reached afterwards */
             try{ WRITE: {
                 /* The write replaces the whole sheet, so first look at what the cloud holds NOW. */
@@ -3395,6 +3437,8 @@
                     FONT_SIZE_MOBILE:STATE.dMb.fs,H_ALIGN_MOBILE:STATE.dMb.ha,V_ALIGN_MOBILE:STATE.dMb.va,T_WRAP_MOBILE:STATE.dMb.wr,HIDDEN_COLS_MOBILE:JSON.stringify(STATE.dMb.hC),
                     COLOR_RULES:STATE.cR,COLOR_FORMATTING:STATE.cF,HIDDEN_TABS:JSON.stringify(STATE.hT),LANG:STATE.lang,THEME:STATE.theme,ALL_TABS:JSON.stringify(STATE.aT),VIEW_MODE:STATE.vM,TRACK:STATE.track,REDUCE_MOTION:STATE.reduceMotion
                 }};
+                /* what was sent, frozen: an edit made while the save runs must not make the read-back look wrong */
+                const sent=JSON.parse(JSON.stringify(p.values));
                 /* Read Apps Script's real answer: a text/plain POST needs no preflight and the web app
                    answers with Access-Control-Allow-Origin:*. Only when the browser still blocks it do we
                    fall back to the old blind no-cors send ("blind": we cannot see a refusal). */
@@ -3414,10 +3458,11 @@
                 for(let attempt=0; attempt<3 && !match; attempt++){
                     await new Promise(r=>setTimeout(r, attempt===0?(blind?800:0):1400)); /* confirmed by the server: read back at once */
                     vd=await chkCloud(STATE.url, STATE.pass, savedSheet);
-                    if(vd&&vd.ok&&Array.isArray(vd.values)){ reached=true; match=cloudMatches(vd.values, p.values); }
+                    if(vd&&vd.ok&&Array.isArray(vd.values)){ reached=true; match=cloudMatches(vd.values, sent); }
                 }
-                if(match){ sTst(t("mSv")); setUns(false); ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); vibSv(); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); PENDING_IMPORT.delete(savedSheet); ok=true; }
-                else if(reached && !blind){ sTst(t("mSvChk"),"warning"); ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); ok=true; }
+                const clean=()=>{ if(CHG_GEN===chg0) setUns(false); if(CFG_GEN===cfg0) ls('cfgDirty',''); }; /* edits made during the save stay marked as unsaved */
+                if(match){ sTst(t("mSv")); clean(); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); vibSv(); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); PENDING_IMPORT.delete(savedSheet); ok=true; }
+                else if(reached && !blind){ sTst(t("mSvChk"),"warning"); if(CFG_GEN===cfg0) ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); ok=true; }
                 else if(reached){ sTst(t("mSvUnk"),"error"); CLOUD_BASE[savedSheet]=JSON.stringify(vd.values); } /* blind send and the cloud does not show it: NOT saved, the local changes stay */
                 else { sTst((vd&&vd.error)||t("mF"),"error"); }
             } }catch(e){sTst(t("mF"),"error");}
@@ -3479,7 +3524,7 @@
             const hdr=$('app-header'), btn=$('btn-sv'), slot=$('btn-sv-slot'), radar=$('hdr-radar'), gear=$('hdr-gear'), left=$('hdr-left'), extra=$('nav-extra');
             if(!hdr||!btn||!slot||!extra)return;
             const hidden=!!STATE.hideHdr;
-            hdr.classList.toggle('hdr-hidden', hidden);
+            hdr.classList.toggle('hdr-hidden', hidden); document.body.classList.toggle('hdr-off', hidden);
             if(hidden){ if(radar) extra.appendChild(radar); if(gear) extra.appendChild(gear); extra.appendChild(btn); }
             else { if(gear && left) left.appendChild(gear); if(radar && left) left.appendChild(radar); slot.appendChild(btn); }
             fitTbl();
@@ -3574,7 +3619,7 @@
             const m=document.createElement('div'); m.className='pop-menu'; m.setAttribute('role','menu');
             m.innerHTML=items.map((it,i)=> it==='-' ? '<div class="pop-sep"></div>'
                 : `<button type="button" role="menuitem" class="pop-item${it.danger?' danger':''}" data-mi="${i}"${it.disabled?' disabled':''}>${ic(it.icon)}<span>${esc(it.label)}</span></button>`).join('');
-            document.body.appendChild(m);
+            floatHost().appendChild(m);
             const r=anchor.getBoundingClientRect(), mw=m.offsetWidth, mh=m.offsetHeight;
             let left=r.right-mw, top=r.bottom+6;
             if(top+mh>window.innerHeight-8) top=Math.max(8, r.top-mh-6);
@@ -3715,7 +3760,8 @@
             });
             /* Buttons in the header, search row, phone toolbar, table header and empty state carry data-act; one listener runs them */
             document.addEventListener('click',e=>{
-                const el=e.target.closest('[data-act]'); if(!el || el.disabled) return;
+                const el=e.target.closest('[data-act],[data-fn]'); if(!el || el.disabled) return;
+                if(el.dataset.act===undefined){ runFn(el, e, 'fn'); return; }
                 let act=el.dataset.act, tgt=el;
                 /* the stats tip in a header opens only on the phone; on PC a click there sorts the column as before */
                 if(act==='phTip' && !document.body.classList.contains('is-mobile')){ tgt=el.closest('th[data-act]'); if(!tgt) return; act=tgt.dataset.act; }
@@ -3730,6 +3776,9 @@
             document.addEventListener('click',e=>{ if(!e.target.closest('#rdr-grade-wrap')){ const list=$('rdr-grade-list'), btn=$('rdr-grade-btn'); if(list)list.classList.remove('open'); if(btn)btn.setAttribute('aria-expanded','false'); } });
 
             DOM.nv.addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(b) sTab(b.dataset.tab); });
+            /* Esc goes through onKeydown (it may only clear a search first); if the browser still closes the dialog, finish the close properly */
+            DOM.md.addEventListener('cancel', e=>e.preventDefault());
+            DOM.md.addEventListener('close', ()=>{ if(DOM.md.classList.contains('open')) cMod(); });
             DOM.md.addEventListener('click',e=>{
                 const tb=e.target.closest('[data-tmp-t]'); if(tb){ tTmp('t', tb.dataset.tmpT); return; }
                 const cb=e.target.closest('[data-tmp-c]'); if(cb){ tTmp('c', cb.dataset.tmpC); return; }
