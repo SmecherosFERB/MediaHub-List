@@ -1328,7 +1328,10 @@
         function isHidden(h){ const k=colKey(h); return (STATE.hC||[]).some(x=>colKey(x)===k); }
         let DOM={}, COL={}, tHT=[], tHC=[], tRules=[], tFine={fs:14,hfs:0,pad:9,poW:70,poH:70,words:0,pills:0,note:5,twPx:1600}, tLook={}, tText={fs:'14',ha:'center',va:'middle',wr:'normal'}, tAccent='#e50914', tPoFit='fill', CST_DRAFT=false, C_RUL={GRADE:[], TEXT:{}}, P_TAB='', TMR_CB=null, CUR_ACCENT='#e50914', TAB_FADE=false, SAVING=false, SAV_TAB=null, PEND_STG=null, LOCK_CNT=0;
         
-        let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], nx:false, sC:null, sD:'asc', lib:lsJSON('library',{}), fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false', lazy:ls('lazy')!=='false' };
+        /* undo history: the newest 300 steps are kept, so a long session does not keep growing in memory */
+        const HIST_MAX=300;
+        function pushHist(e){ STATE.hist.push(e); if(STATE.hist.length>HIST_MAX) STATE.hist.splice(0, STATE.hist.length-HIST_MAX); }
+        let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], nx:false, sC:null, sD:'asc', lib:{} /* filled by loadLib() from IndexedDB before the first load */, fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false', lazy:ls('lazy')!=='false' };
         /* Look settings from Depth Customization (per PC / mobile profile, this device only). The defaults
            reproduce the look the app had before these settings existed. */
         const LOOK_DEF={ fw:'black', upper:true, lines:'soft', sticky:true, tw:'lim', poLock:false, poRad:'rd', badge:'br', zoom:'3', pillSt:'fill', lenFmt:'full', imdb:'full', rPlus:true, rMinus:true, scSt:'pill', scFmt:'raw' };
@@ -1543,7 +1546,7 @@
         function cMod(){ if(CFM_DISMISS){ const d=CFM_DISMISS; CFM_DISMISS=null; d(); } CST_DRAFT=false; DOM.md.classList.remove('open'); if(DOM.md.open) DOM.md.close(); floatOut(); PEND_STG=null; P_TAB=''; if(MOD_RETURN&&MOD_RETURN.focus&&document.contains(MOD_RETURN)){ try{ MOD_RETURN.focus({preventScroll:true}); }catch(e){} } MOD_RETURN=null; setTimeout(()=>{ if(!DOM.md.classList.contains('open')) DOM.mb.innerHTML=''; }, 300); }
         function cfmM(msg, onYes, onCancel){ oMod('cfm'); $('cfm-msg').innerText=msg; $('b-cfm-yes').onclick=()=>{ cMod(); onYes&&onYes(); }; $('b-cfm-no').onclick=()=>{ cMod(); onCancel&&onCancel(); }; }
         function oNt(r,c){ if(!STATE.data[r])return; oMod('nte'); const v=STATE.data[r][c], txt=$('i-nt'); txt.value=v; $('b-sn').onclick=()=>sNt(r,c); setTimeout(()=>txt.focus(),50); }
-        function sNt(r,c){ if(!STATE.data[r]){cMod();return;} const n=$('i-nt').value; if(STATE.data[r][c]!==n){ STATE.hist.push({t:'E',rowRef:STATE.data[r],c,v:STATE.data[r][c]}); STATE.data[r][c]=n; cmtSt(t("mNt")); } cMod(); }
+        function sNt(r,c){ if(!STATE.data[r]){cMod();return;} const n=$('i-nt').value; if(STATE.data[r][c]!==n){ pushHist({t:'E',rowRef:STATE.data[r],c,v:STATE.data[r][c]}); STATE.data[r][c]=n; cmtSt(t("mNt")); } cMod(); }
         function cmtSt(m=null, r=false){ if(r===true)fRdx(); else if(r==='num')fNum(); upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); if(m)sTst(m, m.includes(t("mRv"))||m.includes(t("mRs"))?"info":"success"); }
         function mCol(){ COL={}; if(STATE.hdrs?.length) STATE.hdrs.forEach((h,i)=>{ const raw=String(h).toUpperCase().trim(), k=colKey(h); if(COL[raw]===undefined) COL[raw]=i; if(COL[k]===undefined) COL[k]=i; }); const d=$('s-col'); if(d&&STATE.hdrs?.length){ const cur=d.value; d.innerHTML=STATE.hdrs.map((h,i)=>({h,i})).filter(({h})=>colKey(h)!=='POSTER').map(({h,i})=>`<option value="${i}" style="background:var(--card-bg);color:var(--text-color);">${esc(colLabel(h))}</option>`).join(''); d.value=[...d.options].some(o=>o.value===cur)?cur:(COL.NAME!==undefined?COL.NAME:''); } rSColUI(); }
         function tSCol(){ const list=$('s-col-list'), btn=$('s-col-btn'); if(!list||!btn)return; const open=list.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); }
@@ -1643,7 +1646,7 @@
             if(tab){ SAV_TAB=tab; }
             await sCld();
         }
-        function cAll(){ cfmM(t('cCf'), ()=>{ clearTimeout(LIB_TM); LIB_TM=null; /* a pending write must not bring the library back */ Object.keys(localStorage).filter(k=>k.startsWith('tk_')).forEach(k=>localStorage.removeItem(k)); location.reload(); }); }
+        function cAll(){ cfmM(t('cCf'), ()=>{ clearTimeout(LIB_TM); LIB_TM=null; /* a pending write must not bring the library back */ Object.keys(localStorage).filter(k=>k.startsWith('tk_')).forEach(k=>localStorage.removeItem(k)); idbDel('library').finally(()=>location.reload()); }); }
 
         function chkImg(u){ if(!u||!u.startsWith('http'))return Promise.resolve('empty'); return new Promise(res=>{const i=new Image(); let done=false; const fin=v=>{if(done)return; done=true; clearTimeout(to); res(v);}; const to=setTimeout(()=>fin('dead'),8000); i.onload=()=>fin('ok'); i.onerror=()=>fin('dead'); i.src=u;}); }
         async function chkImgsThrottled(urls, limit=8){
@@ -1799,7 +1802,7 @@
         }
         function clCommit(acc, msg=true){
             const n=acc.edits.length+acc.dels.length;
-            if(n){ STATE.hist.push({t:'B', edits:acc.edits, dels:acc.dels}); upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); }
+            if(n){ pushHist({t:'B', edits:acc.edits, dels:acc.dels}); upLib(STATE.sheet, STATE.hdrs, STATE.data); rTab(); setUns(true); }
             if(msg) sTst(n?t('clFixedN').replace('{n}',n):t('clNone'), n?'success':'info');
             clRender();
             return n;
@@ -1997,7 +2000,7 @@
                 }catch(e){ sTst(t('mSF'),'error'); }
             }
             const l=STATE.lib[STATE.sheet];
-            if(l){ const rn=renameHdrs(l.headers); if(rn.changed){ l.headers=rn.h; ls('library',JSON.stringify(STATE.lib)); } }
+            if(l){ const rn=renameHdrs(l.headers); if(rn.changed){ l.headers=rn.h; saveLib(); } }
             STATE.hdrs=l?.headers||[]; STATE.data=l?.data||[]; padRows(STATE.hdrs, STATE.data); applyDisp(false); fRdx(); appTr(); setLd(false);
             if(PENDING_IMPORT.has(targetSheet) && l) setUns(true); /* imported, not pushed yet: light the dot and arm the unsaved-changes gate */
         }
@@ -2005,12 +2008,65 @@
         /* The whole library is one JSON string in localStorage; writing it on every cell edit cost tens of ms
            on a big collection. It is written once the edits pause, and flushed at once when the page is hidden
            or closed and before anything that reads or ships it. */
-        let LIB_TM=null;
-        function flushLib(){ if(!LIB_TM) return; clearTimeout(LIB_TM); LIB_TM=null; ls('library',JSON.stringify(STATE.lib)); }
-        function upLib(s,h,d){ STATE.lib[s]={headers:h,data:d}; clearTimeout(LIB_TM); LIB_TM=setTimeout(()=>{ LIB_TM=null; ls('library',JSON.stringify(STATE.lib)); },400); setUns(true); }
-        document.addEventListener('visibilitychange', ()=>{ if(document.hidden) flushLib(); });
-        window.addEventListener('pagehide', flushLib);
-        window.addEventListener('beforeunload', flushLib);
+        let LIB_TM=null, LIB_WRITING=null;
+        /* ===== library storage: IndexedDB (no ~5 MB cap, the write happens off the main thread), localStorage as fallback =====
+           The library is kept as one JSON string under the key "library". If IndexedDB cannot be opened (some browsers
+           refuse it for pages opened from a file), everything keeps working on localStorage as before. */
+        let IDB=null, IDB_OK=null;
+        function idbOpen(){
+            if(IDB_OK===false) return Promise.resolve(null);
+            if(IDB) return Promise.resolve(IDB);
+            return new Promise(res=>{
+                const fail=()=>{ IDB_OK=false; res(null); };
+                const to=setTimeout(fail, 2000); /* a browser that never answers counts as "no IndexedDB" */
+                try{
+                    const rq=indexedDB.open('mediahub', 1);
+                    rq.onupgradeneeded=()=>{ rq.result.createObjectStore('kv'); };
+                    rq.onsuccess=()=>{ clearTimeout(to); IDB=rq.result; IDB_OK=true; res(IDB); };
+                    rq.onerror=rq.onblocked=()=>{ clearTimeout(to); fail(); };
+                }catch(e){ clearTimeout(to); fail(); }
+            });
+        }
+        function idbReq(mode, fn){
+            return idbOpen().then(db=>{ if(!db) return undefined; return new Promise(res=>{
+                try{ const tx=db.transaction('kv', mode), rq=fn(tx.objectStore('kv')); tx.oncomplete=()=>res(rq.result===undefined?null:rq.result); tx.onerror=tx.onabort=()=>res(undefined); }
+                catch(e){ res(undefined); }
+            }); });
+        }
+        const idbGet=k=>idbReq('readonly', st=>st.get(k)), idbPut=(k,v)=>idbReq('readwrite', st=>st.put(v,k)), idbDel=k=>idbReq('readwrite', st=>st.delete(k));
+        /* start-up: a library still in localStorage (older version, or the safety copy written while closing) wins,
+           moves to IndexedDB and leaves localStorage, freeing that space */
+        async function loadLib(){
+            const raw=ls('library');
+            if(raw){
+                STATE.lib=jp(raw, {}, true);
+                if(await idbPut('library', raw)!==undefined){ try{ localStorage.removeItem('tk_library'); }catch(e){} }
+                return;
+            }
+            const v=await idbGet('library');
+            if(typeof v==='string') STATE.lib=jp(v, {}, true);
+        }
+        /* once IndexedDB holds the newest library, an older safety copy in localStorage must not win at the next start */
+        function dropLsCopy(){ if(IDB_OK){ try{ localStorage.removeItem('tk_library'); }catch(e){} } }
+        function saveLib(){
+            const str=JSON.stringify(STATE.lib);
+            if(IDB_OK===false){ ls('library', str); return; }
+            const w=LIB_WRITING=idbPut('library', str).then(r=>{ if(r===undefined){ IDB_OK=false; ls('library', str); } else dropLsCopy(); if(LIB_WRITING===w) LIB_WRITING=null; });
+        }
+        function flushLib(){ if(!LIB_TM) return; clearTimeout(LIB_TM); LIB_TM=null; saveLib(); }
+        function upLib(s,h,d){ STATE.lib[s]={headers:h,data:d}; clearTimeout(LIB_TM); LIB_TM=setTimeout(()=>{ LIB_TM=null; saveLib(); },400); setUns(true); }
+        /* closing or hiding the page: an IndexedDB write may not finish in time, so the newest library also goes
+           to localStorage (when it fits) and is picked up on the next start */
+        function libSafety(){
+            if(!LIB_TM && !LIB_WRITING) return;
+            clearTimeout(LIB_TM); LIB_TM=null;
+            const str=JSON.stringify(STATE.lib);
+            try{ localStorage.setItem('tk_library', str); }catch(e){}
+            if(IDB_OK!==false) idbPut('library', str).then(r=>{ if(r!==undefined) dropLsCopy(); });
+        }
+        document.addEventListener('visibilitychange', ()=>{ if(document.hidden) libSafety(); });
+        window.addEventListener('pagehide', libSafety);
+        window.addEventListener('beforeunload', libSafety);
         /* Keep the DOM language attribute in step with the UI language. */
         /* Rough but honest picture of how much of the ~5 MB localStorage budget this app uses.
            Keys are stored as UTF-16, so a character costs 2 bytes. */
@@ -2022,9 +2078,15 @@
             return { bytes, quota, pct:Math.min(100, Math.round(bytes/quota*1000)/10) };
         }
         const fmtBytes = b => b<1024?`${b} B`:(b<1024*1024?`${(b/1024).toFixed(1)} KB`:`${(b/1024/1024).toFixed(2)} MB`);
-        function rLsUI(){
-            const fill=$('ls-fill'); if(!fill) return;
+        /* with IndexedDB the real figures come from the browser (usage and quota for this page) */
+        async function storageUsage(){
             const u=lsUsage();
+            if(IDB_OK && navigator.storage?.estimate){ try{ const e=await navigator.storage.estimate(); if(e.quota) return { bytes:Math.max(e.usage||0, u.bytes), quota:e.quota, pct:Math.min(100, Math.round((e.usage||0)/e.quota*1000)/10) }; }catch(_){} }
+            return u;
+        }
+        async function rLsUI(){
+            const fill=$('ls-fill'); if(!fill) return;
+            const u=await storageUsage();
             fill.style.width=Math.max(u.pct,1.5)+'%';
             fill.className='meter-fill'+(u.pct>=90?' full':(u.pct>=70?' warn':''));
             const lbl=$('ls-lbl'); if(lbl) lbl.textContent=`${fmtBytes(u.bytes)} ${t('uOf')} ~${fmtBytes(u.quota)}`;
@@ -2045,7 +2107,7 @@
                     if(!names.length || !names.every(k=>i[k] && Array.isArray(i[k].headers) && Array.isArray(i[k].data) && i[k].data.every(Array.isArray))) throw new Error();
                     cfmM(t('impW'), ()=>{
                         Object.values(i).forEach(c=>{ c.headers=renameHdrs(c.headers).h; });
-                        STATE.lib=i; ls('library',JSON.stringify(i));
+                        STATE.lib=i; saveLib();
                         /* with a cloud URL the cloud is normally the source of truth and would overwrite the import on the very next read, so the imported sheets are held until saved */
                         PENDING_IMPORT=new Set(STATE.url?names:[]);
                         sTst(t("mIm")); lDat();
@@ -2531,13 +2593,8 @@
             }
             return out+esc(txt.slice(last));
         }
-        function rTab(skipHeader=false){
-            STATS=null;
-            const q=fold(DOM.sr.value);
-            syncMTools();
-            if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return DOM.br.innerHTML=`<tr><td colspan="99" class="p-20 text-center"><div class="flex flex-col items-center gap-2"><i class="fas fa-clapperboard text-[var(--theme-accent)] opacity-30" style="font-size:2.25rem;"></i><div class="text-[var(--text-muted)] uppercase font-black italic">${t('blk')}</div><div class="text-[10px] text-[var(--text-muted)]" style="opacity:.7;font-weight:400;">${t('blkSub')}</div></div></td></tr>`; }
-            if(!skipHeader) rHdr();
-            const scE=$('s-col'), sc=scE&&scE.value?parseInt(scE.value):COL.NAME;
+        /* the rows the table shows, in order: search + NEXT filter + the column sort */
+        function calcFDat(q, sc){
             STATE.fDat=STATE.data.map((r,i)=>({row:r,origIdx:i})).filter(({row:r})=>(!q||isNaN(sc)||fold(r[sc]).includes(q))&&(!STATE.nx||COL.GRADE===undefined||String(r[COL.GRADE]??'').trim().toUpperCase()==='NEXT'));
             if(STATE.sC!==null){
                 /* sort keys are worked out once per row (not once per comparison); text uses the shared Collator */
@@ -2545,24 +2602,36 @@
                 STATE.fDat.forEach(x=>{ const v=String(x.row[c]??'').trim(); x.k=v; x.n=NUM.test(v)?parseFloat(v.replace(',','.')):null; });
                 STATE.fDat.sort((a,b)=>(a.n!==null&&b.n!==null ? a.n-b.n : TXT_CMP(a.k,b.k))*dr);
             }
+            return STATE.fDat;
+        }
+        function rTab(skipHeader=false){
+            STATS=null;
+            const q=fold(DOM.sr.value);
+            syncMTools();
+            if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return DOM.br.innerHTML=`<tr><td colspan="99" class="p-20 text-center"><div class="flex flex-col items-center gap-2"><i class="fas fa-clapperboard text-[var(--theme-accent)] opacity-30" style="font-size:2.25rem;"></i><div class="text-[var(--text-muted)] uppercase font-black italic">${t('blk')}</div><div class="text-[10px] text-[var(--text-muted)]" style="opacity:.7;font-weight:400;">${t('blkSub')}</div></div></td></tr>`; }
+            if(!skipHeader) rHdr();
+            const scE=$('s-col'), sc=scE&&scE.value?parseInt(scE.value):COL.NAME;
+            calcFDat(q, sc);
             rTBr(q, sc);
             if(STATE.hlBatch) setTimeout(()=>{ STATE.hlBatch=null; },50);
 
             if(TAB_FADE){ TAB_FADE=false; const card=DOM.br.closest('.theme-card'); if(card){ card.classList.remove('tab-fade'); void card.offsetWidth; card.classList.add('tab-fade'); } }
 
-            if(STATE.hlRef){
-                if(STATE.track){
-                    setTimeout(()=>{
-                        const e=DOM.br.querySelector('.hl-pulse');
-                        if(e){
-                            e.scrollIntoView({behavior:prefersReducedMotion()?'auto':'smooth',block:'center'});
-                            setTimeout(()=>e.classList.remove('hl-pulse'),3000);
-                        }
-                        STATE.hlRef=null;
-                    },50);
-                } else {
+            scrollToHl();
+        }
+        function scrollToHl(){
+            if(!STATE.hlRef) return;
+            if(STATE.track){
+                setTimeout(()=>{
+                    const e=DOM.br.querySelector('.hl-pulse');
+                    if(e){
+                        e.scrollIntoView({behavior:prefersReducedMotion()?'auto':'smooth',block:'center'});
+                        setTimeout(()=>e.classList.remove('hl-pulse'),3000);
+                    }
                     STATE.hlRef=null;
-                }
+                },50);
+            } else {
+                STATE.hlRef=null;
             }
         }
 
@@ -2760,17 +2829,76 @@
             if(p.at>=p.total) RENDER_PENDING=null;
             placeSentinel();
         }
+        const TR_ROW=new WeakMap(); /* <tr> -> its row object, so a single row can be moved without redrawing the table */
+        function makeRowTr(idx, q, sc, ctx){
+            const {row:r, origIdx:oi}=STATE.fDat[idx];
+            const tr=document.createElement('tr');
+            tr.className="border-b border-[var(--theme-accent)]/10 transition-colors" + (((STATE.hlRef===r || STATE.hlBatch?.has(r)) && STATE.track)?" hl-pulse":"") + (ctx.poster?"":" m-nop");
+            tr.dataset.oi=oi;
+            tr.innerHTML=buildRowHTML(r, oi, idx, q, sc, ctx);
+            TR_ROW.set(tr, r);
+            return tr;
+        }
         function appendRows(from, to, q, sc, ctx){
-            const fg=document.createDocumentFragment(), list=STATE.fDat;
-            for(let idx=from; idx<to; idx++){
-                const {row:r, origIdx:oi}=list[idx];
-                const tr=document.createElement('tr');
-                tr.className="border-b border-[var(--theme-accent)]/10 transition-colors" + (((STATE.hlRef===r || STATE.hlBatch?.has(r)) && STATE.track)?" hl-pulse":"") + (ctx.poster?"":" m-nop");
-                tr.dataset.oi=oi;
-                tr.innerHTML=buildRowHTML(r, oi, idx, q, sc, ctx);
-                fg.appendChild(tr);
-            }
+            const fg=document.createDocumentFragment();
+            for(let idx=from; idx<to; idx++) fg.appendChild(makeRowTr(idx, q, sc, ctx));
             DOM.br.appendChild(fg);
+        }
+        /* A new score re-sorts the list, but only ONE row changes place. Instead of redrawing the table (480 ms with
+           3000 titles) that row is moved, and the rows around it only get their index / # badge / arrows corrected.
+           Returns false when it cannot be sure, and the caller redraws as before. */
+        function fastRegrade(row){
+            if(!STATE.hdrs?.length || !DOM.br) return false;
+            const q=fold(DOM.sr.value), scE=$('s-col'), sc=scE&&scE.value?parseInt(scE.value):COL.NAME;
+            if(q && sc===COL.GRADE) return false;
+            const trs=[...DOM.br.querySelectorAll('tr[data-oi]')], old=STATE.fDat||[];
+            if(!trs.length || trs.length>old.length) return false;
+            for(let i=0;i<trs.length;i++) if(TR_ROW.get(trs[i])!==old[i].row) return false; /* the table must be the prefix it should be */
+            const list=calcFDat(q, sc); if(!list.length) return false;
+            hideZoom(); hideNoteTip(); hideGs();
+            const ctx=rowCtx(), mine=trs.find(tr=>TR_ROW.get(tr)===row);
+            if(mine) mine.remove();
+            const want=Math.min(trs.length, list.length);
+            /* tracking a row that moved past the drawn part: draw the rows up to it in steps, frame by frame, then scroll */
+            let reach=-1;
+            if(STATE.track && STATE.hlRef===row){ const np=list.findIndex(x=>x.row===row); if(np>=want) reach=Math.min(list.length, np+12); }
+            const cur=[...DOM.br.querySelectorAll('tr[data-oi]')], sentinel=DOM.br.querySelector('tr.row-sentinel');
+            let ci=0;
+            for(let i=0;i<want;i++){
+                const tr=cur[ci];
+                if(tr && TR_ROW.get(tr)===list[i].row){ ci++; continue; }
+                DOM.br.insertBefore(makeRowTr(i, q, sc, ctx), tr||sentinel||null);
+            }
+            for(;ci<cur.length;ci++) cur[ci].remove();
+            /* indexes, # badges and the first/last arrows of the rows that stayed */
+            const nCol=ctx.nCol, last=list.length-1;
+            [...DOM.br.querySelectorAll('tr[data-oi]')].forEach((tr,i)=>{
+                const {row:r, origIdx:oi}=list[i];
+                if(tr.dataset.oi!==String(oi)){ tr.dataset.oi=oi; tr.querySelectorAll('[data-r]').forEach(e=>{ e.dataset.r=oi; }); }
+                if(nCol!==undefined){ const nv=tr.querySelector('.no-val'), txt=String(r[nCol]??''); if(nv && nv.textContent!==txt) nv.textContent=txt; }
+                const up=tr.querySelector('[data-a="mu"]'), dn=tr.querySelector('[data-a="md"]');
+                if(up && up.disabled!==(i===0)) up.disabled=(i===0);
+                if(dn && dn.disabled!==(i===last)) dn.disabled=(i===last);
+            });
+            RENDER_PENDING = want<list.length ? { gen:RENDER_GEN, q, sc, ctx, at:want, total:list.length } : null;
+            placeSentinel();
+            STATS=null; rHdr(); syncMTools();
+            if(reach>0) growRows(reach); else scrollToHl();
+            return true;
+        }
+        function growRows(target){
+            const gen=RENDER_GEN;
+            const step=()=>{
+                const p=RENDER_PENDING;
+                if(!p || p.gen!==gen || p.at>=Math.min(target, p.total)){ scrollToHl(); return; }
+                const sn=DOM.br.querySelector('tr.row-sentinel'); if(sn){ ROW_IO&&ROW_IO.unobserve(sn); sn.remove(); }
+                const to=Math.min(p.at+150, target, p.total);
+                appendRows(p.at, to, p.q, p.sc, p.ctx); p.at=to;
+                if(p.at>=p.total) RENDER_PENDING=null;
+                placeSentinel();
+                requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
         }
         function rTBr(q='', sc){
             hideZoom(); hideNoteTip(); hideGs();
@@ -2841,7 +2969,7 @@
             if(COL.GRADE!==undefined)r[COL.GRADE]=g;
             if(COL.REWATCH!==undefined)r[COL.REWATCH]='0';
             STATE.data.push(r);
-            STATE.hist.push({t:'A',rowRef:r});   /* the + button add is undoable too */
+            pushHist({t:'A',rowRef:r});   /* the + button add is undoable too */
             STATE.hlRef = r;
             cMod(); cmtSt(`${t("mAd")}${n}`,true);
             if(STATE.tmdbKey) syR(STATE.data.indexOf(r),false,true); /* no key: just add it, no error and no Settings popping up */
@@ -3464,7 +3592,7 @@
             set(COL.REWATCH, '0');
             if(ext?.imdb_id) set(COL.IMDB, `https://www.imdb.com/title/${ext.imdb_id}`);
             STATE.data.push(row);
-            STATE.hist.push({t:'A',rowRef:row});
+            pushHist({t:'A',rowRef:row});
             STATE.hlRef=row;
             cmtSt(t('mAd'), true);
             setUns(true);
@@ -3555,27 +3683,28 @@
             const raw=String(v??'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ');
             const n=c===COL.GRADE?raw.trim().toUpperCase().replace(/,/g,'.'):raw.trim();
             if(row[c]===n)return;
-            STATE.hist.push({t:'E',rowRef:row,c,v:row[c]});
+            pushHist({t:'E',rowRef:row,c,v:row[c]});
             row[c]=n;
             setUns(true);
             if(c===COL.GRADE){
-                /* a new grade changes the ranking, so the whole table has to be rebuilt */
+                /* a new grade changes the ranking: re-sort, then move just this row (full redraw only as a fallback) */
                 STATE.hlRef=row;
-                cmtSt(null,true);
+                fRdx(); upLib(STATE.sheet, STATE.hdrs, STATE.data);
+                if(!fastRegrade(row)) rTab();
                 return;
             }
             upLib(STATE.sheet, STATE.hdrs, STATE.data);
             if(updateRow(r)){ STATS=null; rHdr(); } else rTab();
         }
         
-        function eLnk(r,c){ if(!STATE.data[r])return; oMod('lnk'); const cur=STATE.data[r][c]; $('i-lk').value=cur; setTimeout(()=>$('i-lk').focus(),50); $('b-lk-sv').onclick=()=>{ const n=$('i-lk').value.trim(); cMod(); if(n!==cur){STATE.hist.push({t:'E',rowRef:STATE.data[r],c,v:cur}); STATE.data[r][c]=n; cmtSt(); setUns(true);} }; }
-        function dRow(i){ if(!STATE.data[i])return; cfmM(t('dC'), ()=>{ if(!STATE.data[i])return;STATE.hist.push({t:'D',r:i,row:STATE.data[i]}); /* the row itself, so older undo steps that point at it still work */ STATE.data.splice(i,1); cmtSt(t("mDl")); setUns(true);}); }
+        function eLnk(r,c){ if(!STATE.data[r])return; oMod('lnk'); const cur=STATE.data[r][c]; $('i-lk').value=cur; setTimeout(()=>$('i-lk').focus(),50); $('b-lk-sv').onclick=()=>{ const n=$('i-lk').value.trim(); cMod(); if(n!==cur){pushHist({t:'E',rowRef:STATE.data[r],c,v:cur}); STATE.data[r][c]=n; cmtSt(); setUns(true);} }; }
+        function dRow(i){ if(!STATE.data[i])return; cfmM(t('dC'), ()=>{ if(!STATE.data[i])return;pushHist({t:'D',r:i,row:STATE.data[i]}); /* the row itself, so older undo steps that point at it still work */ STATE.data.splice(i,1); cmtSt(t("mDl")); setUns(true);}); }
 
         function mvRow(oi, dir){
             const idx=STATE.fDat.findIndex(x=>x.origIdx===oi); if(idx<0)return;
             const tIdx=idx+dir; if(tIdx<0||tIdx>=STATE.fDat.length)return;
             const a=STATE.fDat[idx].origIdx, b=STATE.fDat[tIdx].origIdx;
-            STATE.hist.push({t:'M', a:STATE.data[a], b:STATE.data[b]}); /* undoable: swap the same two rows back */
+            pushHist({t:'M', a:STATE.data[a], b:STATE.data[b]}); /* undoable: swap the same two rows back */
             [STATE.data[a],STATE.data[b]]=[STATE.data[b],STATE.data[a]];
             cmtSt(null,'num'); setUns(true);
         }
@@ -3910,7 +4039,7 @@
                 LAST_Y=y;
             },{passive:true});
             document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) rLastSaved(); });
-            migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(); lDat(); rLastSaved(); setInterval(rLastSaved, 15000);
+            migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(); loadLib().then(lDat); rLastSaved(); setInterval(rLastSaved, 15000);
         };
         if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initApp); else initApp();
     </script>
