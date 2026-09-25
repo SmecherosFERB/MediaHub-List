@@ -1,0 +1,408 @@
+/**
+ * MEDIA HUB — Google Apps Script backend  (v3, for the client with cloud-conflict checks)
+ *
+ * Drop-in replacement: same GET read, same POST write, same response shape.
+ * Nothing has to change in MEDIA HUB.
+ *
+ * SETUP (once):
+ *   1. Put your password in ACCESS_KEY just below (the same one you type in MEDIA HUB).
+ *   2. Deploy → Manage deployments → pencil icon → Version: "New version" → Deploy
+ *      (editing the existing deployment keeps the same web-app URL)
+ *   3. Reload the spreadsheet once to get the "MEDIA HUB" menu (backups / restore).
+ *
+ *   Changing the password later means editing the line below AND deploying a new version,
+ *   otherwise the deployment keeps serving the old code with the old password.
+ */
+
+// ============================== PASSWORD ==============================
+const ACCESS_KEY = 'SECRET';   // <-- your MEDIA HUB cloud password
+
+// ============================== SETTINGS ==============================
+const BACKUP_KEEP_RECENT = 10;   // the newest N backups of each category are always kept
+const BACKUP_KEEP_DAYS   = 7;    // plus the last backup of each of the N most recent days
+const MAX_SHEET_NAME     = 80;
+const CONFIG_SHEET       = 'CONFIG';
+const BACKUP_PREFIX      = '_BK_';
+const STAMP_FORMAT       = 'yyyyMMdd-HHmmss';
+const DROP_CONFIG_KEYS   = ['TMDB_KEY'];   // never stored in the sheet (the app does not send it, for privacy)
+const URL_COLUMNS        = ['POSTER', 'IMDB'];
+
+
+// ============================== BASICS ==============================
+function jsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+                       .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getAccessKey_() {
+  /* A value in Script Properties still wins, so an existing setup keeps working untouched. */
+  const fromProps = PropertiesService.getScriptProperties().getProperty('ACCESS_KEY');
+  const k = fromProps || ACCESS_KEY;
+  if (!k || k === 'CHANGE-ME') throw new Error('Server not configured: set ACCESS_KEY at the top of the script');
+  return String(k);
+}
+
+/** Constant-time comparison: does not reveal how many leading characters matched. */
+function isAuthorized_(pass) {
+  const key = getAccessKey_();
+  if (typeof pass !== 'string' || pass.length !== key.length) return false;
+  let diff = 0;
+  for (let i = 0; i < key.length; i++) diff |= pass.charCodeAt(i) ^ key.charCodeAt(i);
+  return diff === 0;
+}
+
+/** CONFIG and anything starting with "_" (backups) are never readable or writable as a category. */
+function isReservedName_(name) {
+  const n = String(name || '').trim();
+  return !n || n.length > MAX_SHEET_NAME || n.charAt(0) === '_' || n.toUpperCase() === CONFIG_SHEET;
+}
+
+/** Every row gets exactly as many cells as the header, and every cell becomes a string. */
+function normalizeTable_(values) {
+  if (!Array.isArray(values) || !values.length || !Array.isArray(values[0]) || !values[0].length) {
+    throw new Error('Request has no table to save');
+  }
+  const width = values[0].length;
+  return values.map(row => {
+    const r = Array.isArray(row) ? row.slice(0, width) : [];
+    while (r.length < width) r.push('');
+    return r.map(c => (c === null || c === undefined) ? '' : String(c));
+  });
+}
+
+/** Content fingerprint. Trailing blank rows are ignored because Sheets does not keep them. */
+function tableHash_(table) {
+  const rows = table.map(r => r.map(c => (c === null || c === undefined) ? '' : String(c)));
+  while (rows.length && rows[rows.length - 1].every(c => c === '')) rows.pop();
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, JSON.stringify(rows), Utilities.Charset.UTF_8);
+  return bytes.map(b => ((b + 256) % 256).toString(16).padStart(2, '0')).join('');
+}
+
+function readJsonProp_(key) {
+  try { return JSON.parse(PropertiesService.getScriptProperties().getProperty(key) || 'null'); } catch (_) { return null; }
+}
+
+
+// ============================== CONFIG ==============================
+function readConfig_(ss) {
+  const out = {};
+  const sh = ss.getSheetByName(CONFIG_SHEET);
+  if (!sh) return out;
+  sh.getDataRange().getDisplayValues().forEach(row => {
+    if (row.length >= 2 && row[0]) out[row[0]] = row[1];
+  });
+  return out;
+}
+
+/** Merges the incoming settings into the stored ones. Returns false when nothing changed. */
+function writeConfig_(ss, incoming) {
+  const existing = readConfig_(ss);
+  const merged = Object.assign({}, existing);
+  Object.keys(incoming).forEach(k => { merged[k] = incoming[k] == null ? '' : String(incoming[k]); });
+  DROP_CONFIG_KEYS.forEach(k => { delete merged[k]; });
+
+  const canon = o => JSON.stringify(Object.keys(o).sort().map(k => [k, String(o[k])]));
+  if (canon(merged) === canon(existing)) return false;
+
+  let sh = ss.getSheetByName(CONFIG_SHEET);
+  if (!sh) { sh = ss.insertSheet(CONFIG_SHEET); sh.hideSheet(); }
+  const rows = Object.keys(merged).map(k => [k, merged[k]]);
+  const oldRows = sh.getLastRow(), oldCols = sh.getLastColumn();
+  if (rows.length) writeTable_(sh, rows, oldRows, oldCols);
+  else if (oldRows) sh.getRange(1, 1, oldRows, Math.max(oldCols, 2)).clear();
+  return true;
+}
+
+function listTabs_(ss) {
+  return ss.getSheets().map(s => s.getName()).filter(n => !isReservedName_(n));
+}
+
+
+// ============================== WRITING ==============================
+/**
+ * Never leaves the sheet empty: new values go over the old ones first, then whatever the old
+ * version had beyond the new size is removed. Cells are plain text ("@") BEFORE writing, so
+ * Sheets cannot turn "9-1-1" or "1/2" into dates, or "8.5" into 8 May on a Romanian locale.
+ */
+function writeTable_(sh, values, oldRows, oldCols) {
+  const rows = values.length, cols = values[0].length;
+  if (sh.getMaxRows() < rows)    sh.insertRowsAfter(sh.getMaxRows(), rows - sh.getMaxRows());
+  if (sh.getMaxColumns() < cols) sh.insertColumnsAfter(sh.getMaxColumns(), cols - sh.getMaxColumns());
+  sh.getRange(1, 1, rows, cols).setNumberFormat('@').setValues(values);
+  if (oldRows > rows) sh.getRange(rows + 1, 1, oldRows - rows, Math.max(oldCols, cols)).clear();
+  if (oldCols > cols) sh.getRange(1, cols + 1, rows, oldCols - cols).clear();
+}
+
+
+// ============================== BACKUPS ==============================
+/**
+ * The cloud state is snapshotted before EVERY save that changes it, unless that exact content is
+ * already the newest backup. There is no time throttle any more: MEDIA HUB now lets you overwrite
+ * a copy another device saved minutes ago, and that copy must survive the overwrite.
+ * Retention: the newest BACKUP_KEEP_RECENT, plus the last backup of each of the BACKUP_KEEP_DAYS
+ * most recent days, so a busy editing session cannot push yesterday's state out.
+ */
+function stampNow_() {
+  return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), STAMP_FORMAT);
+}
+function stampOf_(backupName, name) {
+  return backupName.slice((BACKUP_PREFIX + name + '_').length, (BACKUP_PREFIX + name + '_').length + 15);
+}
+
+/** Backups of ONE category, oldest first. The stamp check stops "ANIME" from matching "ANIME_X". */
+function backupsOf_(ss, name) {
+  const prefix = BACKUP_PREFIX + name + '_';
+  return ss.getSheets()
+    .map(s => s.getName())
+    .filter(n => n.indexOf(prefix) === 0 && /^\d{8}-\d{6}(-\d+)?$/.test(n.slice(prefix.length)))
+    .sort();
+}
+
+function backupSheet_(ss, sh, name, contentHash) {
+  const last = readJsonProp_('BKH_' + name);
+  if (last && last.hash === contentHash && ss.getSheetByName(last.name)) return null;   // already backed up
+
+  const base = BACKUP_PREFIX + name + '_' + stampNow_();
+  let newName = base, k = 2;
+  while (ss.getSheetByName(newName)) newName = base + '-' + (k++);                      // same second
+  const copy = sh.copyTo(ss);
+  copy.setName(newName);
+  copy.hideSheet();
+  PropertiesService.getScriptProperties().setProperty('BKH_' + name, JSON.stringify({ name: newName, hash: contentHash }));
+  pruneBackups_(ss, name);
+  return newName;
+}
+
+function pruneBackups_(ss, name) {
+  const list = backupsOf_(ss, name);
+  const keep = new Set(list.slice(-BACKUP_KEEP_RECENT));
+  const lastOfDay = {};
+  list.forEach(n => { lastOfDay[stampOf_(n, name).slice(0, 8)] = n; });   // sorted, so the last one wins
+  Object.keys(lastOfDay).sort().slice(-BACKUP_KEEP_DAYS).forEach(d => keep.add(lastOfDay[d]));
+  list.forEach(n => {
+    if (keep.has(n)) return;
+    const s = ss.getSheetByName(n);
+    if (s) ss.deleteSheet(s);
+  });
+}
+
+
+// ============================== FORMATTING ==============================
+/**
+ * The full pass runs only when layout settings or columns change; otherwise just newly added
+ * rows are formatted. The fingerprint lives in Script Properties, so it never reaches the app.
+ */
+function formatSheet_(sh, name, headers, rows, oldRows, cfg) {
+  const fs = parseInt(cfg.FONT_SIZE, 10);
+  const style = {
+    h: cfg.H_ALIGN || 'center',
+    v: cfg.V_ALIGN || 'middle',
+    wrap: cfg.T_WRAP !== 'nowrap',
+    font: isNaN(fs) ? 10 : Math.max(6, fs - 2),
+    headers: headers.join('|')
+  };
+  const props = PropertiesService.getScriptProperties();
+  const key = 'FMT_' + name, fp = JSON.stringify(style);
+  if (props.getProperty(key) === fp) {
+    if (rows > oldRows && oldRows > 0) formatBand_(sh, style, headers, oldRows + 1, rows - oldRows);
+    return;
+  }
+  formatBand_(sh, style, headers, 1, rows);
+  formatHeader_(sh, style, headers);
+  props.setProperty(key, fp);
+}
+
+function formatBand_(sh, style, headers, startRow, numRows) {
+  if (numRows <= 0) return;
+  sh.getRange(startRow, 1, numRows, headers.length)
+    .setFontColor('black')
+    .setFontSize(style.font)
+    .setHorizontalAlignment(style.h)
+    .setVerticalAlignment(style.v)
+    .setWrap(style.wrap)
+    .setBorder(true, true, true, true, true, true);
+  headers.forEach((header, i) => {
+    const col = sh.getRange(startRow, i + 1, numRows, 1);
+    const h = String(header).toUpperCase().trim();
+    if (URL_COLUMNS.indexOf(h) !== -1)       col.setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+    else if (h === 'NAME')                    col.setFontSize(style.font + 2).setHorizontalAlignment('left');
+    else if (h === 'GRADE' || h === 'EXTRA')  col.setFontSize(style.font + 1);
+  });
+}
+
+function formatHeader_(sh, style, headers) {
+  sh.getRange(1, 1, 1, headers.length)
+    .setFontSize(style.font)
+    .setFontWeight('bold')
+    .setHorizontalAlignment('center')
+    .setWrap(false);
+  headers.forEach((header, i) => {
+    if (URL_COLUMNS.indexOf(String(header).toUpperCase().trim()) !== -1) sh.setColumnWidth(i + 1, 70);
+  });
+  sh.setFrozenRows(1);
+}
+
+
+// ============================== WEB APP ==============================
+function doGet(e) {
+  const lock = LockService.getScriptLock();
+  let locked = false;
+  try {
+    const p = (e && e.parameter) || {};
+    if (!isAuthorized_(p.pass)) return jsonResponse({ ok: false, error: 'Unauthorized access' });
+
+    const name = String(p.sheet || '').trim();
+    if (isReservedName_(name)) return jsonResponse({ ok: false, error: 'Invalid sheet name' });
+
+    // Waits for a save in progress, so the conflict check and the post-save verification in
+    // MEDIA HUB always compare against a complete sheet, never a half-written one.
+    locked = lock.tryLock(10000);
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(name);
+    if (!sh) return jsonResponse({ ok: false, error: 'Target sheet does not exist' });
+
+    return jsonResponse({
+      ok: true,
+      values: sh.getDataRange().getDisplayValues(),
+      config: readConfig_(ss),
+      tabs: listTabs_(ss),
+      fileUrl: ss.getUrl()
+    });
+  } catch (err) {
+    console.error(err);
+    return jsonResponse({ ok: false, error: err.message });
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  let locked = false;
+  try {
+    let d;
+    try { d = JSON.parse(e.postData.contents); } catch (_) { return jsonResponse({ ok: false, error: 'Invalid request body' }); }
+    if (!d || !isAuthorized_(d.pass)) return jsonResponse({ ok: false, error: 'Unauthorized access' });
+
+    const name = String(d.sheet || '').trim();
+    if (isReservedName_(name)) return jsonResponse({ ok: false, error: 'Invalid sheet name' });
+
+    const values = (Array.isArray(d.values) && d.values.length) ? normalizeTable_(d.values) : null;
+    const config = (d.config && typeof d.config === 'object') ? d.config : null;
+
+    // One save at a time: phone and PC saving together can no longer interleave.
+    locked = lock.tryLock(30000);
+    if (!locked) return jsonResponse({ ok: false, error: 'Another save is in progress, try again' });
+
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let backup = null, changed = false;
+
+    if (values) {
+      let sh = ss.getSheetByName(name);
+      const isNew = !sh;
+      if (isNew) sh = ss.insertSheet(name);
+      const oldRows = isNew ? 0 : sh.getLastRow();
+      const oldCols = isNew ? 0 : sh.getLastColumn();
+      const current = (!isNew && oldRows > 0) ? sh.getDataRange().getDisplayValues() : null;
+      const curHash = current ? tableHash_(current) : null;
+      changed = curHash !== tableHash_(values);
+
+      if (changed) {
+        const oldData = Math.max(0, oldRows - 1), newData = values.length - 1;
+        // A save with no rows never wipes a category that has data.
+        if (oldData > 0 && newData === 0 && d.force !== true) {
+          return jsonResponse({ ok: false, error: 'Refused: this save would empty "' + name + '" (' + oldData + ' rows). Nothing was changed.' });
+        }
+        if (current) backup = backupSheet_(ss, sh, name, curHash);
+        writeTable_(sh, values, oldRows, oldCols);
+      }
+      // Cheap when nothing changed; still applies a new font size / alignment sent with the save.
+      formatSheet_(sh, name, values[0], values.length, oldRows, config || readConfig_(ss));
+    }
+
+    const configChanged = config ? writeConfig_(ss, config) : false;
+
+    return jsonResponse({ ok: true, changed: changed, configChanged: configChanged, rows: values ? values.length : 0, backup: backup });
+  } catch (err) {
+    console.error(err);
+    return jsonResponse({ ok: false, error: err.message });
+  } finally {
+    if (locked) lock.releaseLock();
+  }
+}
+
+
+// ============================== SPREADSHEET MENU ==============================
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('MEDIA HUB')
+    .addItem('List backups', 'menuListBackups')
+    .addItem('Restore a backup…', 'menuRestore')
+    .addToUi();
+}
+
+function describeBackup_(ss, backupName, name) {
+  const when = Utilities.parseDate(stampOf_(backupName, name), Session.getScriptTimeZone(), STAMP_FORMAT);
+  const s = ss.getSheetByName(backupName);
+  const rows = s ? Math.max(0, s.getLastRow() - 1) : 0;
+  return Utilities.formatDate(when, Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm') + '  ·  ' + rows + ' titles';
+}
+
+function menuListBackups() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const lines = listTabs_(ss).map(name => {
+    const b = backupsOf_(ss, name);
+    return name + ': ' + (b.length ? b.length + ' backups, newest ' + describeBackup_(ss, b[b.length - 1], name) : 'none yet');
+  });
+  SpreadsheetApp.getUi().alert('MEDIA HUB backups', lines.join('\n') || 'No categories yet.', SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+function menuRestore() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const r1 = ui.prompt('Restore a backup', 'Category name (for example ANIME):', ui.ButtonSet.OK_CANCEL);
+  if (r1.getSelectedButton() !== ui.Button.OK) return;
+  const name = r1.getResponseText().trim();
+  const list = backupsOf_(ss, name).reverse();                       // newest first
+  if (!list.length) { ui.alert('No backups for "' + name + '".'); return; }
+  const menu = list.map((b, i) => (i + 1) + ')  ' + describeBackup_(ss, b, name)).join('\n');
+  const r2 = ui.prompt('Backups of ' + name, menu + '\n\nType the number to restore (1 = newest):', ui.ButtonSet.OK_CANCEL);
+  if (r2.getSelectedButton() !== ui.Button.OK) return;
+  const idx = parseInt(r2.getResponseText(), 10) - 1;
+  const label = (idx >= 0 && idx < list.length) ? describeBackup_(ss, list[idx], name) : '';   // before pruning can touch it
+  try {
+    restoreBackup_(name, idx);
+    ui.alert('Restored "' + name + '" from ' + label + '.\n\n'
+           + 'The state you replaced was backed up too.\n'
+           + 'Reload MEDIA HUB on every device BEFORE editing, otherwise a device that is still open '
+           + 'will offer to overwrite this restore on its next save.');
+  } catch (err) {
+    ui.alert('Restore failed: ' + err.message);
+  }
+}
+
+/** index 0 = newest backup. Returns the name of the backup that was restored. */
+function restoreBackup_(name, index) {
+  if (isReservedName_(name)) throw new Error('Invalid category name');
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) throw new Error('A save is in progress, try again');
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(name);
+    if (!sh) throw new Error('No category called "' + name + '"');
+    const list = backupsOf_(ss, name).reverse();
+    if (!list.length) throw new Error('No backups for "' + name + '"');
+    if (!(index >= 0 && index < list.length)) throw new Error('Pick a number between 1 and ' + list.length);
+    const chosen = list[index];
+    const values = normalizeTable_(ss.getSheetByName(chosen).getDataRange().getDisplayValues());
+    const oldRows = sh.getLastRow(), oldCols = sh.getLastColumn();
+    if (oldRows > 0) backupSheet_(ss, sh, name, tableHash_(sh.getDataRange().getDisplayValues()));
+    writeTable_(sh, values, oldRows, oldCols);
+    PropertiesService.getScriptProperties().deleteProperty('FMT_' + name);
+    formatSheet_(sh, name, values[0], values.length, oldRows, readConfig_(ss));
+    return chosen;
+  } finally {
+    lock.releaseLock();
+  }
+}
