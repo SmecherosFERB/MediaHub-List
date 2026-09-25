@@ -158,8 +158,10 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 ## 🧩 Under the hood
 
 - A single HTML file with vanilla JavaScript: no framework and no build step.
-- Precompiled Tailwind utilities plus custom CSS, [Font Awesome](https://fontawesome.com/) icons and the [Inter](https://rsms.me/inter/) font, all loaded without blocking the page.
-- Modern browser features: native `<dialog>` windows, `Intl.Collator` sorting, `AbortSignal` timeouts, and lazy rendering of large lists.
+- Precompiled Tailwind utilities plus custom CSS. The [Inter](https://rsms.me/inter/) font loads without blocking the page.
+- [Font Awesome](https://fontawesome.com/) icons are built into the file (only the ones the app uses), so they show at once and work offline, with nothing to download.
+- Modern browser features: native `<dialog>` windows, `Intl.Collator` sorting, `AbortSignal` timeouts, IndexedDB storage, and lazy rendering of large lists.
+- Kept light: opening a window never redraws the table behind it, animations run on the compositor, so an open window uses almost no CPU, and search remembers the normalised text of every cell.
 - Backend: Google Apps Script on your own Google account. Data: your Google Sheet. Metadata: TMDB.
 
 ## 🏷️ Versions
