@@ -5,9 +5,7 @@
 MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own Google Sheet**, TMDB fills in the details for you, and a built-in radar tells you when something you follow gets a new season. There's nothing to install and no account to create beyond your own Google Drive. Open the file and start tracking.
 
 <img width="1882" height="868" alt="MEDIA HUB – table view on PC" src="https://github.com/user-attachments/assets/b7a81336-1d56-439c-a4cf-84fb0d1059b9" />
-<img width="935" height="850" alt="MEDIA HUB – settings" src="https://github.com/user-attachments/assets/40bbbddb-603e-4a0c-8ef3-d213653b8daa" />
-<img width="1148" height="837" alt="MEDIA HUB – customization" src="https://github.com/user-attachments/assets/458604c0-c981-4151-a1f7-95e9ab6c4c79" />
-<img width="1170" height="803" alt="MEDIA HUB – radar" src="https://github.com/user-attachments/assets/54b0386a-e89f-4242-b62c-4b9ec05457fc" />
+<img width="907" height="820" alt="Screenshot 2026-09-25 120758" src="https://github.com/user-attachments/assets/c2212a7e-da7c-4c86-a1f4-ea865b5acd7e" />
 
 ---
 
@@ -68,6 +66,8 @@ Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Setti
 - Requests are rate-limit aware: they retry on "too many requests", time out instead of hanging, and cache results for 30 minutes.
 
 ## 🛰️ Radar
+<img width="1148" height="837" alt="MEDIA HUB – customization" src="https://github.com/user-attachments/assets/458604c0-c981-4151-a1f7-95e9ab6c4c79" />
+<img width="1170" height="803" alt="MEDIA HUB – radar" src="https://github.com/user-attachments/assets/54b0386a-e89f-4242-b62c-4b9ec05457fc" />
 
 **Updates** scans the current category and reports:
 - new seasons, episodes currently airing, completed seasons, new films and announced releases;
