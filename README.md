@@ -73,7 +73,7 @@ Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Setti
 - new seasons, episodes currently airing, completed seasons, new films and announced releases;
 - the release date and how many days are left.
 
-You can filter by score range (e.g. `8-10` or `7+`), hide anything older than a chosen year, and choose whether NEXT titles are included. HOLD titles are always scanned. Results are grouped into *All / Seasons / Airing / Films / Soon*.
+You can filter by score range (e.g. `8-10` or `7+`), hide anything older than a chosen year, and pick which special scores are scanned too with the **Include** chips: **NEXT**, **HOLD** and **DROP**, each on or off (HOLD is on by default). Results are grouped into *All / Seasons / Airing / Films / Soon*.
 
 **Search** lets you discover new titles on TMDB by type (movies, series, anime, anime films), rating range, year and genres, and add them to your list with one click.
 
