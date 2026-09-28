@@ -114,6 +114,8 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 ## ☁️ Saving, sync and safety
 
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type.
+- **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
+- **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
 - **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. Every save is protected:
   - **One request:** with the current backend (v4) a save is a single request. The check and the write happen together on the server, and the answer carries the sheet as written.
   - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
