@@ -17,6 +17,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 - **Radar:** finds new seasons, new episodes and new films for the titles in your list.
 - **Clean Report:** finds and repairs messy data such as duplicates, dead posters, inconsistent formats and missing links.
 - **Built for PC and phone:** a spreadsheet-style table on desktop and poster cards on mobile, each with its own display settings.
+- **Quick filters on the phone:** **ALL · NEXT · HOLD · DROP** chips, each with its count, show just the titles with that score in one tap.
 - **Bilingual:** English and Romanian.
 
 ---
