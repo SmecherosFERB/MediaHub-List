@@ -42,6 +42,8 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 
 Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes, so each row stays compact and easy to read.
 
+The totals (episodes and watch time) count only titles with a numeric score, i.e. what you have watched and rated. NEXT, HOLD and DROP titles are left out.
+
 ### Scores and sorting
 Numeric scores always come first, then:
 1. **NEXT**: still to watch (green)
