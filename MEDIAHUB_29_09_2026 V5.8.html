@@ -2434,7 +2434,7 @@
         let STATS=null;
         const pHdrCnts=()=>((STATS||(STATS={})).p||(STATS.p=calcPCnts()));
         const gHdrCnts=()=>((STATS||(STATS={})).g||(STATS.g=calcGCnts()));
-        function calcPCnts(){ let nx=0, hd=0, dp=0, rS=0, rC=0, tE=0, tM=0; (STATE.data||[]).forEach(r=>{const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT')nx++; else if(v==='HOLD')hd++; else if(v==='DROP')dp++; else if(v!==''&&!isNaN(parseFloat(v.replace(',','.')))){rS+=parseFloat(v.replace(',','.')); rC++;} const o=parseOwned(COL.EXTRA!==undefined?r[COL.EXTRA]:''); if(o.episodes!=null)tE+=o.episodes; if(o.runtime!=null)tM+=o.runtime;}); return {tot:(STATE.data||[]).length, nx, hd, dp, avg:rC>0?(rS/rC):0, ep:tE, mins:tM, time:fmtMins(tM)}; }
+        function calcPCnts(){ let nx=0, hd=0, dp=0, rS=0, rC=0, tE=0, tM=0; (STATE.data||[]).forEach(r=>{const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT')nx++; else if(v==='HOLD')hd++; else if(v==='DROP')dp++; else if(v!==''&&!isNaN(parseFloat(v.replace(',','.')))){rS+=parseFloat(v.replace(',','.')); rC++; /* episodes and time count only titles you watched and scored: NEXT is not started, and for HOLD / DROP the Length is the whole show, not what was seen */ const o=parseOwned(COL.EXTRA!==undefined?r[COL.EXTRA]:''); if(o.episodes!=null)tE+=o.episodes; if(o.runtime!=null)tM+=o.runtime;} }); return {tot:(STATE.data||[]).length, nx, hd, dp, avg:rC>0?(rS/rC):0, ep:tE, mins:tM, time:fmtMins(tM)}; }
         /* "0h" for a category with 4425 episodes reads like a bug; show real units, or nothing. */
         function fmtMins(m){ if(!m) return ''; const d=Math.floor(m/1440), h=Math.floor((m%1440)/60), mm=m%60;
             if(d) return `${d}d ${h}h`; if(h) return `${h}h ${mm}m`; return `${mm}m`; }
