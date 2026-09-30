@@ -1421,7 +1421,8 @@
             if(alt && img.src!==alt){ img.dataset.fbDone='1'; img.src=alt; }
         }, true);
         function openDrive(){ STATE.fU ? window.open(STATE.fU,'_blank','noopener') : sTst(t('mNC'),'warning'); }
-        function openHelp(){ window.open('https://gist.githubusercontent.com/SmecherosFERB/a7b8fd79373cfa886ec1282f4bbe7835/raw/HELP.TXT','_blank','noopener'); }
+        /* HELP = the setup guide at the top of the Apps Script file in the repository (raw text, always the latest on main) */
+        function openHelp(){ window.open('https://raw.githubusercontent.com/SmecherosFERB/MediaHub-List/refs/heads/main/script.google.com%2BHELP%20for%20MediaHub%20CONFIGURATION.txt','_blank','noopener'); }
         function onAccentInput(v){ const l=$('ac-val'); if(l) l.textContent=String(v).toUpperCase(); setAccent(v); }
         function onRawFocus(){ RAW_FOCUS=true; }
         function clickEl(id){ $(id)?.click(); }
