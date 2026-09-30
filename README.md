@@ -120,7 +120,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
   - **Rows:** density, row lines, sticky header, table width (full, limited or a custom pixel width);
   - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position, hover zoom;
   - **Pills:** number of genre pills, pill style, length format, R+ / R- pills;
-  - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score (auto = default);
+  - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score in pixels (the stepper starts from the size on screen);
   - **Score:** pill, coloured text or plain, and display format (`9.5`, `9.50`, `★★★★½` or `95`).
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
 - **Behaviour:** scroll to changed rows, animations, vibration (phone), lazy loading, and hiding the header.
