@@ -55,6 +55,7 @@ Click any column header to sort it ascending, descending or back to off. Sorting
 
 ### Editing
 - Click a cell to edit it. Arrow keys and Enter move between cells.
+- On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
 - Move rows up or down: hover the # badge on PC, or use the row menu on the phone.
 - **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions and whole Clean Report steps.
 - A duplicate warning appears when you add a title that's already in the list.
@@ -74,6 +75,7 @@ Every category has an `IMDB_Score` column (the app adds it at the end when a she
 - **⋮ table menu → Sync external score** fills the IMDb score of every title with an IMDB link (missing scores first, so a run cut short by the daily limit still fills the gaps). One Undo reverts it.
 - The score is also filled in when you add or sync a title, and the Clean Report can fill missing scores or refresh them all.
 - You can type a score yourself with the pen on the IMDB button.
+- The button size, the IMDB text and the score size can be changed in **Depth Customization → IMDb**, separately for PC and phone.
 
 An optional `ANIMELIST_Score` column is kept in the sheet but not shown yet.
 
@@ -117,7 +119,8 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
   - **Text:** size, weight, capitals, header size, wrapping, alignment, words per line, note preview length;
   - **Rows:** density, row lines, sticky header, table width (full, limited or a custom pixel width);
   - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position, hover zoom;
-  - **Pills:** number of genre pills, pill style, length format, IMDB button style, R+ / R- pills;
+  - **Pills:** number of genre pills, pill style, length format, R+ / R- pills;
+  - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score (auto = default);
   - **Score:** pill, coloured text or plain, and display format (`9.5`, `9.50`, `★★★★½` or `95`).
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
 - **Behaviour:** scroll to changed rows, animations, vibration (phone), lazy loading, and hiding the header.
