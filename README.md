@@ -35,8 +35,8 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP` |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
 | **Length** | `4 Seasons \| 89 Episodes` or `148 min`, shown as a compact pill |
-| **IMDB** | A yellow IMDB button, or *Add link* when it's missing |
-| **Rewatches** | A counter with − / + buttons |
+| **IMDB** | A yellow IMDB button (with the IMDb score, e.g. **IMDB 7.7**, when the sheet has an `IMDB_Score` column), or *Add link* when it's missing |
+| **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
 | **Notes** | A short preview with "…"; hover (PC) to read the whole note |
 | **Image** | The poster, with a hover zoom on PC |
 
@@ -68,6 +68,9 @@ Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Setti
 - **Sync this row / Sync whole table** refreshes the details, and asks you to choose when a title has several matches.
 - Requests are rate-limit aware: they retry on "too many requests", time out instead of hanging, and cache results for 30 minutes.
 
+### IMDb scores (optional)
+Add a column named `IMDB_Score` to your sheet (the app never creates it; it only uses it when it's there). Its value is shown inside the IMDB button. TMDB has no IMDb ratings, so the scores come from [OMDb](https://www.omdbapi.com/apikey.aspx): put your free OMDb key (1000 requests a day) in **Settings**, and the score is filled in when you add or sync a title. The Clean Report can fill every missing score or refresh them all. You can also type a score yourself with the pen on the IMDB button. An `ANIMELIST_Score` column is kept in the sheet but not shown yet.
+
 ## 🛰️ Radar
 <img width="1148" height="837" alt="MEDIA HUB – customization" src="https://github.com/user-attachments/assets/458604c0-c981-4151-a1f7-95e9ab6c4c79" />
 <img width="1170" height="803" alt="MEDIA HUB – radar" src="https://github.com/user-attachments/assets/54b0386a-e89f-4242-b62c-4b9ec05457fc" />
@@ -88,6 +91,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 |---|---|
 | Possible duplicates | Matches titles regardless of accents or punctuation. *Show* jumps to the row; *Delete* removes one copy. |
 | Missing IMDB link | Finds the link on TMDB by title, or lets you paste one yourself. |
+| Missing IMDb scores | Only with an `IMDB_Score` column: fills scores from OMDb, and can refresh all of them. |
 | Dead or empty posters | Replaces them with the TMDB poster. There is also an option to move *every* poster to TMDB. |
 | Grades normalised | Turns any mark between digits into a dot (`9,10` → `9.10`) and capitalises `next` / `hold` / `drop`. |
 | Invalid grades | Fixes clear cases (`10/10`, `9.5.`, `8+`) and lists the rest for you to edit. |
@@ -127,7 +131,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two.
 - **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
 - **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets).
-- **Privacy:** the TMDB key is never written to the sheet. The App Script URL, cloud password and TMDB key are hidden behind a show/hide eye in Settings.
+- **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
 
 ---
 
@@ -141,6 +145,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
    4. **Deploy → New deployment → Web app**: *Execute as: Me*, *Who has access: Anyone*. Copy the web-app URL.
    5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection.
 3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
+4. **Optional:** add an OMDb key and an `IMDB_Score` column for IMDb scores in the IMDB button.
 
 > **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app also works with the older v3 script (it then reads the sheet before and after each save), so it keeps working until you redeploy.
 
