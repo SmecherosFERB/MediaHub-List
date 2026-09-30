@@ -1,3 +1,95 @@
+/*
+============================== MEDIA HUB — SETUP & HELP ==============================
+Everything between here and the XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX line is help.
+The code to paste into Apps Script is the part BELOW that line.
+
+------------------------------STEP 1------------------------------: Cloud Database Setup
+
+1-Go to Google Drive https://drive.google.com/drive/my-drive -> Click + New -> Google Sheets.
+
+2-In the top menu, click Extensions -> Apps Script (log in and accept permissions if asked).
+
+3-Copy the code from the XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX SECTION BELLOW paste it into the editor (delete the old code first).
+
+4-Click the blue Deploy button (top right) -> New deployment.
+
+5-Click the gear icon (⚙️ Select type) -> Choose Web app.
+
+6-Under "Who has access", change it to Anyone and click Deploy.
+
+7-Copy the generated Web app URL (it starts with https://script.google.com/macros...).
+
+8-Paste that link into the Google Apps Script URL field in the Settings menu.
+
+--Cloud Password-- is: SECRET
+You can modify the password in the code (the ACCESS_KEY line in the PASSWORD section), but you need to Deploy as a New Version again.
+
+------------------------------STEP 2------------------------------: Auto-Sync (TMDB API Key)
+
+1-Go to https://www.themoviedb.org/ and create a free account->JOIN TMDB.
+
+2-Go to your Account Settings -> API (or directly to https://www.themoviedb.org/settings/api).
+
+3-Click on "Create" or request a new API key (choose the Developer / Free option).
+
+4-Complete the required form with basic details about your app.
+
+5-Once approved, copy your "API Key (v3 auth)". It is a long string of letters and numbers.
+
+6-Paste that key into the TMDB API Key field in the Settings menu.
+
+------------------------------STEP 3 (OPTIONAL)------------------------------: IMDb Scores (OMDb API Key)
+
+1-Go to https://www.omdbapi.com/apikey.aspx -> choose FREE (1,000 daily limit) -> fill in your email, name and a short use (e.g. "personal watch list") -> Submit.
+
+2-Open the email from OMDb and click the activation link (the key does NOT work until it is activated).
+
+3-Copy the key from that email (a short code of letters and numbers).
+
+4-Paste it into the OMDb Key field in the Settings menu and press TEST.
+
+5-In the table ⋮ menu click SYNC EXTERNAL SCORE: it fills IMDB_Score for every title with an IMDB link
+  (missing scores first; 1 request per title). Scores are also filled when you add or sync a title.
+  The OMDb key stays only on your device, it is never saved in the sheet.
+
+------------------------------UPDATING THE SCRIPT------------------------------
+
+1-Open the sheet -> Extensions -> Apps Script -> replace the old code with the new PROVIDED CODE (keep your password line).
+
+2-Deploy -> Manage deployments -> pencil icon -> Version: New version -> Deploy.
+  Editing the existing deployment keeps the SAME Web app URL, so nothing changes in the app.
+
+3-Reload the spreadsheet once to get the "MEDIA HUB" menu (backups / restore of any category).
+
+----SHEET COLUMNS----
+Each category is one sheet: # | Title | Score | Genres | Length | IMDB | IMDB_Score | Rewatches | Notes | Image
+IMDB_Score is added by the app automatically when a sheet doesn't have it (the next save writes it to the sheet).
+ANIMELIST_Score is optional: if you add it, it is kept but not shown yet.
+
+----THE CONFIG SHEET IS CREATED AUTOMATICALLY (HIDDEN): THERE WILL BE SAVED ALL THE USER SETTINGS/Preferences----
+
+----Universal Color Formatting (Theme Engine)----
+Global System:
+<MEDIAHUB> #192990 - Changes the main accent color (default red) USE ACCENT SLIDER (Settings -> CUSTOM -> Accent color).
+Colour rules (same place, RULES) colour a column when it matches, e.g. SCORE 9-10 green or GENRES Action red.
+
+---CONTROLL SECTION HAVE:---
+1)⋮ TABLE MENU (top of the CONTROL column on PC / next to sort on the phone)=SYNC WHOLE TABLE, SYNC EXTERNAL SCORE, UNDO
+2)⋮ ON EACH ROW=SYNC THIS ROW (WAND), MOVE UP/DOWN (phone), DELETE (TRASHCAN)
+3)UNDO=IN THE ⋮ TABLE MENU OR CTRL+Z, WORKS FOR ANY EDIT
+4)NEXT=BUTTON NEXT TO SEARCH ON PC / ALL · NEXT · HOLD · DROP CHIPS ON THE PHONE (SHOW ONLY THAT SCORE)
+5)PLUS ICON (+)=ADD SOMETHING TO THE LIST
+6)POSTER HAVE A LIST WITH SOME STATS ON HOVER OR TAP.
+7)HIDE THE MEDIAHUB TITLE FOR MORE SPACE=Settings -> CUSTOM -> Behaviour -> Hide header
+8)SAVE TO CLOUD BUTTON ON TOP RIGHT (OR CTRL+S); A WHITE DOT ON IT = UNSAVED CHANGES
+9)RADAR YOU CAN SCAN ENTIRE PAGE FOR NEW RELEASES, OR SEARCH TMDB FOR NEW TITLES
+10)CLEAN (in Settings)=CLEAN REPORT: DUPLICATES, MISSING LINKS/POSTERS/IMDb SCORES, FORMATS, WITH FIX ALL
+11)IMDB BUTTON=OPENS IMDb; ITS PEN EDITS THE LINK AND THE IMDb SCORE
+12)REWATCH − / + ON THE PHONE=PRESS AND HOLD (A STRAY TAP CHANGES NOTHING)
+*/
+
+// XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX  (copy everything from this line down)
+
 /**
  * MEDIA HUB — Google Apps Script backend  (v4)
  *

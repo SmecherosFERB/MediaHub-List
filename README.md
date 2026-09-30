@@ -149,7 +149,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 1. **Download** the latest `MEDIAHUB_DD_MM_YYYY Vx.y.html` from this repository and open it in any modern browser. You can use it locally right away.
 2. **Connect Google Sheets** (optional, needed for the cloud):
    1. Create a Google Sheet, then open **Extensions → Apps Script**.
-   2. Paste the contents of `script.google.com code for mediahub.txt` into `Code.gs`.
+   2. Open `script.google.com+HELP for MediaHub CONFIGURATION.txt`. It starts with a step-by-step setup guide (cloud, TMDB, optional OMDb, updating the script, controls); paste everything from the `XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX` line down into `Code.gs`.
    3. Set your password on the `ACCESS_KEY` line, or add an `ACCESS_KEY` entry under *Project Settings → Script Properties*.
    4. **Deploy → New deployment → Web app**: *Execute as: Me*, *Who has access: Anyone*. Copy the web-app URL.
    5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection.
