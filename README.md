@@ -114,14 +114,14 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 ## 🎨 Make it yours
 
 - **Themes:** Auto (follows your system), Light or Dark, plus any accent colour.
-- **Colour rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`.
-- **Depth Customization**, with a search box to find any option quickly:
+- **Colour rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`. Point at a rule to get ▲ / ▼ arrows and reorder it (on a phone the arrows are always shown).
+- **Depth Customization**, with a search box to find any option quickly. Drawers and options are listed alphabetically, each with its name on the left and its control on the right; sizes show the real number (e.g. 2 genre pills, 11.5 px) instead of 0 / auto:
   - **Text:** size, weight, capitals, header size, wrapping, alignment, words per line, note preview length;
   - **Rows:** density, row lines, sticky header, table width (full, limited or a custom pixel width);
-  - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position, hover zoom;
-  - **Pills:** number of genre pills, pill style, length format, R+ / R- pills;
+  - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position, hover zoom from 1.0× (off) to 6.0× in steps of 0.1 (default 2.0×);
+  - **Pills:** number of genre pills, pill style, length format, R+ / R- pills, pill text size (px) and pill size (%);
   - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score in pixels (the stepper starts from the size on screen);
-  - **Score:** pill, coloured text or plain, and display format (`9.5`, `9.50`, `★★★★½` or `95`).
+  - **Score:** pill, coloured text or plain, display format (`9.5`, `9.50`, `★★★★½` or `95`), score text size (px) and score pill size (%).
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
 - **Behaviour:** scroll to changed rows, animations, vibration (phone), lazy loading, and hiding the header.
 
