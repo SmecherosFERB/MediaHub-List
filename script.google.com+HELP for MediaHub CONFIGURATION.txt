@@ -1,8 +1,5 @@
 /*
 ============================== MEDIA HUB — SETUP & HELP ==============================
-Everything between here and the XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX line is help.
-The code to paste into Apps Script is the part BELOW that line.
-
 ------------------------------STEP 1------------------------------: Cloud Database Setup
 
 1-Go to Google Drive https://drive.google.com/drive/my-drive -> Click + New -> Google Sheets.
@@ -51,15 +48,6 @@ You can modify the password in the code (the ACCESS_KEY line in the PASSWORD sec
 5-In the table ⋮ menu click SYNC EXTERNAL SCORE: it fills IMDB_Score for every title with an IMDB link
   (missing scores first; 1 request per title). Scores are also filled when you add or sync a title.
   The OMDb key stays only on your device, it is never saved in the sheet.
-
-------------------------------UPDATING THE SCRIPT------------------------------
-
-1-Open the sheet -> Extensions -> Apps Script -> replace the old code with the new PROVIDED CODE (keep your password line).
-
-2-Deploy -> Manage deployments -> pencil icon -> Version: New version -> Deploy.
-  Editing the existing deployment keeps the SAME Web app URL, so nothing changes in the app.
-
-3-Reload the spreadsheet once to get the "MEDIA HUB" menu (backups / restore of any category).
 
 ----SHEET COLUMNS----
 Each category is one sheet: # | Title | Score | Genres | Length | IMDB | IMDB_Score | Rewatches | Notes | Image
