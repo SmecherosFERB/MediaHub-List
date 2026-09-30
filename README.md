@@ -156,6 +156,8 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
 4. **Optional:** add an OMDb key for IMDb scores in the IMDB button (⋮ table menu → Sync external score).
 
+> **Help:** the **HELP** button in Settings opens this setup guide (the raw `script.google.com+HELP for MediaHub CONFIGURATION.txt`).
+
 > **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app also works with the older v3 script (it then reads the sheet before and after each save), so it keeps working until you redeploy.
 
 ---
