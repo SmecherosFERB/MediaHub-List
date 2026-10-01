@@ -117,7 +117,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 - **Themes:** Auto (follows your system), Light, Dark, **AMOLED** (pure black) or **Midnight** (deep blue), chosen from one compact row; the view mode (Auto / PC / MOBILE) sits in the row under it.
 - **Visible columns and their order:** switch any column on or off, and point at a column to move it up or down with ▲ / ▼. The parts of a merged cell move with their group (Length and IMDB with Genres, Notes with Rewatches). The order is saved per layout profile.
-- **Depth Customization** is one list with a search box. Its sections are listed alphabetically, each option has its name on the left and its control on the right, sizes show the real number (e.g. 2 genre pills, 11.5 px) instead of 0 / auto, and every section has a small ↺ button that resets only that section:
+- **Depth Customization** is one list with a search box. Its sections are listed alphabetically, each option has its name on the left and its control on the right, sizes show the real number (e.g. 2 genre pills, 11.5 px) instead of 0 / auto, and every section has a small ↺ button right after its name that resets only that section (changing an option never moves the list):
   - **Alignment & lines:** horizontal and vertical alignment, wrapping, words per line;
   - **Colours:** the accent colour, from a picker or one of 10 ready-made colours;
   - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score;
