@@ -43,6 +43,8 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 
 Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes, so each row stays compact and easy to read.
 
+On PC the **Image** header shows how many titles the category has. Point at the **Score** header for its stats: the average score first, then how many titles have each score (10 … 1), then DROP, HOLD and NEXT, then the total episodes and watch time.
+
 The totals (episodes and watch time) count only titles with a numeric score, i.e. what you have watched and rated. NEXT, HOLD and DROP titles are left out.
 
 ### Scores and sorting
