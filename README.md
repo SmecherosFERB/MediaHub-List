@@ -113,15 +113,22 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 
 ## 🎨 Make it yours
 
-- **Themes:** Auto (follows your system), Light or Dark, plus any accent colour.
-- **Colour rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`. Point at a rule to get ▲ / ▼ arrows and reorder it (on a phone the arrows are always shown).
-- **Depth Customization**, with a search box to find any option quickly. Drawers and options are listed alphabetically, each with its name on the left and its control on the right; sizes show the real number (e.g. 2 genre pills, 11.5 px) instead of 0 / auto:
-  - **Text:** size, weight, capitals, header size, wrapping, alignment, words per line, note preview length;
+Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the visible categories and the visible columns; from there **Depth Customization** opens every colour, rule and size option.
+
+- **Themes:** Auto (follows your system), Light, Dark, **AMOLED** (pure black) or **Midnight** (deep blue), chosen from one compact row; the view mode (Auto / PC / MOBILE) sits in the row under it.
+- **Visible columns and their order:** switch any column on or off, and point at a column to move it up or down with ▲ / ▼. The parts of a merged cell move with their group (Length and IMDB with Genres, Notes with Rewatches). The order is saved per layout profile.
+- **Depth Customization** is one list with a search box. Its sections are listed alphabetically, each option has its name on the left and its control on the right, sizes show the real number (e.g. 2 genre pills, 11.5 px) instead of 0 / auto, and every section has a small ↺ button that resets only that section:
+  - **Alignment & lines:** horizontal and vertical alignment, wrapping, words per line;
+  - **Colours:** the accent colour, from a picker or one of 10 ready-made colours;
+  - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score;
+  - **Phone cards** (MOBILE profile): space between cards, card corners, and the poster on the left or on top across the card;
+  - **Pills:** number of genre pills, pill style, length format, rating pills (Both / R+ / R- / None), pill text size and pill size;
+  - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position and size, hover zoom from 1.0× (off) to 6.0× in steps of 0.1 (default 2.0×);
+  - **Rewatch & Notes:** size of the Rewatch counter and its − / + buttons, note text size, note preview length;
   - **Rows:** density, row lines, sticky header, table width (full, limited or a custom pixel width);
-  - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position, hover zoom from 1.0× (off) to 6.0× in steps of 0.1 (default 2.0×);
-  - **Pills:** number of genre pills, pill style, length format, R+ / R- pills, pill text size (px) and pill size (%);
-  - **IMDb:** button style (full, icon or hidden), button size (50–200%), size of the IMDB text and of the IMDb score in pixels (the stepper starts from the size on screen);
-  - **Score:** pill, coloured text or plain, display format (`9.5`, `9.50`, `★★★★½` or `95`), score text size (px) and score pill size (%).
+  - **Rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`. The switch on the Rules bar turns table colouring on or off; tap a rule's colour dot to switch just that rule off (it is kept), duplicate it, or point at it for ▲ / ▼ to reorder (always shown on a phone);
+  - **Score:** pill, coloured text or plain, display format (`9.5`, `9.50`, `★★★★½` or `95`), score text size and score pill size;
+  - **Text:** font (Inter, System, Narrow, Serif or Mono), size, weight, capitals, header size, title size and weight, letter spacing and line spacing.
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
 - **Behaviour:** scroll to changed rows, animations, vibration (phone), lazy loading, and hiding the header.
 
