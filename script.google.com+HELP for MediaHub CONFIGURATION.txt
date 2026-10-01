@@ -58,8 +58,10 @@ ANIMELIST_Score is optional: if you add it, it is kept but not shown yet.
 
 ----Universal Color Formatting (Theme Engine)----
 Global System:
-<MEDIAHUB> #192990 - Changes the main accent color (default red) USE ACCENT SLIDER (Settings -> CUSTOM -> Accent color).
-Colour rules (same place, RULES) colour a column when it matches, e.g. SCORE 9-10 green or GENRES Action red.
+<MEDIAHUB> #192990 - Changes the main accent color (default red) USE ACCENT SLIDER (Settings -> CUSTOMIZATION -> Depth Customization -> Colours,
+  with 10 ready-made colours). Themes: Auto, Light, Dark, AMOLED (pure black) and Midnight (deep blue) in Settings -> CUSTOMIZATION.
+Colour rules (Depth Customization -> Rules) colour a column when it matches, e.g. SCORE 9-10 green or GENRES Action red.
+  The switch on the Rules bar turns colouring on/off; tap a rule's colour dot to switch only that rule off.
 
 ---CONTROLL SECTION HAVE:---
 1)⋮ TABLE MENU (top of the CONTROL column on PC / next to sort on the phone)=SYNC WHOLE TABLE, SYNC EXTERNAL SCORE, UNDO
@@ -68,7 +70,7 @@ Colour rules (same place, RULES) colour a column when it matches, e.g. SCORE 9-1
 4)NEXT=BUTTON NEXT TO SEARCH ON PC / ALL · NEXT · HOLD · DROP CHIPS ON THE PHONE (SHOW ONLY THAT SCORE)
 5)PLUS ICON (+)=ADD SOMETHING TO THE LIST
 6)POSTER HAVE A LIST WITH SOME STATS ON HOVER OR TAP.
-7)HIDE THE MEDIAHUB TITLE FOR MORE SPACE=Settings -> CUSTOM -> Behaviour -> Hide header
+7)HIDE THE MEDIAHUB TITLE FOR MORE SPACE=Settings -> CUSTOMIZATION -> Behaviour -> Hide header
 8)SAVE TO CLOUD BUTTON ON TOP RIGHT (OR CTRL+S); A WHITE DOT ON IT = UNSAVED CHANGES
 9)RADAR YOU CAN SCAN ENTIRE PAGE FOR NEW RELEASES, OR SEARCH TMDB FOR NEW TITLES
 10)CLEAN (in Settings)=CLEAN REPORT: DUPLICATES, MISSING LINKS/POSTERS/IMDb SCORES, FORMATS, WITH FIX ALL
