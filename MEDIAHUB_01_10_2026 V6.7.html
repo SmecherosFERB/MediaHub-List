@@ -822,6 +822,9 @@
         .ph-tip table { border-collapse:collapse; }
         .ph-tip td { padding:2px 10px; font-size:11.4px; font-weight:700; text-transform:none; letter-spacing:normal; text-align:left; white-space:nowrap; color:var(--text-muted); }
         .ph-tip tr td:last-child { text-align:right; font-weight:900; color:var(--theme-accent); }
+        .ph-tip tr.ph-sep-b td { border-bottom:1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent); padding-bottom:4px; }
+        .ph-tip tr.ph-sep-t td { border-top:1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent); padding-top:4px; }
+        .ph-hdr.ph-plain { cursor:default; }
         #app-header.hdr-hidden { display:none; }
         #tbl-box { max-height:73vh; }
         #nav #btn-sv, #nav #hdr-radar, #nav #hdr-gear { margin-left:8px; }
@@ -2627,7 +2630,7 @@
         /* "0h" for a category with 4425 episodes reads like a bug; show real units, or nothing. */
         function fmtMins(m){ if(!m) return ''; const d=Math.floor(m/1440), h=Math.floor((m%1440)/60), mm=m%60;
             if(d) return `${d}d ${h}h`; if(h) return `${h}h ${mm}m`; return `${mm}m`; }
-        function calcGCnts(){ const buckets={}; let rated=0, nx=0, hd=0, dp=0; (STATE.data||[]).forEach(r=>{ const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT'){nx++;return;} if(v==='HOLD'){hd++;return;} if(v==='DROP'){dp++;return;} if(v===''||isNaN(parseFloat(v.replace(',','.'))))return; const key=Math.min(10,Math.max(1,Math.round(parseFloat(v.replace(',','.'))))); buckets[key]=(buckets[key]||0)+1; rated++; }); const dist=[]; for(let g=10;g>=1;g--){ if(buckets[g]) dist.push({label:String(g), count:buckets[g]}); } if(nx) dist.push({label:t('sW'), count:nx}); if(hd) dist.push({label:t('sHd'), count:hd}); if(dp) dist.push({label:t('sDr'), count:dp}); return {rated, dist}; }
+        function calcGCnts(){ const buckets={}; let rated=0, nx=0, hd=0, dp=0; (STATE.data||[]).forEach(r=>{ const v=String(r[COL.GRADE]??'').toUpperCase().trim(); if(v==='NEXT'){nx++;return;} if(v==='HOLD'){hd++;return;} if(v==='DROP'){dp++;return;} if(v===''||isNaN(parseFloat(v.replace(',','.'))))return; const key=Math.min(10,Math.max(1,Math.round(parseFloat(v.replace(',','.'))))); buckets[key]=(buckets[key]||0)+1; rated++; }); const dist=[]; for(let g=10;g>=1;g--){ if(buckets[g]) dist.push({label:String(g), count:buckets[g]}); } if(dp) dist.push({label:t('sDr'), count:dp}); if(hd) dist.push({label:t('sHd'), count:hd}); if(nx) dist.push({label:t('sW'), count:nx}); return {rated, dist}; }
         /* A content rating ("R - 17+", "PG-13") is not a genre, so it gets its own pill. */
         const RATE_RX=/(^|\s)(R\s*[-\u2013\u2014]?\s*17\+|R\s*[+-]|PG-?13|TV-?MA|TV-?14|NC-?17|PG|G)(?![A-Za-z0-9])|17\+/i; /* not \b: after "R+" both sides are non-word, so \b never matched */
         function splitTheme(v){
@@ -3189,7 +3192,7 @@
         function rHdr(){
             if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return; }
             {
-                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr" data-act="phTip"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span><span class="ph-tip"><table><tbody><tr><td>${t('sTot')}</td><td>${pc.tot}</td></tr><tr><td>${t('sAvg')}</td><td>${pc.avg.toFixed(2)}</td></tr><tr><td>${t('sW')}</td><td>${pc.nx}</td></tr>${pc.hd?`<tr><td>${t('sHd')}</td><td>${pc.hd}</td></tr>`:''}<tr><td>${t('sDr')}</td><td>${pc.dp}</td></tr>${pc.ep?`<tr><td>${t('sEp')}</td><td>${pc.ep}</td></tr>`:''}${pc.time?`<tr><td>${t('sTi')}</td><td>${pc.time}</td></tr>`:''}</tbody></table></span></span></th>`); }
+                let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr ph-plain"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span></span></th>`); } /* just the total: the stats live in the Score header */
                 const ctx=rowCtx(), part=c=>`<span>${esc(colLabel(STATE.hdrs[c]))}</span>`, dot='<span class="th-dot">·</span>';
                 ctx.ord.forEach(c=>{ const h=STATE.hdrs[c];
                     if(ctx.hid.has(c))return;
@@ -3201,7 +3204,11 @@
                     else if(c===ctx.infoIn) label=[ctx.genIn!==null?COL.THEME:null, ctx.lenIn!==null?COL.EXTRA:null].filter(x=>x!==null).map(part).join(dot);
                     else if(c===ctx.rnIn) label=[ctx.rwIn!==null?COL.REWATCH:null, ctx.noteIn!==null?COL.NOTE:null].filter(x=>x!==null).map(part).join(dot);
                     if(colKey(h)==='GRADE'){
-                        const rows=gHdrCnts().dist.map(d=>`<tr><td>${d.label}</td><td>${d.count}</td></tr>`).join('');
+                        /* Score header list: the average first, then 10 … 1, DROP / HOLD / NEXT, then episodes and watch time */
+                        const g=gHdrCnts(), pc=pHdrCnts(), tr=(l,v,c='')=>`<tr${c?` class="${c}"`:''}><td>${esc(l)}</td><td>${esc(v)}</td></tr>`;
+                        const rows=(g.rated?tr(t('sAvg'), pc.avg.toFixed(2), 'ph-sep-b'):'')
+                            + g.dist.map(d=>tr(d.label, d.count)).join('')
+                            + (pc.ep?tr(t('sEp'), pc.ep, 'ph-sep-t'):'') + (pc.time?tr(t('sTi'), pc.time, pc.ep?'':'ph-sep-t'):'');
                         label=`<span class="ph-hdr" data-act="phTip"><span>${label}</span><span class="ph-count-dot"></span><span class="ph-tip"><table><tbody>${rows}</tbody></table></span></span>`;
                     } else label=`<span>${label}</span>`;
                     th.push(thSort(c, srt, label, i));
