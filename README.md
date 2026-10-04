@@ -55,6 +55,8 @@ Numeric scores always come first, then:
 
 Click any column header to sort it ascending, descending or back to off. Sorting handles numbers and accented text correctly.
 
+**Sort by IMDb score:** click **IMDb** in the header of the cell that holds the IMDB button on PC, or pick **IMDb Score** in the sort menu on the phone. The highest score comes first, a second click puts the lowest first, and titles without a score always stay at the end.
+
 ### Editing
 - Click a cell to edit it. Arrow keys and Enter move between cells.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
