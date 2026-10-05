@@ -140,7 +140,8 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 ## ☁️ Saving, sync and safety
 
-- **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type.
+- **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed.
+- **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
 - **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
 - **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. Every save is protected:
@@ -169,7 +170,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 > **Help:** the **HELP** button in Settings opens this setup guide (the raw `script.google.com+HELP for MediaHub CONFIGURATION.txt`).
 
-> **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app also works with the older v3 script (it then reads the sheet before and after each save), so it keeps working until you redeploy.
+> **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app needs the v4 script: with an older one it does not save and asks you to update it.
 
 ---
 
