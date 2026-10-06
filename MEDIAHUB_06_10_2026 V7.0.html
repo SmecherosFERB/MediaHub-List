@@ -445,7 +445,11 @@
         #h-row .th-dot { margin:0 5px; opacity:.45; }
         #h-row .th-sub { display:inline-flex; align-items:center; gap:4px; padding:1px 6px; border-radius:999px; cursor:pointer; }
         #h-row .th-sub:hover, #h-row .th-sub:focus-visible { background:color-mix(in srgb, var(--theme-accent) 14%, transparent); outline:none; }
-        #h-row .th-sub.on { color:var(--theme-accent); }
+        #h-row .th-sub.on { color:var(--theme-accent); background:color-mix(in srgb, var(--theme-accent) 14%, transparent); }
+        /* the sorted column keeps its colour after the mouse leaves (not only the hover tint) */
+        #h-row th[aria-sort="ascending"], #h-row th[aria-sort="descending"] { background:color-mix(in srgb, var(--theme-accent) 10%, transparent); box-shadow:inset 0 -2px 0 var(--theme-accent); }
+        #h-row th[aria-sort="ascending"]:not(.th-multi), #h-row th[aria-sort="descending"]:not(.th-multi) { color:var(--theme-accent); }
+        #h-row th.th-multi { cursor:default; }
         .active-tab { border-bottom:3px solid var(--active-tab-border); color:var(--active-tab-text); background:var(--active-tab-bg); }
         .control-col { width:54px; min-width:54px; background:var(--control-bg); text-align:center; }
         .grade-cell { max-width:5ch; width:5ch; white-space:nowrap; }
@@ -2665,6 +2669,12 @@
         }
         /* sorting by IMDb score is offered when the sheet has the column, the IMDB button is drawn and the score is not hidden */
         const imdbSortable=()=>COL.IMDB_SCORE!==undefined && !isHidden('IMDB_Score') && !isHidden('IMDB') && STATE.imdb!=='hide';
+        /* a sort on a column that is no longer shown (hidden in Visible columns, IMDb hidden, column gone) would reorder the list with no arrow anywhere: drop it */
+        function dropHiddenSort(){
+            const c=STATE.sC; if(c===null||c===undefined) return;
+            const h=STATE.hdrs?.[c], k=h===undefined?'':colKey(h);
+            if(h===undefined || k==='POSTER' || k==='IMDB' || isHidden(h) || (DATA_COLS.has(k) && !(c===COL.IMDB_SCORE && imdbSortable()))){ STATE.sC=null; STATE.sD='asc'; }
+        }
         function srtT(c, kb=false){ sortCol(c); rTab(); if(kb) $('h-row')?.querySelector(`[data-col="${c}"][tabindex]`)?.focus(); /* the header is rebuilt, so hand keyboard focus back */ }
         
         function tNxt(){ setGf(STATE.nx?'':'NEXT'); }
@@ -3250,13 +3260,19 @@
                 const dr=STATE.sD==='asc'?1:-1, c=STATE.sC, NUM=/^-?\d+([.,]\d+)?$/;
                 STATE.fDat.forEach(x=>{ const v=String(x.row[c]??'').trim(); x.k=v; x.n=NUM.test(v)?parseFloat(v.replace(',','.')):null; });
                 if(c===COL.IMDB_SCORE) STATE.fDat.sort((a,b)=>(a.n===null)-(b.n===null) || (a.n!==null ? (a.n-b.n)*dr : 0)); /* no score / N/A: always last */
-                else STATE.fDat.sort((a,b)=>(a.n!==null&&b.n!==null ? a.n-b.n : TXT_CMP(a.k,b.k))*dr);
+                else {
+                    /* groups never flip with the direction: empty cells always last; on Score the numbers come first, then NEXT / HOLD / DROP in this order, then other text */
+                    const gr=c===COL.GRADE, ST={NEXT:0,HOLD:1,DROP:2};
+                    STATE.fDat.forEach(x=>{ const u=x.k.toUpperCase(); x.g=!x.k?3:(!gr||x.n!==null?0:(u in ST?1:2)); x.s=x.g===1?ST[u]:0; });
+                    STATE.fDat.sort((a,b)=>a.g-b.g || (a.g===3?0:(a.g===1?a.s-b.s:(a.n!==null&&b.n!==null ? a.n-b.n : TXT_CMP(a.k,b.k))*dr)));
+                }
             }
             return STATE.fDat;
         }
         function rTab(skipHeader=false){
             STATS=null;
             const q=fold(DOM.sr.value);
+            dropHiddenSort();
             syncMTools();
             if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return DOM.br.innerHTML=`<tr><td colspan="99" class="p-20 text-center"><div class="flex flex-col items-center gap-2"><i class="fas fa-clapperboard text-[var(--theme-accent)] opacity-30" style="font-size:2.25rem;"></i><div class="text-[var(--text-muted)] uppercase font-black italic">${t('blk')}</div><div class="text-[10px] text-[var(--text-muted)]" style="opacity:.7;font-weight:400;">${t('blkSub')}</div></div></td></tr>`; }
             if(!skipHeader) rHdr();
@@ -3287,26 +3303,33 @@
 
         /* One sortable header cell. Click and Enter / Space are handled once, by the shared [data-act] listeners. */
         const thSort=(c, srt, label, icon)=>`<th scope="col" aria-sort="${srt}" class="cursor-pointer select-none hover:bg-[var(--theme-accent)]/5 transition-colors" data-col="${c}" data-act="sortCol" tabindex="0"><div class="flex items-center justify-center gap-1.5">${label}${ic(icon,'text-xs')}</div></th>`;
+        /* A merged header (Genres · Length · IMDb, Rewatches · Notes, Title · IMDb): every word sorts its own column and carries its own arrow */
+        const thMulti=(srt, label)=>`<th scope="col" aria-sort="${srt}" class="th-multi select-none transition-colors"><div class="flex items-center justify-center gap-1.5 flex-wrap">${label}</div></th>`;
+        const srtIc=c=>STATE.sC===c?(STATE.sD==='asc'?'sort-up':'sort-down'):'sort opacity-30';
+        const srtAria=c=>STATE.sC===c?(STATE.sD==='asc'?'ascending':'descending'):'none';
+        const thSub=(c, text, tip='')=>`<span class="th-sub${STATE.sC===c?' on':''}" data-act="sortCol" data-col="${c}" tabindex="0" role="button"${tip?` aria-label="${esc(tip)}" title="${esc(tip)}"`:''}>${text}${ic(srtIc(c)+' text-[var(--theme-accent)]','text-xs')}</span>`;
         function rHdr(){
             if(!STATE.hdrs?.length){ DOM.hr.innerHTML=""; return; }
             {
                 let th = []; if(!isHidden('POSTER')){ const pc=pHdrCnts(); th.push(`<th scope="col" class="w-16 notranslate text-center"><span class="ph-hdr ph-plain"><span>${esc(t('cPOSTER'))}</span><span class="ph-count">${pc.tot}</span></span></th>`); } /* just the total: the stats live in the Score header */
-                const ctx=rowCtx(), part=c=>`<span>${esc(colLabel(STATE.hdrs[c]))}</span>`, dot='<span class="th-dot">·</span>';
+                const ctx=rowCtx(), dot='<span class="th-dot">·</span>';
                 ctx.ord.forEach(c=>{ const h=STATE.hdrs[c];
                     if(ctx.hid.has(c))return;
-                    const i=STATE.sC===c?(STATE.sD==='asc'?'sort-up text-[var(--theme-accent)]':'sort-down text-[var(--theme-accent)]'):'sort text-[var(--theme-accent)] opacity-30';
-                    const srt=STATE.sC===c?(STATE.sD==='asc'?'ascending':'descending'):'none';
-                    /* merged cells get a combined label; clicking still sorts by the column the cell lives in */
-                    let label=esc(colLabel(h));
-                    if(c===ctx.noIn) label=`<span class="th-no">${esc(colLabel(STATE.hdrs[ctx.nCol]))}</span><span>${label}</span>`;
-                    else if(c===ctx.infoIn) label=[ctx.genIn!==null?COL.THEME:null, ctx.lenIn!==null?COL.EXTRA:null].filter(x=>x!==null).map(part).join(dot);
-                    else if(c===ctx.rnIn) label=[ctx.rwIn!==null?COL.REWATCH:null, ctx.noteIn!==null?COL.NOTE:null].filter(x=>x!==null).map(part).join(dot);
-                    let srtA=srt;
-                    if(c===ctx.imdbIn && imdbSortable()){ /* the IMDb score has no column of its own: it sorts from the header of the cell its button lives in */
-                        const ic2=STATE.sC===COL.IMDB_SCORE?(STATE.sD==='asc'?'sort-up':'sort-down'):'sort opacity-30';
-                        if(STATE.sC===COL.IMDB_SCORE) srtA=STATE.sD==='asc'?'ascending':'descending';
-                        label+=`${dot}<span class="th-sub${STATE.sC===COL.IMDB_SCORE?' on':''}" data-act="sortCol" data-col="${COL.IMDB_SCORE}" tabindex="0" role="button" aria-label="${esc(t('srtImdb'))}" title="${esc(t('srtImdb'))}">IMDb${ic(ic2+' text-[var(--theme-accent)]','text-xs')}</span>`;
+                    const i=srtIc(c)+' text-[var(--theme-accent)]';
+                    /* the columns sorted from this header: merged cells have several, each word sorts its own column */
+                    let cols=[c];
+                    if(c===ctx.infoIn) cols=[ctx.genIn!==null?COL.THEME:null, ctx.lenIn!==null?COL.EXTRA:null].filter(x=>x!==null);
+                    else if(c===ctx.rnIn) cols=[ctx.rwIn!==null?COL.REWATCH:null, ctx.noteIn!==null?COL.NOTE:null].filter(x=>x!==null);
+                    const imdbHere=c===ctx.imdbIn && imdbSortable(); /* the IMDb score has no column of its own: it sorts from the header of the cell its button lives in */
+                    const pre=c===ctx.noIn?`<span class="th-no">${esc(colLabel(STATE.hdrs[ctx.nCol]))}</span>`:'';
+                    if(cols.length+(imdbHere?1:0)>1){
+                        const sorted=[...cols, imdbHere?COL.IMDB_SCORE:null].find(x=>x!==null && x===STATE.sC);
+                        const label=pre+cols.map(x=>thSub(x, esc(colLabel(STATE.hdrs[x])))).join(dot)+(imdbHere?dot+thSub(COL.IMDB_SCORE, 'IMDb', t('srtImdb')):'');
+                        th.push(thMulti(sorted!==undefined?srtAria(sorted):'none', label));
+                        return;
                     }
+                    let label=pre?`${pre}<span>${esc(colLabel(h))}</span>`:esc(colLabel(h));
+                    const srtA=srtAria(c);
                     if(colKey(h)==='GRADE'){
                         /* Score header list: the average first, then 10 … 1, DROP / HOLD / NEXT, then episodes and watch time */
                         const g=gHdrCnts(), pc=pHdrCnts(), tr=(l,v,c='')=>`<tr${c?` class="${c}"`:''}><td>${esc(l)}</td><td>${esc(v)}</td></tr>`;

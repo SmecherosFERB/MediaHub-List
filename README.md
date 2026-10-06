@@ -53,7 +53,11 @@ Numeric scores always come first, then:
 2. **HOLD**: started, then paused (amber)
 3. **DROP**: abandoned (red)
 
-Click any column header to sort it ascending, descending or back to off. Sorting handles numbers and accented text correctly.
+Click any column header to sort it ascending, descending or back to off. Sorting handles numbers and accented text correctly. The sorted column stays highlighted in the accent colour, even when the mouse moves away.
+
+In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length and **Notes** by notes.
+
+Empty cells always stay at the end, in both directions. When sorting by **Score**, the numbers come first, then **NEXT**, **HOLD** and **DROP** in that order.
 
 **Sort by IMDb score:** click **IMDb** in the header of the cell that holds the IMDB button on PC, or pick **IMDb Score** in the sort menu on the phone. The highest score comes first, a second click puts the lowest first, and titles without a score always stay at the end.
 
