@@ -32,7 +32,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 |---|---|
 | **#** | Position in the list, shown as a small badge on the poster |
 | **Title** | The name, editable in place |
-| **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP` |
+| **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP`. Only clean values count: something like `8abc`, `10/10` or `95` is left out of the average, the colours and the score order until Clean Report fixes it |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
 | **Length** | `4 Seasons \| 89 Episodes` or `148 min`, shown as a compact pill |
 | **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link |
@@ -69,7 +69,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 - Pasting text with several lines into a cell joins the lines with spaces.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
 - Move rows up or down: hover the # badge on PC, or use the row menu on the phone. The list always stays in score order (from the very first category you open, whatever the column layout of each sheet), so a row can only swap places with titles that have the **same score** (for example, to order your NEXT list). The arrows are off while a column is sorted. After a delete the # numbers close the gap.
-- **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions and whole Clean Report steps.
+- **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions and whole Clean Report steps. **Redo** (Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z) puts back what you undid; both are also in the ⋮ table menu. A new edit after an undo starts fresh, so there is nothing left to redo.
 - A duplicate warning appears when you add a title that's already in the list.
 
 ---
@@ -191,6 +191,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 | `Shift + A` | Add a new title |
 | `Ctrl/Cmd + S` | Save to the cloud |
 | `Ctrl/Cmd + Z` | Undo |
+| `Ctrl/Cmd + Y` or `Ctrl/Cmd + Shift + Z` | Redo |
 | `Esc` | Close a window, clear the search, or cancel the edit of a cell |
 | `↑` `↓` `Enter` | Move to the previous or next row while editing |
 | `←` `→` | Move to the previous or next cell |
