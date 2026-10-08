@@ -25,7 +25,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 ## 📚 Your collection
 
 ### Categories
-Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use; their data is kept.
+Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept.
 
 ### The table
 | Column | What it holds |
@@ -68,7 +68,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 - A **Score** typed in the table must be 1–10 (decimals allowed, `9,5` becomes `9.5`) or **NEXT**, **HOLD**, **DROP**; anything else is refused with a short message and the old score stays.
 - Pasting text with several lines into a cell joins the lines with spaces.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
-- Move rows up or down: hover the # badge on PC, or use the row menu on the phone. The list always stays in score order, so a row can only swap places with titles that have the **same score** (for example, to order your NEXT list). The arrows are off while a column is sorted. After a delete the # numbers close the gap.
+- Move rows up or down: hover the # badge on PC, or use the row menu on the phone. The list always stays in score order (from the very first category you open, whatever the column layout of each sheet), so a row can only swap places with titles that have the **same score** (for example, to order your NEXT list). The arrows are off while a column is sorted. After a delete the # numbers close the gap.
 - **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions and whole Clean Report steps.
 - A duplicate warning appears when you add a title that's already in the list.
 
@@ -138,7 +138,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Poster:** fill or fit, width and height (optionally locked to 2:3), corner style, # badge position and size, hover zoom from 1.0× (off) to 6.0× in steps of 0.1 (default 2.0×);
   - **Rewatch & Notes:** size of the Rewatch counter and its − / + buttons, note text size, note preview length;
   - **Rows:** density, row lines, sticky header, table width (full, limited or a custom pixel width);
-  - **Rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`. The switch on the Rules bar turns table colouring on or off; tap a rule's colour dot to switch just that rule off (it is kept), duplicate it, or point at it for ▲ / ▼ to reorder (always shown on a phone);
+  - **Rules:** colour scores or text by value, for example `SCORE 9-10 green` or `GENRES Action red`. Rules work on Title, Score, Genres (the matching pill), Length, Notes and Rewatches (an exact number); columns that can't be coloured (Image, IMDB, IMDb score, #) aren't offered. The switch on the Rules bar turns table colouring on or off; tap a rule's colour dot to switch just that rule off (it is kept), duplicate it, or point at it for ▲ / ▼ to reorder (always shown on a phone);
   - **Score:** pill, coloured text or plain, display format (`9.5`, `9.50`, `★★★★½` or `95`), score text size and score pill size;
   - **Text:** font (Inter, System, Narrow, Serif or Mono), size, weight, capitals, header size, title size and weight, letter spacing and line spacing.
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
