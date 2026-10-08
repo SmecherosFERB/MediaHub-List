@@ -57,14 +57,18 @@ Click any column header to sort it ascending, descending or back to off. Sorting
 
 In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length and **Notes** by notes.
 
+The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*.
+
 Empty cells always stay at the end, in both directions. When sorting by **Score**, the numbers come first, then **NEXT**, **HOLD** and **DROP** in that order.
 
 **Sort by IMDb score:** click **IMDb** in the header of the cell that holds the IMDB button on PC, or pick **IMDb Score** in the sort menu on the phone. The highest score comes first, a second click puts the lowest first, and titles without a score always stay at the end.
 
 ### Editing
-- Click a cell to edit it. Arrow keys and Enter move between cells.
+- Click a cell to edit it. Arrow keys and Enter move between cells. **Esc** cancels the edit and puts the old text back.
+- A **Score** typed in the table must be 1–10 (decimals allowed, `9,5` becomes `9.5`) or **NEXT**, **HOLD**, **DROP**; anything else is refused with a short message and the old score stays.
+- Pasting text with several lines into a cell joins the lines with spaces.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
-- Move rows up or down: hover the # badge on PC, or use the row menu on the phone.
+- Move rows up or down: hover the # badge on PC, or use the row menu on the phone. The list always stays in score order, so a row can only swap places with titles that have the **same score** (for example, to order your NEXT list). The arrows are off while a column is sorted. After a delete the # numbers close the gap.
 - **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions and whole Clean Report steps.
 - A duplicate warning appears when you add a title that's already in the list.
 
@@ -155,7 +159,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two.
 - **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
-- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets).
+- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`).
 - **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
 
 ---
@@ -186,10 +190,10 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 | `Shift + A` | Add a new title |
 | `Ctrl/Cmd + S` | Save to the cloud |
 | `Ctrl/Cmd + Z` | Undo |
-| `Esc` | Close a window or clear the search |
+| `Esc` | Close a window, clear the search, or cancel the edit of a cell |
 | `↑` `↓` `Enter` | Move to the previous or next row while editing |
 | `←` `→` | Move to the previous or next cell |
-| `Shift + ↑/↓` | Move the current row up or down |
+| `Shift + ↑/↓` | Move the current row up or down (among titles with the same score) |
 
 ---
 
