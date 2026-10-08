@@ -35,7 +35,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP` |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
 | **Length** | `4 Seasons \| 89 Episodes` or `148 min`, shown as a compact pill |
-| **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing |
+| **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link |
 | **IMDB_Score** | The IMDb score shown inside the IMDB button (not a column of its own); switch it off in *Visible columns* to hide the score |
 | **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
 | **Notes** | A short preview with "…"; hover (PC) to read the whole note |
@@ -148,7 +148,8 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 ## ☁️ Saving, sync and safety
 
-- **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed.
+- **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed. Without a cloud there is nothing else to save: no unsaved dot, no "save first?" questions when you switch category, and no browser warning when you close the page.
+- **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
 - **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
 - **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
