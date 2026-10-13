@@ -57,7 +57,7 @@ Click any column header to sort it ascending, descending or back to off. Sorting
 
 In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length and **Notes** by notes.
 
-The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*.
+As soon as you type, an **×** appears in the search box: click it (or press Esc) to clear the search and show all titles again. The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*.
 
 Empty cells always stay at the end, in both directions. When sorting by **Score**, the numbers come first, then **NEXT**, **HOLD** and **DROP** in that order.
 
@@ -85,6 +85,7 @@ Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Setti
 ### IMDb scores
 Every category has an `IMDB_Score` column (the app adds it at the end when a sheet doesn't have it yet; the next save puts it in the sheet). Its value is shown inside the IMDB button. TMDB has no IMDb ratings, so the scores come from [OMDb](https://www.omdbapi.com/apikey.aspx): put your free OMDb key (1000 requests a day) in **Settings**, then:
 - **⋮ table menu → Sync external score** fills the IMDb score of every title with an IMDB link (missing scores first, so a run cut short by the daily limit still fills the gaps). One Undo reverts it.
+- **⋮ on a row → Sync external score** does the same for that one title (one Undo step); it is greyed out when the title has no IMDB link.
 - The score is also filled in when you add or sync a title, and the Clean Report can fill missing scores or refresh them all.
 - You can type a score yourself with the pen on the IMDB button.
 - The button size, the IMDB text and the score size can be changed in **Depth Customization → IMDb**, separately for PC and phone.
@@ -148,6 +149,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 ## ☁️ Saving, sync and safety
 
+- **Two tabs open:** if MEDIA HUB is open in another tab too, a banner says so (both tabs write the same local library, so edit in only one). When the other tab saves the category you are looking at, the banner says it changed and offers **Reload** to show the latest version.
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed. Without a cloud there is nothing else to save: no unsaved dot, no "save first?" questions when you switch category, and no browser warning when you close the page.
 - **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
 - **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
