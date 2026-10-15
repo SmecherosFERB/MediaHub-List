@@ -113,7 +113,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 | Possible duplicates | Matches titles regardless of accents or punctuation. *Show* jumps to the row; *Delete* removes one copy. |
 | Missing IMDB link | Finds the link on TMDB by title, or lets you paste one yourself. |
 | Missing IMDb scores | With an OMDb key: fills scores from OMDb, and can refresh all of them. |
-| Dead or empty posters | Replaces them with the TMDB poster. There is also an option to move *every* poster to TMDB. |
+| Dead or empty posters | Replaces them with the TMDB poster. There is also an option to move *every* poster to TMDB. Without a connection the posters are not checked (a message says so) instead of all being called dead. |
 | Grades normalised | Turns any mark between digits into a dot (`9,10` → `9.10`) and capitalises `next` / `hold` / `drop`. |
 | Invalid grades | Fixes clear cases (`10/10`, `9.5.`, `8+`) and lists the rest for you to edit. |
 | Length formats | Rewrites every length in one format, e.g. `R- 4 Seasons \| 89 Episodes` or `148 min`. |
