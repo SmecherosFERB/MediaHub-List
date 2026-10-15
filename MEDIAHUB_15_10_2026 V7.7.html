@@ -1686,7 +1686,7 @@
         function pushHist(e){ STATE.hist.push(e); if(STATE.hist.length>HIST_MAX) STATE.hist.splice(0, STATE.hist.length-HIST_MAX); STATE.redo=[]; }
         /* the rows were swapped out (other category, cloud reload, import): old steps point at rows that are gone */
         function clearHist(){ STATE.hist=[]; STATE.redo=[]; }
-        let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', omdbKey:ls('omdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], gf:'', sC:null, sD:'asc', lib:{} /* filled by loadLib() from IndexedDB before the first load */, fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], redo:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false', lazy:ls('lazy')!=='false' };
+        let STATE={ url:ls('url')||'', pass:ls('pass')||'', tmdbKey:ls('tmdb')||'', omdbKey:ls('omdb')||'', lang:ls('lang')||'EN', fU:'', theme:ls('theme')||'dark', sheet:ls('sheet')||'MOVIES', hdrs:[], data:[], gf:'', sC:null, sD:'asc', lib:{} /* filled by loadLib() from IndexedDB before the first load */, fDat:[], hT:lsJSON('hiddenTabs',[]), hC:lsJSON('hiddenCols',[]), fs:ls('fontSize')||'14', cF:ls('colorFormatting')!=='false', cR:ls('colorRules')||'', ha:ls('ha')||'center', va:ls('va')||'middle', wr:ls('wr')||'normal', aT:lsJSON('allTabs',['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS']), hist:[], redo:[], uns:false, vM:ls('vM')||'auto', hlRef:null, track:ls('track')!=='false', lastSaved:parseInt(ls('lastSaved'))||null, savedAt:lsJSON('lastSavedMap', {}), dPc:lsJSON('dispPc',null), dMb:lsJSON('dispMobile',null), reduceMotion:ls('reduceMotion')==='true', unsData:false, hlBatch:null, vib:ls('vib')!=='false', lazy:ls('lazy')!=='false' };
         /* Score filter: '' = all, or NEXT / HOLD / DROP (the phone toolbar chips). STATE.nx stays as the "only NEXT"
            switch the PC button and older code use. */
         Object.defineProperty(STATE, 'nx', { get(){ return STATE.gf==='NEXT'; }, set(v){ STATE.gf=v?'NEXT':''; } });
@@ -2040,7 +2040,10 @@
         }
         function sTab(n){ if(STATE.sheet===n)return; if(SAVING){ SAV_TAB=n; sTst(t('mQd'),'info'); return; } if(cloudUns()){P_TAB=n; oMod('uns'); return;} eSw(n); }
         function lockNav(l){ LOCK_CNT=Math.max(0, LOCK_CNT+(l?1:-1)); SAVING=LOCK_CNT>0; if(!DOM.nv)return; DOM.nv.style.opacity=SAVING?'0.5':''; DOM.nv.style.pointerEvents=SAVING?'none':''; }
-        function eSw(n){ CLOUD.pend.delete(STATE.sheet); /* leaving a sheet means its unsaved import was saved or discarded */ STATE.sheet=n; ls('sheet',n); STATE.sC=null; STATE.sD='asc'; clearHist(); TAB_FADE=true; DOM.nv.querySelectorAll('button').forEach(b=>b.classList.remove('active-tab')); const tg=$(tabId(n)); if(tg) tg.classList.add('active-tab'); lDat(); }
+        function eSw(n){ CLOUD.pend.delete(STATE.sheet); /* leaving a sheet means its unsaved import was saved or discarded */
+            if(TAB.chg===STATE.sheet){ TAB.stale.add(STATE.sheet); TAB.chg=''; } /* still out of date: flagged for the next visit */
+            if(TAB.stale.has(n)) TAB.chg=n; /* changed in another tab and not refreshed here: say so, with Reload */
+            rTabWarn(); STATE.sheet=n; ls('sheet',n); STATE.sC=null; STATE.sD='asc'; clearHist(); rLastSaved(); TAB_FADE=true; DOM.nv.querySelectorAll('button').forEach(b=>b.classList.remove('active-tab')); const tg=$(tabId(n)); if(tg) tg.classList.add('active-tab'); lDat(); }
         /* DISCARD: with a cloud the local copy goes back to the cloud rows this session saw (or is dropped when they are
            unknown, so the next visit reads the cloud) - otherwise the instant view would show the discarded edits again */
         function dropLocalEdits(sheet){
@@ -3911,7 +3914,7 @@
             if(!v || v===String(prev??'')){ if(!OMDB_ERR) sTst(t('extDone').replace('{n}',0),'info'); return; } /* N/A never wipes a score */
             if(sheet===STATE.sheet && !STATE.data.includes(row)) return; /* undone or deleted meanwhile */
             row[si]=v;
-            if(sheet===STATE.sheet){ pushHist({t:'E', rowRef:row, c:si, v:prev}); upLib(sheet, STATE.hdrs, STATE.data); STATS=null; if(!updateRow(STATE.data.indexOf(row))) rTab(); }
+            if(sheet===STATE.sheet){ pushHist({t:'E', rowRef:row, c:si, v:prev}); upLib(sheet, STATE.hdrs, STATE.data); STATS=null; if(updateRow(STATE.data.indexOf(row))){ rHdr(); syncMTools(); } else rTab(); }
             else commitTo(sheet);
             sTst(t('extDone').replace('{n}',1),'success');
         }
@@ -4482,12 +4485,12 @@
         /* the cloud shows exactly what was sent */
         function saveOk_(sheet, res, chg0, cfg0){
             sTst(t("mSv"));
-            STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); vibSv(); setBase_(sheet, res); CLOUD.pend.delete(sheet);
+            markSaved(sheet); vibSv(); setBase_(sheet, res); CLOUD.pend.delete(sheet);
             if(CHG_GEN===chg0) setUns(false); else setDirtyBase(sheet); if(CFG_GEN===cfg0) ls('cfgDirty',''); /* edits made during the save stay marked as unsaved */
         }
         /* the server confirmed the write, but the sheet does not read back exactly as sent */
         function saveUnsure_(sheet, res, cfg0){
-            sTst(t("mSvChk"),"warning"); if(CFG_GEN===cfg0) ls('cfgDirty',''); STATE.lastSaved=Date.now(); ls('lastSaved',STATE.lastSaved); setBase_(sheet, res); setDirtyBase(sheet);
+            sTst(t("mSvChk"),"warning"); if(CFG_GEN===cfg0) ls('cfgDirty',''); markSaved(sheet); setBase_(sheet, res); setDirtyBase(sheet);
         }
         /* Script v4+: ONE request. It carries the server hash of the sheet as this device last saw it (or 'none' when the
            category was never loaded here; nothing for an import, which never asked). The server compares and writes under
@@ -4547,10 +4550,13 @@
             if(SAV_TAB){ const nx=SAV_TAB; SAV_TAB=null; sTab(nx); }
             return ok;
         }
+        /* "saved N min ago" belongs to the category on screen (it was one time for all of them) */
+        function markSaved(sheet){ if(!STATE.savedAt || typeof STATE.savedAt!=='object') STATE.savedAt={}; STATE.savedAt[sheet]=Date.now(); ls('lastSavedMap', JSON.stringify(STATE.savedAt)); }
         function rLastSaved(){
             const el=$('last-saved'); if(!el)return;
-            if(!STATE.lastSaved){ el.textContent=''; return; }
-            const mins=Math.floor((Date.now()-STATE.lastSaved)/60000);
+            const at=STATE.savedAt?.[STATE.sheet];
+            if(!at){ el.textContent=''; return; }
+            const mins=Math.floor((Date.now()-at)/60000);
             if(mins<1) el.textContent=t('svN');
             else if(mins<60) el.textContent=t('svA').replace('{m}', mins);
             else if(mins<1440) el.textContent=t('svH').replace('{n}', Math.floor(mins/60));
@@ -4566,7 +4572,7 @@
             if(row[c]===n)return;
             /* a Score typed in the table must be 1-10 or NEXT / HOLD / DROP (empty is fine): anything else is put back, never saved */
             if(c===COL.GRADE && n!=='' && !GRADE_OK(n)){ if(normG(row[c])!==n) sTst(t('addBad'),'warning'); updateRow(r); return; }
-            pushHist({t:'E',rowRef:row,c,v:row[c]});
+            pushHist(c===COL.GRADE ? {t:'E',rowRef:row,c,v:row[c],...gradeNb(row)} : {t:'E',rowRef:row,c,v:row[c]});
             row[c]=n;
             setUns(true);
             if(c===COL.GRADE){
@@ -4577,7 +4583,7 @@
                 return;
             }
             upLib(STATE.sheet, STATE.hdrs, STATE.data);
-            if(updateRow(r)){ STATS=null; rHdr(); } else rTab();
+            if(updateRow(r)){ STATS=null; rHdr(); syncMTools(); } else rTab(); /* the phone bar counts episodes / time from Length too */
         }
         
         /* the IMDB pen: link, plus the IMDb score when the sheet has an IMDB_Score column (one undo step for both) */
@@ -4598,7 +4604,7 @@
                 pushHist(edits.length===1?{t:'E', rowRef:row, c:edits[0].c, v:edits[0].v}:{t:'B', edits, dels:[]});
                 cmtSt(); setUns(true);
                 const sheet=STATE.sheet;
-                if(sI!==undefined && n!==cur && ns===curS && STATE.omdbKey) fillImdbScore(row, true).then(ch=>{ if(ch && commitTo(sheet) && STATE.data.includes(row)){ if(!updateRow(STATE.data.indexOf(row))) rTab(); } omdbWarn(); }); /* a new link: fetch its score */
+                if(sI!==undefined && n!==cur && ns===curS && STATE.omdbKey) fillImdbScore(row, true).then(ch=>{ if(ch && commitTo(sheet) && STATE.data.includes(row)){ if(updateRow(STATE.data.indexOf(row))){ STATS=null; rHdr(); syncMTools(); } else rTab(); } omdbWarn(); }); /* a new link: fetch its score */
             };
         }
         function dRow(i){ if(!STATE.data[i])return; cfmM(t('dC'), ()=>{ if(!STATE.data[i])return;pushHist({t:'D',r:i,row:STATE.data[i]}); /* the row itself, so older undo steps that point at it still work */ STATE.data.splice(i,1); cmtSt(t("mDl"),'num'); setUns(true);}); }
@@ -4720,8 +4726,17 @@
         /* Undo / Redo. Every step can be applied, and applying it gives back the step that reverses it:
            E sets a value, D puts a deleted row back (reverse: A), A takes a row out (reverse: D), M swaps two rows,
            B is one Clean report step (rows to take out again, deleted rows to put back, values to set). */
+        /* a score step keeps the row's neighbours: undo / redo puts it back beside the same-score title it sat next to,
+           so a hand-made order (e.g. the NEXT list) survives; the stable re-sort that follows keeps it there */
+        function gradeNb(row){ const i=STATE.data.indexOf(row); return {pv:STATE.data[i-1]||null, nx:STATE.data[i+1]||null}; }
+        function gradeBack(a){
+            const d=STATE.data, row=a.rowRef, k=gRank(row[COL.GRADE]), i=d.indexOf(row); if(i<0) return;
+            const near=x=>x && x!==row && d.includes(x) && gRank(x[COL.GRADE])===k;
+            const ref=near(a.pv)?a.pv:near(a.nx)?a.nx:null; if(!ref) return;
+            d.splice(i,1); d.splice(d.indexOf(ref)+(ref===a.pv?1:0), 0, row);
+        }
         function applyHist(a){
-            if(a.t==='E'){ const inv={t:'E', rowRef:a.rowRef, c:a.c, v:a.rowRef[a.c]}; a.rowRef[a.c]=a.v; STATE.hlRef=a.rowRef; return inv; }
+            if(a.t==='E'){ const g=a.c===COL.GRADE, inv={t:'E', rowRef:a.rowRef, c:a.c, v:a.rowRef[a.c], ...(g?gradeNb(a.rowRef):{})}; a.rowRef[a.c]=a.v; if(g) gradeBack(a); STATE.hlRef=a.rowRef; return inv; }
             if(a.t==='D'){ STATE.data.splice(Math.min(a.r, STATE.data.length), 0, a.row); STATE.hlRef=a.row; return {t:'A', rowRef:a.row}; }
             if(a.t==='A'){ const i=STATE.data.indexOf(a.rowRef); if(i>=0) STATE.data.splice(i,1); STATE.hlRef=null; return {t:'D', r:Math.max(0,i), row:a.rowRef}; }
             if(a.t==='M'){ const ia=STATE.data.indexOf(a.a), ib=STATE.data.indexOf(a.b); if(ia>=0&&ib>=0){ [STATE.data[ia],STATE.data[ib]]=[STATE.data[ib],STATE.data[ia]]; } STATE.hlRef=a.a; return a; }
@@ -4819,14 +4834,32 @@
         /* Two tabs of MEDIA HUB write the same local library, and the last write of a category wins. Tabs say hello / here / bye
            on a channel (BroadcastChannel, or the storage event where it is missing); while another tab is open a banner says so,
            and when another tab saved the category shown here, the banner offers a reload instead of letting one tab overwrite the other. */
-        const TAB={ id:Math.random().toString(36).slice(2,10), peers:new Set(), ch:null, off:false, chg:'' };
+        const TAB={ id:Math.random().toString(36).slice(2,10), peers:new Set(), ch:null, off:false, chg:'', stale:new Set() };
         function tabSend(m){ try{ m={...m, from:TAB.id}; if(TAB.ch) TAB.ch.postMessage(m); else localStorage.setItem('tk_tabmsg', JSON.stringify({...m, n:Math.random()})); }catch(e){} }
         function tabOnMsg(m){
             if(!m || m.from===TAB.id) return;
             if(m.t==='hello'){ TAB.peers.add(m.from); tabSend({t:'here'}); }
             else if(m.t==='here') TAB.peers.add(m.from);
             else if(m.t==='bye') TAB.peers.delete(m.from);
-            else if(m.t==='lib'){ TAB.peers.add(m.from); if((m.names||[]).includes(STATE.sheet)) TAB.chg=STATE.sheet; }
+            else if(m.t==='lib'){ TAB.peers.add(m.from); tabPull(m.names||[]); }
+            rTabWarn();
+        }
+        /* another tab saved these categories. The one on screen gets the banner (you may be typing in it); the others take the
+           other tab's copy from the local library right away, so opening them later never shows - and never saves over - an old one.
+           A category with a write of ours still pending (or one we could not read) is only flagged: opening it shows the banner. */
+        async function tabPull(names){
+            for(const n of names){
+                if(n===STATE.sheet){ TAB.chg=n; continue; }
+                if(LIB.dirty.has(n) || LIB.inflight.has(n)){ TAB.stale.add(n); continue; }
+                let c=null;
+                try{
+                    if(LIB.dbOk===false) c=jp(ls('library'), {}, true)[n]||null;
+                    else { const v=await idbReq('readonly', st=>st.get(libKey(n))); if(typeof v==='string') c=jp(v, null, true); }
+                }catch(e){ c=null; }
+                if(c && Array.isArray(c.headers) && Array.isArray(c.data) && STATE.sheet!==n){ STATE.lib[n]=c; TAB.stale.delete(n); }
+                else if(STATE.sheet===n) TAB.chg=n; /* opened while we were reading: reload to be safe */
+                else TAB.stale.add(n);
+            }
             rTabWarn();
         }
         function rTabWarn(){
@@ -4994,6 +5027,7 @@
                 LAST_Y=y;
             },{passive:true});
             document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) rLastSaved(); });
+            if(STATE.lastSaved && !Object.keys(STATE.savedAt||{}).length){ STATE.savedAt={[STATE.sheet]:STATE.lastSaved}; ls('lastSavedMap', JSON.stringify(STATE.savedAt)); } /* from the old single "last saved" */
             migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(); loadLib().then(lDat); rLastSaved(); setInterval(rLastSaved, 15000);
         };
         if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initApp); else initApp();
