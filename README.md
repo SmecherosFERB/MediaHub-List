@@ -25,7 +25,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 ## 📚 Your collection
 
 ### Categories
-Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category. A sheet of your own without a Score column takes titles without a score (the Add window doesn't ask for one). The app always opens on the category you had open last time.
+Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. A hidden category that has changes not saved to the cloud yet keeps its tab (with the dot) until you save them. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category. A sheet of your own without a Score column takes titles without a score (the Add window doesn't ask for one). The app always opens on the category you had open last time.
 
 ### The table
 | Column | What it holds |
@@ -43,7 +43,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 
 Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes, so each row stays compact and easy to read.
 
-On PC the **Image** header shows how many titles the category has. Point at the **Score** header for its stats: the average score first, then how many titles have each score (10 … 1), then DROP, HOLD and NEXT, then the total episodes and watch time.
+On PC the **Image** header shows how many titles the category has. Point at the **Score** header for its stats: the average score first, then how many titles have each score (10 … 1; a 9.5 counts with the 9s), then DROP, HOLD and NEXT, then the total episodes and watch time.
 
 The totals (episodes and watch time) count only titles with a numeric score, i.e. what you have watched and rated. NEXT, HOLD and DROP titles are left out. On the phone the same totals sit in the bar above the cards, and they update as soon as you edit a Length or a score.
 
@@ -144,6 +144,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Text:** font (Inter, System, Narrow, Serif or Mono), size, weight, capitals, header size, title size and weight, letter spacing and line spacing.
 - **Separate PC and MOBILE profiles:** visible columns, sizes, look, and even whether the MEDIA HUB header is shown, are all remembered per device type.
 - **Behaviour:** scroll to changed rows, animations, vibration (phone), lazy loading, and hiding the header.
+- The **view mode** and **vibration** belong to the device you set them on: changing them never marks anything as unsaved.
 
 ---
 
@@ -167,8 +168,8 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Verified saves:** success is only reported when the sheet really shows what you sent.
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two. If you empty a category on purpose, saving asks you first and then empties it (the sheet keeps a backup copy).
-- **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
-- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). A category in an imported `.json` that isn't in your list yet gets its own tab. Blank lines in a CSV are skipped.
+- **Settings sync:** themes, colour rules and both display profiles travel with your sheet. A save sends only the settings you changed on this device, so a setting changed on another device (new colour rules, say) is never written back over with this device's older copy; the next load brings it here. Settings you changed and haven't saved yet keep the dot on, also after a restart: until you save them they win over the cloud copy.
+- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). Importing a `.json` replaces only the categories in the file (the question names them); your other categories stay as they are. A category in an imported `.json` that isn't in your list yet gets its own tab. A CSV replaces the category on screen (the question says which one and how many titles). Blank lines in a CSV are skipped.
 - **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
 
 ---
@@ -181,7 +182,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
    2. Open `script.google.com+HELP for MediaHub CONFIGURATION.txt`. It starts with a step-by-step setup guide (cloud, TMDB, optional OMDb, updating the script, controls); paste everything from the `XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX` line down into `Code.gs`.
    3. Set your password on the `ACCESS_KEY` line, or add an `ACCESS_KEY` entry under *Project Settings → Script Properties*.
    4. **Deploy → New deployment → Web app**: *Execute as: Me*, *Who has access: Anyone*. Copy the web-app URL.
-   5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection.
+   5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection (on a brand-new spreadsheet it says the category isn't there yet: the first save creates it; a script older than v4 is flagged right there, so you update it before your first save).
 3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
 4. **Optional:** add an OMDb key for IMDb scores in the IMDB button (⋮ table menu → Sync external score).
 
