@@ -151,6 +151,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 - **Two tabs open:** if MEDIA HUB is open in another tab too, a banner says so (both tabs write the same local library, so edit in only one). When the other tab saves the category you are looking at, the banner says it changed and offers **Reload** to show the latest version. A change to any other category is picked up by itself, so when you switch to it you see the other tab's edits and your next edit builds on them; only if this tab still has a write of its own pending for that category does it show the banner with **Reload** when you open it.
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed. Without a cloud there is nothing else to save: no unsaved dot, no "save first?" questions when you switch category, and no browser warning when you close the page.
+- **Unsaved changes in another category:** with a cloud, the tab of a category that has changes not saved yet (after an import, a TMDB sync that finished after you switched, or a kept DISCARD) shows a small dot; the category on screen has its dot on the save button.
 - **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
 - **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. If the cloud copy changed and the table updates while you are typing in a cell, what you typed counts as an edit made here, so you're asked which version to keep; a dialog that was open (delete, note, link) never acts on a different title: if its title is no longer in the list, nothing is changed and a message says so. The same goes for a row button pressed while the table changes (for example a long press on Rewatches + on the phone). A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
@@ -165,7 +166,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
   - **Verified saves:** success is only reported when the sheet really shows what you sent.
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
-  - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two.
+  - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two. If you empty a category on purpose, saving asks you first and then empties it (the sheet keeps a backup copy).
 - **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
 - **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). A category in an imported `.json` that isn't in your list yet gets its own tab.
 - **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
@@ -195,7 +196,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 | Keys | Action |
 |---|---|
 | `/` | Focus the search bar |
-| `Shift + A` | Add a new title (type the title, `Tab` to the score, `Enter` to add; `Ctrl/Cmd + Z` right after takes it back) |
+| `Shift + A` | Add a new title (the cursor is in the title; `Tab` to the score, `Enter` to add; `Ctrl/Cmd + Z` right after takes it back) |
 | `Ctrl/Cmd + S` | Save to the cloud |
 | `Ctrl/Cmd + Z` | Undo |
 | `Ctrl/Cmd + Y` or `Ctrl/Cmd + Shift + Z` | Redo |
