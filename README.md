@@ -25,7 +25,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 ## 📚 Your collection
 
 ### Categories
-Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category.
+Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category. A sheet of your own without a Score column takes titles without a score (the Add window doesn't ask for one). The app always opens on the category you had open last time.
 
 ### The table
 | Column | What it holds |
@@ -195,7 +195,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 | Keys | Action |
 |---|---|
 | `/` | Focus the search bar |
-| `Shift + A` | Add a new title |
+| `Shift + A` | Add a new title (type the title, `Tab` to the score, `Enter` to add; `Ctrl/Cmd + Z` right after takes it back) |
 | `Ctrl/Cmd + S` | Save to the cloud |
 | `Ctrl/Cmd + Z` | Undo |
 | `Ctrl/Cmd + Y` or `Ctrl/Cmd + Shift + Z` | Redo |
