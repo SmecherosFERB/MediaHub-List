@@ -102,7 +102,7 @@ An optional `ANIMELIST_Score` column is kept in the sheet but not shown yet.
 
 You can filter by score range (e.g. `8-10` or `7+`), hide anything older than a chosen year, and pick which special scores are scanned too with the **Include** chips: **NEXT**, **HOLD** and **DROP**, each on or off (HOLD is on by default). Results are grouped into *All / Seasons / Airing / Films / Soon*.
 
-**Search** lets you discover new titles on TMDB by type (movies, series, anime, anime films), rating range, year and genres, and add them to your list with one click.
+**Search** lets you discover new titles on TMDB by type (movies, series, anime, anime films), rating range, year and genres, and add them to your list with one click: the title comes in as NEXT with its poster, genres, Length, IMDB link (and IMDb score, with an OMDb key), written the same way a TMDB sync writes them.
 
 ## 🧹 Clean Report
 
@@ -120,7 +120,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 | Genres | Uses one spelling per genre (`sci-fi` → `Sci-Fi`) and removes repeats. |
 | Text cleanup | Removes stray spaces, turns Rewatches into a number, deletes empty rows and flags rows without a title. |
 
-**Fix all** runs the local fixes first, then the TMDB repairs, with progress shown and a **STOP** button. A whole run can be undone in one step.
+**Fix all** runs the local fixes first, then the TMDB repairs, with progress shown and a **STOP** button. A whole run can be undone in one step, and the undo puts every title back exactly where it was. A fixed score moves the title to its place in the score order right away (for example `10/10` becomes `10` and goes to the top).
 
 ---
 
@@ -152,9 +152,10 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 - **Two tabs open:** if MEDIA HUB is open in another tab too, a banner says so (both tabs write the same local library, so edit in only one). When the other tab saves the category you are looking at, the banner says it changed and offers **Reload** to show the latest version. A change to any other category is picked up by itself, so when you switch to it you see the other tab's edits and your next edit builds on them; only if this tab still has a write of its own pending for that category does it show the banner with **Reload** when you open it.
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed. Without a cloud there is nothing else to save: no unsaved dot, no "save first?" questions when you switch category, and no browser warning when you close the page.
 - **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
-- **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
+- **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. If the cloud copy changed and the table updates while you are typing in a cell, what you typed counts as an edit made here, so you're asked which version to keep; a dialog that was open (delete, note, link) never acts on a different title: if its title is no longer in the list, nothing is changed and a message says so. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
 - **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
+- **Typing is never interrupted:** if the table is redrawn while you type (for example a TMDB sync of a title you just added finishes), the cursor stays in your cell with your text.
 - **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. The small time note next to the save button (NOW, 5-min, …) is kept per category, so it always tells when the category on screen was last saved (a category never saved from this device shows none). Every save is protected:
   - **One request:** with the current backend (v4) a save is a single request. The check and the write happen together on the server, and the answer carries the sheet as written.
   - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
