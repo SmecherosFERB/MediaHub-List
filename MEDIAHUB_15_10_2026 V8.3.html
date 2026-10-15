@@ -1420,7 +1420,7 @@
     <template id="tpl-add"><div class="add-form text-left">
         <div class="add-cat"><i class="fas fa-folder-open"></i><span data-tr="addTo">Adding to</span><b id="add-cat"></b></div>
         <label for="i-an" class="lbl" data-tr="addTtl">Title</label>
-        <div class="add-field"><i class="fas fa-film"></i><input type="text" id="i-an" class="inp" data-p="addTtlPh" placeholder="Movie, series or anime name" autocomplete="off" spellcheck="false" data-in="addCheck"><button type="button" class="add-clr" data-fn="addClear" data-tr-al="clrSrchB"><i class="fas fa-xmark"></i></button></div>
+        <div class="add-field"><i class="fas fa-film"></i><input type="text" id="i-an" class="inp" data-p="addTtlPh" placeholder="Movie, series or anime name" autocomplete="off" spellcheck="false" data-in="addCheck"><button type="button" class="add-clr" data-fn="addClear" data-tr-al="clrSrchB" tabindex="-1"><i class="fas fa-xmark"></i></button></div>
         <p id="add-dup" class="add-hint warn" aria-live="polite"></p>
         <label for="i-ag" class="lbl" data-tr="addSc">Score</label>
         <div class="add-score">
@@ -1931,7 +1931,7 @@
         function floatIn(){ if(DOM.ts && DOM.ts.parentElement!==DOM.md) DOM.md.appendChild(DOM.ts); }
         function floatOut(){ if(DOM.ts && DOM.ts.parentElement!==document.body) document.body.appendChild(DOM.ts); }
         const floatHost=()=>DOM.md?.open ? DOM.md : document.body;
-        function cMod(){ if(CFM_DISMISS){ const d=CFM_DISMISS; CFM_DISMISS=null; d(); } DRAFT.on=false; NOTE_OPEN=null; DOM.md.classList.remove('open'); if(DOM.md.open) DOM.md.close(); floatOut(); PEND_STG=null; P_TAB=''; if(MOD_RETURN&&MOD_RETURN.focus&&document.contains(MOD_RETURN)){ try{ MOD_RETURN.focus({preventScroll:true}); }catch(e){} } MOD_RETURN=null; setTimeout(()=>{ if(!DOM.md.classList.contains('open')) DOM.mb.innerHTML=''; }, 300); }
+        function cMod(){ if(CFM_DISMISS){ const d=CFM_DISMISS; CFM_DISMISS=null; d(); } DRAFT.on=false; NOTE_OPEN=null; DOM.md.classList.remove('open'); if(DOM.md.open) DOM.md.close(); if(DOM.md.contains(document.activeElement)) document.activeElement.blur(); /* a field of the closed window must not keep the keys (Ctrl+Z right after Add was an undo of the text box) */ floatOut(); PEND_STG=null; P_TAB=''; if(MOD_RETURN&&MOD_RETURN.focus&&document.contains(MOD_RETURN)){ try{ MOD_RETURN.focus({preventScroll:true}); }catch(e){} } MOD_RETURN=null; setTimeout(()=>{ if(!DOM.md.classList.contains('open')) DOM.mb.innerHTML=''; }, 300); }
         function cfmM(msg, onYes, onCancel){ oMod('cfm'); $('cfm-msg').innerText=msg; $('b-cfm-yes').onclick=()=>{ cMod(); onYes&&onYes(); }; $('b-cfm-no').onclick=()=>{ cMod(); onCancel&&onCancel(); }; }
         let NOTE_OPEN=null; /* {row, c} while the note window is open */
         function oNt(r,c){ const row=STATE.data[r]; if(!row)return; oMod('nte'); const txt=$('i-nt'); txt.value=row[c]; $('b-sn').onclick=()=>sNt(row,c); NOTE_OPEN={row,c}; setTimeout(()=>txt.focus(),50); }
@@ -2045,15 +2045,15 @@
         }
         /* a list cut down by an older version (it took the spreadsheet's tabs as they were) gets its categories back, and every
            category of the library that has titles has a tab (one imported from a backup used to have none) */
-        function fixTabs(){ const m=mergeTabs(STATE.aT, Object.keys(STATE.lib).filter(n=>STATE.lib[n]?.data?.length)); if(JSON.stringify(m)!==JSON.stringify(STATE.aT)){ STATE.aT=m; ls('allTabs', JSON.stringify(m)); rTbs(); } }
-        function rTbs(){
+        function fixTabs(){ const m=mergeTabs(STATE.aT, Object.keys(STATE.lib).filter(n=>STATE.lib[n]?.data?.length)); if(JSON.stringify(m)!==JSON.stringify(STATE.aT)){ STATE.aT=m; ls('allTabs', JSON.stringify(m)); } }
+        function rTbs(noSwitch){
             DOM.nv.querySelectorAll('button[data-tab]').forEach(b=>b.remove());
             const extra=$('nav-extra');
             let f=null, buf='';
             const hT=STATE.aT.every(x=>STATE.hT.includes(x)) ? [] : STATE.hT; /* all hidden (possible before V7.3): show them all rather than no tab at all */
             STATE.aT.forEach(tb=>{if(!hT.includes(tb)){if(!f)f=tb; buf+=`<button type="button" data-tab="${esc(tb)}" id="${tabId(tb)}" class="text-[var(--text-muted)] font-black uppercase transition-all">${esc(tb)}</button>`;}});
             if(extra) extra.insertAdjacentHTML('beforebegin', buf); else DOM.nv.insertAdjacentHTML('beforeend', buf);
-            const tg=$(tabId(STATE.sheet)); tg?tg.classList.add('active-tab'):(f&&setTimeout(()=>eSw(f),0));
+            const tg=$(tabId(STATE.sheet)); tg?tg.classList.add('active-tab'):(f&&!noSwitch&&setTimeout(()=>eSw(f),0));
         }
         function sTab(n){ if(STATE.sheet===n)return; if(SAVING){ SAV_TAB=n; sTst(t('mQd'),'info'); return; } if(cloudUns()){P_TAB=n; oMod('uns'); return;} eSw(n); }
         function lockNav(l){ LOCK_CNT=Math.max(0, LOCK_CNT+(l?1:-1)); SAVING=LOCK_CNT>0; if(DOM.nv){ DOM.nv.style.opacity=SAVING?'0.5':''; DOM.nv.style.pointerEvents=SAVING?'none':''; }
@@ -3794,13 +3794,16 @@
         /* ===== Add new item: title + score (typed or one of the NEXT / HOLD / DROP quick buttons), live checks ===== */
         const addGrade=()=>String($('i-ag')?.value||'').toUpperCase().trim().replace(/,/g,'.');
         const addDupOf=n=>COL.NAME!==undefined && normTitle(n) ? STATE.data.find(r=>normTitle(r[COL.NAME])===normTitle(n)) : null;
+        /* a category whose sheet has no Score column (e.g. a DOCS sheet of your own) takes titles without a score: the field is hidden
+           and not required (Add stayed disabled, and a score typed there was thrown away) */
+        const addNeedsScore=()=>!(STATE.hdrs?.length && COL.GRADE===undefined);
         function addCheck(){
             const ti=$('i-an'), btn=$('b-add'); if(!ti||!btn) return;
-            const n=ti.value.trim(), g=addGrade(), okG=GRADE_OK(g), dup=addDupOf(n);
+            const need=addNeedsScore(), n=ti.value.trim(), g=need?addGrade():'', okG=!need || GRADE_OK(g), dup=addDupOf(n);
             ti.closest('.add-field')?.classList.toggle('has-v', !!ti.value);
             document.querySelectorAll('.add-quick .aq').forEach(b=>{ const on=b.textContent.trim()===g; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
             const dh=$('add-dup'); if(dh){ dh.innerHTML=dup?html`${ic('triangle-exclamation')} ${t('addDup')} <b>${dup[COL.NAME]}</b>${COL.GRADE!==undefined&&dup[COL.GRADE]?` · ${dup[COL.GRADE]}`:''}`:''; dh.classList.toggle('show',!!dup); }
-            const sh=$('add-sc-hint'); if(sh){ const bad=!!g && !okG; sh.innerHTML=bad?html`${ic('circle-info')} ${t('addBad')}`:''; sh.classList.toggle('show',bad); $('i-ag').closest('.add-field')?.classList.toggle('bad',bad); }
+            const sh=$('add-sc-hint'); if(sh){ const bad=need && !!g && !okG; sh.innerHTML=bad?html`${ic('circle-info')} ${t('addBad')}`:''; sh.classList.toggle('show',bad); $('i-ag').closest('.add-field')?.classList.toggle('bad',bad); }
             btn.disabled=!(n && okG);
             const l=$('b-add-l'); if(l) l.textContent=t(dup?'addAny':'add');
         }
@@ -3808,12 +3811,13 @@
         function addClear(){ const i=$('i-an'); if(!i) return; i.value=''; addCheck(); i.focus(); }
         function initAdd(){
             const c=$('add-cat'); if(c) c.textContent=STATE.sheet;
+            const need=addNeedsScore(); [document.querySelector('label[for="i-ag"]'), document.querySelector('.add-score'), $('add-sc-hint')].forEach(e=>e?.classList.toggle('hidden', !need));
             addCheck(); $('i-an')?.focus(); setTimeout(()=>{ if(DOM.md.open && document.activeElement?.id!=='i-ag') $('i-an')?.focus(); }, 60);
         }
         function sAdd(){
             if(!STATE.hdrs?.length){STATE.hdrs=["#","Title","Score","Genres","Length","IMDB","IMDB_Score","Rewatches","Notes","Image"];mCol();}
             const n=$('i-an')?.value.trim(), g=addGrade();
-            if(!n || !GRADE_OK(g)){ addCheck(); return; }
+            if(!n || (addNeedsScore() && !GRADE_OK(g))){ addCheck(); return; }
             let r=new Array(STATE.hdrs.length).fill('');
             if(COL.NAME!==undefined)r[COL.NAME]=n;
             if(COL.GRADE!==undefined)r[COL.GRADE]=g;
@@ -5124,7 +5128,8 @@
             },{passive:true});
             document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ rLastSaved(); typingBack(); } });
             if(STATE.lastSaved && !Object.keys(STATE.savedAt||{}).length){ STATE.savedAt={[STATE.sheet]:STATE.lastSaved}; ls('lastSavedMap', JSON.stringify(STATE.savedAt)); } /* from the old single "last saved" */
-            migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(); loadLib().then(()=>{ fixTabs(); lDat(); }); rLastSaved(); setInterval(rLastSaved, 15000);
+            migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(true); /* no switch yet: the list is completed once the library is read (a category of it may not have its tab yet) */
+            loadLib().then(()=>{ fixTabs(); rTbs(); if($(tabId(STATE.sheet))) lDat(); }); /* the category open last time opens again; a hidden one hands over to the first */ rLastSaved(); setInterval(rLastSaved, 15000);
         };
         if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initApp); else initApp();
     </script>
