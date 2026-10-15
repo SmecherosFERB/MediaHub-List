@@ -1868,7 +1868,7 @@
             if(opt&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); e.target.click(); return; }
             if(e.key==='Escape'&&MENU_EL){ closeMenu(); return; }
             const a=document.activeElement, isI=['INPUT','TEXTAREA','SELECT'].includes(a.tagName)||a.contentEditable==='true', isM=DOM.md.classList.contains('open'); if(e.key==='Escape'){if(isM)cMod();else if($('s-col-list')?.classList.contains('open')){$('s-col-list').classList.remove('open');$('s-col-btn')?.setAttribute('aria-expanded','false');}else if(a.id==='srch'){clrSrch();a.blur();}}else if(e.key==='Enter'&&isM&&(a.id==='i-an'||a.id==='i-ag')){e.preventDefault();sAdd();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault(); /* never the browser's "Save page" */ if(!isM){ if(a.contentEditable==='true') a.blur(); /* focusout commits the cell being typed in */ sCld(); }}else if(!isI){if(e.key==='/'&&!isM){e.preventDefault();DOM.sr.focus();}else if(e.shiftKey&&e.key.toLowerCase()==='a'&&!isM){e.preventDefault();oMod('add');}else if((e.ctrlKey||e.metaKey)&&!isM&&(e.key.toLowerCase()==='y'||(e.shiftKey&&e.key.toLowerCase()==='z'))){e.preventDefault();rAct();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!isM){e.preventDefault();uAct();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&!isM){e.preventDefault();sCld();}}}
-        window.addEventListener('beforeunload',e=>{if(cloudUns()){e.preventDefault();e.returnValue='UNSAVED.';return e.returnValue;}});
+        window.addEventListener('beforeunload',e=>{commitTyping(); if(cloudUns()){e.preventDefault();e.returnValue='UNSAVED.';return e.returnValue;}});
 
         function setAccent(aT){ CUR_ACCENT=aT; document.documentElement.style.setProperty('--theme-accent', aT); const tc=$('tc-meta'); if(tc) tc.content=aT; }
         function pCRul() {
@@ -2654,7 +2654,20 @@
         function upLib(s,h,d){ STATE.lib[s]={headers:h,data:d}; LIB.dirty.add(s); clearTimeout(LIB.tm); LIB.tm=setTimeout(()=>{ LIB.tm=null; saveLib(); },400); setUns(true); }
         /* closing or hiding the page: an IndexedDB write may not finish in time, so the categories that changed also go
            to localStorage ('libpart', or the whole library when everything changed) and are picked up on the next start */
+        /* The cell being typed in counts as an edit before the page goes away: closed, reloaded, or hidden when you switch app on a
+           phone (the browser may then be closed in the background). The typed text used to be lost. Coming back puts the cursor back. */
+        let TYPING_BACK=null;
+        function commitTyping(){
+            const a=document.activeElement; if(!a || !DOM.br?.contains(a) || !a.closest?.('[data-a="e"]')) return;
+            const ed=editingCell(); a.blur(); TYPING_BACK = ed && !ed.pill && !ed.fmt ? ed : null;
+        }
+        function typingBack(){
+            const e=TYPING_BACK; TYPING_BACK=null;
+            if(!e || !STATE.data.includes(e.row) || (document.activeElement && document.activeElement!==document.body)) return;
+            backToCell({...e, text:String(e.row[e.c]??'')});
+        }
         function libSafety(){
+            commitTyping();
             if(!LIB.tm && !LIB.writing && !LIB.dirty.size && !LIB.all) return;
             clearTimeout(LIB.tm); LIB.tm=null;
             try{
@@ -3576,7 +3589,7 @@
                 }
                 if(c===COL.GRADE){
                     eCl+=' grade-pill';
-                    if(sty){ const mc=sty.match(/color:([^!;]+)/); sty=mc?`--gp:${mc[1].trim()};`:''; }
+                    if(sty){ const mc=sty.match(/color:([^!;]+)/); sty=mc?`--gp:${mc[1].trim()};${sty.replace(/color:[^;]*;/,'').replace(/font-weight:[^;]*;/g,'')}`:''; } /* the rule's colour fills the pill; its italic / underline and size stay too (they were dropped) */
                     if(!sty){ const gU=v.trim().toUpperCase(); cls=gU==='NEXT'?"grade-cell grade-next":(gU==='HOLD'?"grade-cell grade-hold":(gU==='DROP'?"grade-cell grade-drop":cls)); }
                     /* 9.50 / stars / 95: shown formatted, clicked -> the raw value is edited (never the stars) */
                     const fs=fmtScore(v);
@@ -5079,7 +5092,7 @@
                 if(e.key==='Escape'){ /* Esc cancels the edit: the stored value comes back and nothing is saved */
                     e.preventDefault(); e.stopPropagation(); const col=+c.dataset.c, row=cellRow(c);
                     if(row && !isNaN(col)) c.textContent=String(row[col]??''); hideGs(); c.blur(); if(row) updateRow(STATE.data.indexOf(row)); return; }
-                const s=window.getSelection(); if(e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault(); const tr=c.closest('tr'), oi=parseInt(tr.dataset.oi), colIdx=c.dataset.c, rowRef=STATE.data[oi]; c.blur(); mvRow(oi, e.key==='ArrowUp'?-1:1); focusCell(rowRef, colIdx); return;} if(['ArrowUp','ArrowDown','Enter'].includes(e.key)){e.preventDefault(); if(e.key!=='ArrowUp'){ const nx=c.closest('tr').nextElementSibling; if(!nx||nx.classList.contains('row-sentinel')) flushRender(); } const tT=(e.key==='ArrowUp')?c.closest('tr').previousElementSibling:c.closest('tr').nextElementSibling; if(tT){const nC=tT.querySelector(`[data-c="${c.dataset.c}"][contenteditable="true"]`); if(nC){nC.focus(); const r=document.createRange(); r.selectNodeContents(nC); s.removeAllRanges(); s.addRange(r);}}} if(['ArrowLeft','ArrowRight'].includes(e.key)){const aS=s.focusOffset===0, l=s.focusNode?s.focusNode.textContent.length:0, aE=s.focusOffset===l; if((e.key==='ArrowLeft'&&aS)||(e.key==='ArrowRight'&&aE)){e.preventDefault(); const es=Array.from(c.closest('tr').querySelectorAll('[contenteditable="true"]')), i=es.indexOf(c); let tg=null; if(e.key==='ArrowLeft'&&i>0)tg=es[i-1]; if(e.key==='ArrowRight'&&i<es.length-1)tg=es[i+1]; if(tg){tg.focus(); const r=document.createRange(); r.selectNodeContents(tg); s.removeAllRanges(); s.addRange(r);}}}});
+                const s=window.getSelection(); if(e.shiftKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault(); const tr=c.closest('tr'), oi=parseInt(tr.dataset.oi), colIdx=c.dataset.c, rowRef=STATE.data[oi]; c.blur(); mvRow(oi, e.key==='ArrowUp'?-1:1); focusCell(rowRef, colIdx); return;} if(['ArrowUp','ArrowDown','Enter'].includes(e.key)){e.preventDefault(); if(e.key!=='ArrowUp'){ const nx=c.closest('tr').nextElementSibling; if(!nx||nx.classList.contains('row-sentinel')) flushRender(); } const tT=(e.key==='ArrowUp')?c.closest('tr').previousElementSibling:c.closest('tr').nextElementSibling; if(tT){const nC=tT.querySelector(`[data-c="${c.dataset.c}"][contenteditable="true"]`); if(nC){nC.focus(); const r=document.createRange(); r.selectNodeContents(nC); s.removeAllRanges(); s.addRange(r);}} else if(e.key==='Enter'){ const ref=cellRow(c), col=c.dataset.c; c.blur(); if(ref) focusCell(ref, col); } /* last row: Enter commits and stays (it did nothing) */} if(['ArrowLeft','ArrowRight'].includes(e.key)){const aS=s.focusOffset===0, l=s.focusNode?s.focusNode.textContent.length:0, aE=s.focusOffset===l; if((e.key==='ArrowLeft'&&aS)||(e.key==='ArrowRight'&&aE)){e.preventDefault(); const es=Array.from(c.closest('tr').querySelectorAll('[contenteditable="true"]')), i=es.indexOf(c); let tg=null; if(e.key==='ArrowLeft'&&i>0)tg=es[i-1]; if(e.key==='ArrowRight'&&i<es.length-1)tg=es[i+1]; if(tg){tg.focus(); const r=document.createRange(); r.selectNodeContents(tg); s.removeAllRanges(); s.addRange(r);}}}});
             DOM.br.addEventListener('paste',e=>{
                 const el=e.target.closest('[contenteditable="true"]'); if(!el)return;
                 e.preventDefault();
@@ -5100,7 +5113,7 @@
                 top.classList.toggle('m-top-hide', dy>0 && y>140 && document.activeElement!==DOM.sr);
                 LAST_Y=y;
             },{passive:true});
-            document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) rLastSaved(); });
+            document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ rLastSaved(); typingBack(); } });
             if(STATE.lastSaved && !Object.keys(STATE.savedAt||{}).length){ STATE.savedAt={[STATE.sheet]:STATE.lastSaved}; ls('lastSavedMap', JSON.stringify(STATE.savedAt)); } /* from the old single "last saved" */
             migrateRulesState(); pCRul(); aThUI(); aVM(); aRM(); applyDisp(false); rTbs(); loadLib().then(()=>{ fixTabs(); lDat(); }); rLastSaved(); setInterval(rLastSaved, 15000);
         };
