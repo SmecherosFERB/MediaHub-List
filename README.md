@@ -25,7 +25,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 ## 📚 Your collection
 
 ### Categories
-Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept.
+Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category.
 
 ### The table
 | Column | What it holds |
@@ -156,6 +156,10 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
 - **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
 - **Typing is never interrupted:** if the table is redrawn while you type (for example a TMDB sync of a title you just added finishes), the cursor stays in your cell with your text.
+- **Connecting a cloud for the first time:** the titles you already have are never lost.
+  - A category the spreadsheet doesn't have yet keeps its titles, gets the unsaved dot and a short note; its first save creates the sheet.
+  - An empty sheet in the cloud (one you made by hand before saving) never wipes them either; if this device had synced that category before and the sheet is empty now, you're asked first.
+  - **DISCARD** never throws away a category that has no copy in the cloud: nothing is discarded and its titles stay until you save them.
 - **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. The small time note next to the save button (NOW, 5-min, …) is kept per category, so it always tells when the category on screen was last saved (a category never saved from this device shows none). Every save is protected:
   - **One request:** with the current backend (v4) a save is a single request. The check and the write happen together on the server, and the answer carries the sheet as written.
   - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
