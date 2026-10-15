@@ -45,7 +45,7 @@ Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes
 
 On PC the **Image** header shows how many titles the category has. Point at the **Score** header for its stats: the average score first, then how many titles have each score (10 … 1), then DROP, HOLD and NEXT, then the total episodes and watch time.
 
-The totals (episodes and watch time) count only titles with a numeric score, i.e. what you have watched and rated. NEXT, HOLD and DROP titles are left out.
+The totals (episodes and watch time) count only titles with a numeric score, i.e. what you have watched and rated. NEXT, HOLD and DROP titles are left out. On the phone the same totals sit in the bar above the cards, and they update as soon as you edit a Length or a score.
 
 ### Scores and sorting
 Numeric scores always come first, then:
@@ -69,7 +69,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 - Pasting text with several lines into a cell joins the lines with spaces.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
 - Move rows up or down: hover the # badge on PC, or use the row menu on the phone. The list always stays in score order (from the very first category you open, whatever the column layout of each sheet), so a row can only swap places with titles that have the **same score** (for example, to order your NEXT list). The arrows are off while a column is sorted. After a delete the # numbers close the gap.
-- **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions, TMDB syncs (one row, or the whole table as one step) and whole Clean Report steps. **Redo** (Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z) puts back what you undid; both are also in the ⋮ table menu. A new edit after an undo starts fresh, so there is nothing left to redo. A TMDB sync that finishes after you switched category is saved to the category the title belongs to, and a sync that changed nothing leaves nothing unsaved.
+- **Undo** (Ctrl/Cmd + Z) covers edits, deletions, moves, additions, TMDB syncs (one row, or the whole table as one step) and whole Clean Report steps. **Redo** (Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z) puts back what you undid; both are also in the ⋮ table menu. A new edit after an undo starts fresh, so there is nothing left to redo. Undoing a score change puts the title back exactly where it was among the titles with that score, so an order you made by hand (for example your NEXT list) is kept. A TMDB sync that finishes after you switched category is saved to the category the title belongs to, and a sync that changed nothing leaves nothing unsaved.
 - A duplicate warning appears when you add a title that's already in the list.
 
 ---
@@ -149,13 +149,13 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 ## ☁️ Saving, sync and safety
 
-- **Two tabs open:** if MEDIA HUB is open in another tab too, a banner says so (both tabs write the same local library, so edit in only one). When the other tab saves the category you are looking at, the banner says it changed and offers **Reload** to show the latest version.
+- **Two tabs open:** if MEDIA HUB is open in another tab too, a banner says so (both tabs write the same local library, so edit in only one). When the other tab saves the category you are looking at, the banner says it changed and offers **Reload** to show the latest version. A change to any other category is picked up by itself, so when you switch to it you see the other tab's edits and your next edit builds on them; only if this tab still has a write of its own pending for that category does it show the banner with **Reload** when you open it.
 - **Local first:** your library is kept in the browser, so the app works offline, and edits are saved locally as you type. Each category is stored on its own, so an edit writes only the category it changed. Without a cloud there is nothing else to save: no unsaved dot, no "save first?" questions when you switch category, and no browser warning when you close the page.
 - **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
 - **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
 - **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
-- **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. Every save is protected:
+- **Cloud save** (Ctrl/Cmd + S) writes the current category to your Google Sheet. The small time note next to the save button (NOW, 5-min, …) is kept per category, so it always tells when the category on screen was last saved (a category never saved from this device shows none). Every save is protected:
   - **One request:** with the current backend (v4) a save is a single request. The check and the write happen together on the server, and the answer carries the sheet as written.
   - **Conflict check:** if the sheet was changed somewhere else since you loaded it, you're asked before anything is overwritten. The backend checks this in the same step as the write, so a save from another device can't slip in between.
   - **Verified saves:** success is only reported when the sheet really shows what you sent.
