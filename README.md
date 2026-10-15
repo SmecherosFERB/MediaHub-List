@@ -87,7 +87,7 @@ Every category has an `IMDB_Score` column (the app adds it at the end when a she
 - **⋮ table menu → Sync external score** fills the IMDb score of every title with an IMDB link (missing scores first, so a run cut short by the daily limit still fills the gaps). One Undo reverts it.
 - **⋮ on a row → Sync external score** does the same for that one title (one Undo step); it is greyed out when the title has no IMDB link.
 - The score is also filled in when you add or sync a title, and the Clean Report can fill missing scores or refresh them all.
-- You can type a score yourself with the pen on the IMDB button.
+- You can type a score yourself with the pen on the IMDB button: a number from 0 to 10 (`7,8` is read as 7.8), `N/A`, or empty to clear it; anything else is not saved and the window stays open with a hint.
 - The button size, the IMDB text and the score size can be changed in **Depth Customization → IMDb**, separately for PC and phone.
 
 An optional `ANIMELIST_Score` column is kept in the sheet but not shown yet.
@@ -102,7 +102,7 @@ An optional `ANIMELIST_Score` column is kept in the sheet but not shown yet.
 
 You can filter by score range (e.g. `8-10` or `7+`), hide anything older than a chosen year, and pick which special scores are scanned too with the **Include** chips: **NEXT**, **HOLD** and **DROP**, each on or off (HOLD is on by default). Results are grouped into *All / Seasons / Airing / Films / Soon*.
 
-**Search** lets you discover new titles on TMDB by type (movies, series, anime, anime films), rating range, year and genres, and add them to your list with one click: the title comes in as NEXT with its poster, genres, Length, IMDB link (and IMDb score, with an OMDb key), written the same way a TMDB sync writes them.
+**Search** lets you discover new titles on TMDB by type (movies, series, anime, anime films), rating range, year and genres, and add them to your list with one click: the title comes in as NEXT with its poster, genres, Length, IMDB link (and IMDb score, with an OMDb key), written the same way a TMDB sync writes them. Results already in the category you have open are marked as added.
 
 ## 🧹 Clean Report
 
@@ -154,8 +154,8 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 - **Only data counts as unsaved data:** saving Customization (look, columns, rules) never marks your list as edited; it only syncs the settings with the cloud. Saving just a new TMDB or OMDb key in Settings keeps your unsaved edits; you're asked first only when you switch to another cloud (URL or password).
 - **Instant categories:** a category you have opened before on this device appears at once from the local copy, while the cloud is checked in the background. If the cloud copy changed and the table updates while you are typing in a cell, what you typed counts as an edit made here, so you're asked which version to keep; a dialog that was open (delete, note, link) never acts on a different title: if its title is no longer in the list, nothing is changed and a message says so. The same goes for a row button pressed while the table changes (for example a long press on Rewatches + on the phone). A fingerprint of the sheet tells whether it changed: if nothing changed, nothing happens; if it was saved from another device, the table updates by itself ("Updated from the cloud"); if you also have unsaved edits here, you're asked which version to keep. Only a category never opened on the device waits for the cloud.
 - **Unsaved edits are never lost:** if you close the app before saving (or edit offline), your changes are still there next time. When the cloud copy didn't change in the meantime they are simply kept, with the unsaved dot on; if it did change, you're asked which version to keep.
-- **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell: the cell is committed and saved.
-- **Typing is never interrupted:** if the table is redrawn while you type (for example a TMDB sync of a title you just added finishes), the cursor stays in your cell with your text. What you type is also saved if you close or reload the page, or switch to another app on the phone, while still in the cell; when you come back, the cursor is where you left it. **Enter** moves to the cell below, and on the last row it saves the cell.
+- **Ctrl/Cmd + S works everywhere**, even while you're typing in a cell (the cell is committed and saved) or writing in the note or link window (the note or link is saved first).
+- **Typing is never interrupted:** if the table is redrawn while you type (for example a TMDB sync of a title you just added finishes), the cursor stays in your cell with your text. What you type is also saved if you close or reload the page, or switch to another app on the phone, while still in the cell (or while writing a note); when you come back, the cursor is where you left it. **Enter** moves to the cell below, and on the last row it saves the cell.
 - **Connecting a cloud for the first time:** the titles you already have are never lost.
   - A category the spreadsheet doesn't have yet keeps its titles, gets the unsaved dot and a short note; its first save creates the sheet.
   - An empty sheet in the cloud (one you made by hand before saving) never wipes them either; if this device had synced that category before and the sheet is empty now, you're asked first.
