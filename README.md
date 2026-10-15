@@ -39,7 +39,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **IMDB_Score** | The IMDb score shown inside the IMDB button (not a column of its own); switch it off in *Visible columns* to hide the score |
 | **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
 | **Notes** | A short preview with "…"; hover (PC) to read the whole note |
-| **Image** | The poster, with a hover zoom on PC |
+| **Image** | The poster, with a hover zoom on PC; a poster whose link no longer works shows the empty-poster icon (Clean Report can replace it) |
 
 Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes, so each row stays compact and easy to read.
 
@@ -57,7 +57,7 @@ Click any column header to sort it ascending, descending or back to off. Sorting
 
 In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length and **Notes** by notes.
 
-As soon as you type, an **×** appears in the search box: click it (or press Esc) to clear the search and show all titles again. The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*.
+As soon as you type, an **×** appears in the search box: click it (or press Esc) to clear the search and show all titles again. The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*. A search that is mostly symbols, like `c++`, is matched as typed. On the phone, Enter closes the keyboard.
 
 Empty cells always stay at the end, in both directions. When sorting by **Score**, the numbers come first, then **NEXT**, **HOLD** and **DROP** in that order.
 
@@ -120,7 +120,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 | Genres | Uses one spelling per genre (`sci-fi` → `Sci-Fi`) and removes repeats. |
 | Text cleanup | Removes stray spaces, turns Rewatches into a number, deletes empty rows and flags rows without a title. |
 
-**Fix all** runs the local fixes first, then the TMDB repairs, with progress shown and a **STOP** button. A whole run can be undone in one step, and the undo puts every title back exactly where it was. A fixed score moves the title to its place in the score order right away (for example `10/10` becomes `10` and goes to the top).
+**Show** on an item scrolls to that title (clearing the search or a NEXT / HOLD / DROP filter that hides it). **Fix all** runs the local fixes first, then the TMDB repairs, with progress shown and a **STOP** button. A whole run can be undone in one step, and the undo puts every title back exactly where it was. A fixed score moves the title to its place in the score order right away (for example `10/10` becomes `10` and goes to the top).
 
 ---
 
@@ -168,7 +168,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two. If you empty a category on purpose, saving asks you first and then empties it (the sheet keeps a backup copy).
 - **Settings sync:** themes, colour rules and both display profiles travel with your sheet.
-- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). A category in an imported `.json` that isn't in your list yet gets its own tab.
+- **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). A category in an imported `.json` that isn't in your list yet gets its own tab. Blank lines in a CSV are skipped.
 - **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
 
 ---
