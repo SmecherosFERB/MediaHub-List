@@ -17,7 +17,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 - **Radar:** finds new seasons, new episodes and new films for the titles in your list.
 - **Clean Report:** finds and repairs messy data such as duplicates, dead posters, inconsistent formats and missing links.
 - **Built for PC and phone:** a spreadsheet-style table on desktop and poster cards on mobile, each with its own display settings.
-- **Quick filters on the phone:** **ALL · NEXT · HOLD · DROP** chips, each with its count, show just the titles with that score in one tap.
+- **Quick filters on the phone:** **ALL · NEXT · HOLD · DROP** chips (NEXT, HOLD and DROP with their count) show just the titles with that score in one tap.
 - **Bilingual:** English and Romanian.
 
 ---
@@ -34,7 +34,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Title** | The name, editable in place |
 | **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP`. Only clean values count: something like `8abc`, `10/10` or `95` is left out of the average, the colours and the score order until Clean Report fixes it |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
-| **Length** | `4 Seasons \| 89 Episodes` or `148 min`, shown as a compact pill |
+| **Length** | `4 Seasons \| 89 Episodes` or `148 min` (`2h 28min`, `1h30` or `45m` are understood too), shown as a compact pill |
 | **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link |
 | **IMDB_Score** | The IMDb score shown inside the IMDB button (not a column of its own); switch it off in *Visible columns* to hide the score |
 | **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
@@ -116,7 +116,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 | Dead or empty posters | Replaces them with the TMDB poster. There is also an option to move *every* poster to TMDB. Without a connection the posters are not checked (a message says so) instead of all being called dead. |
 | Grades normalised | Turns any mark between digits into a dot (`9,10` → `9.10`) and capitalises `next` / `hold` / `drop`. |
 | Invalid grades | Fixes clear cases (`10/10`, `9.5.`, `8+`) and lists the rest for you to edit. |
-| Length formats | Rewrites every length in one format, e.g. `R- 4 Seasons \| 89 Episodes` or `148 min`. |
+| Length formats | Rewrites every length in one format, e.g. `R- 4 Seasons \| 89 Episodes` or `148 min` (`2h 28min` becomes `148 min`). |
 | Genres | Uses one spelling per genre (`sci-fi` → `Sci-Fi`) and removes repeats. |
 | Text cleanup | Removes stray spaces, turns Rewatches into a number, deletes empty rows and flags rows without a title. |
 
@@ -182,7 +182,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
    2. Open `script.google.com+HELP for MediaHub CONFIGURATION.txt`. It starts with a step-by-step setup guide (cloud, TMDB, optional OMDb, updating the script, controls); paste everything from the `XXXXXXXXX----(PROVIDED CODE)----XXXXXXXXX` line down into `Code.gs`.
    3. Set your password on the `ACCESS_KEY` line, or add an `ACCESS_KEY` entry under *Project Settings → Script Properties*.
    4. **Deploy → New deployment → Web app**: *Execute as: Me*, *Who has access: Anyone*. Copy the web-app URL.
-   5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection (on a brand-new spreadsheet it says the category isn't there yet: the first save creates it; a script older than v4 is flagged right there, so you update it before your first save).
+   5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection (on a brand-new spreadsheet it says the category isn't there yet: the first save creates it; a script older than v4 is flagged right there, so you update it before your first save; the editor's address or a /dev link gets a hint to copy the Web app URL ending in /exec).
 3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
 4. **Optional:** add an OMDb key for IMDb scores in the IMDB button (⋮ table menu → Sync external score).
 
