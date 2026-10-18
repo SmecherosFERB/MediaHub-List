@@ -1800,7 +1800,7 @@
         function tLng() { STATE.lang=STATE.lang==='EN'?'RO':'EN'; ls('lang',STATE.lang); appTr(); upLng(); markCfg(); setUns(true,false); }
         function upLng() { const m=$('lang-mini'); if(m) m.innerText=STATE.lang; }
 
-        function sVM(m) { STATE.vM=m; ls('vM',m); aVM(); applyDisp(); if(DRAFT.on){ const keep={ht:DRAFT.ht, rules:DRAFT.rules, accent:DRAFT.accent}; initCstDraft(); Object.assign(DRAFT, keep); rDispUI(); } /* the draft takes the other device's look; hidden tabs, colour rules and accent are not per device, so their unapplied edits stay */ rVMUI(); rHdrUI(); if($('c-depth')) rDispUI(); } /* this device only: nothing to save */
+        function sVM(m) { const dev0=curDev(); STATE.vM=m; ls('vM',m); aVM(); applyDisp(); if(DRAFT.on && curDev()!==dev0){ const keep={ht:DRAFT.ht, rules:DRAFT.rules, accent:DRAFT.accent}; initCstDraft(); Object.assign(DRAFT, keep); rDispUI(); } /* the draft takes the other device's look; hidden tabs, colour rules and accent are not per device, so their unapplied edits stay */ rVMUI(); rHdrUI(); if($('c-depth')) rDispUI(); } /* this device only: nothing to save */
         function rVMUI() { ['auto','pc','mobile'].forEach(x=>{ const b=$('b-vm-'+x); if(b){ b.classList.toggle('on', STATE.vM===x); b.setAttribute('aria-pressed', STATE.vM===x?'true':'false'); } }); const c=$('vm-cur'); if(c) c.textContent=STATE.vM==='auto'?`AUTO · ${curDev()==='mobile'?'MOBILE':'PC'}`:STATE.vM.toUpperCase(); }
         function aVM() {
             const vp = $('vp-meta');
