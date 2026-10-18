@@ -79,7 +79,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Settings**. From then on:
 
 - **Adding a title** automatically fetches its poster, genres, IMDB link and length.
-- **Sync this row / Sync whole table** refreshes the details, and asks you to choose when a title has several matches.
+- **Sync this row / Sync whole table** refreshes the details, and asks you to choose when a title has several matches. A title that already has an IMDB link syncs exactly that title; otherwise the result with the same title is preferred over TMDB's first one.
 - Requests are rate-limit aware: they retry on "too many requests", time out instead of hanging, and cache results for 30 minutes.
 
 ### IMDb scores
@@ -110,7 +110,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 
 | Check | What it does |
 |---|---|
-| Possible duplicates | Matches titles regardless of accents or punctuation. *Show* jumps to the row; *Delete* removes one copy. |
+| Possible duplicates | Matches titles regardless of accents, spaces or punctuation (`Spider-Man` = `Spiderman`, `&` = `and`, any alphabet). *Show* jumps to the row; *Delete* removes one copy. |
 | Missing IMDB link | Finds the link on TMDB by title, or lets you paste one yourself. |
 | Missing IMDb scores | With an OMDb key: fills scores from OMDb, and can refresh all of them. |
 | Dead or empty posters | Replaces them with the TMDB poster. There is also an option to move *every* poster to TMDB. Without a connection the posters are not checked (a message says so) instead of all being called dead. |
