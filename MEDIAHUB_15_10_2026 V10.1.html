@@ -2172,11 +2172,12 @@
                 if(hit?.poster_path) return tmdbImg(hit.poster_path,'w500');
             }
             const name=String(row[COL.NAME]||'').trim(); if(!name) return null;
-            const isMovie=STATE.sheet.toUpperCase().includes('MOVIE');
+            const isMovie=isMovieCat();
             const d=await tmdbGet(tmdbUrl(`search/${isMovie?'movie':'tv'}`,{query:name, language:lng}));
             const p=bestHit((d?.results||[]).filter(x=>x?.poster_path), name)?.poster_path;
             return p?tmdbImg(p,'w500'):null;
         }
+        const isMovieCat=(n=STATE.sheet)=>/MOVIE|FILM/i.test(String(n??'')); /* MOVIES, ANIME MOVIE, and FILME / FILMS too (a "FILME" list was searched as series) */
         /* ===================== CLEAN REPORT =====================
            Every check returns issues { row, edits:[[col,value]], del, man, label, from, to }.
            man = needs the user (no safe automatic fix). Fixes are applied into an accumulator and
@@ -2350,7 +2351,7 @@
         async function tmdbImdbFor(row){
             if(!STATE.tmdbKey) return null;
             const name=String(row[COL.NAME]||'').trim(); if(!name) return null;
-            const lng=STATE.lang==='RO'?'ro-RO':'en-US', isMovie=STATE.sheet.toUpperCase().includes('MOVIE');
+            const lng=STATE.lang==='RO'?'ro-RO':'en-US', isMovie=isMovieCat();
             for(const type of (isMovie?['movie','tv']:['tv','movie'])){
                 const d=await tmdbGet(tmdbUrl(`search/${type}`,{query:name, language:lng}));
                 const hit=bestHit(d?.results, name); if(!hit) continue;
@@ -3686,10 +3687,11 @@
         }
         /* Note preview: cut at the chosen length, back to the last space when it is close, and mark the cut with "…".
            The full text shows in #note-tip on hover / keyboard focus (PC only). */
+        const cutAt=(s,n)=>{ const c=s.substring(0,n); return /[\uD800-\uDBFF]$/.test(c) ? c.slice(0,-1) : c; }; /* never half an emoji: it showed as "�" */
         function notePreview(v, np){
             v=v.trim(); if(np<=0 || !v) return '';
             if(v.length<=np) return v;
-            let cut=v.substring(0,np); const sp=cut.lastIndexOf(' ');
+            let cut=cutAt(v,np); const sp=cut.lastIndexOf(' ');
             if(sp>=np*0.6) cut=cut.substring(0,sp);
             return cut.replace(/[\s.,;:!?\-–—]+$/,'')+'…';
         }
@@ -3697,7 +3699,7 @@
             v=String(v??''); const np=STATE.note??5, full=v.trim();
             const pv=notePreview(v, np), tx=pv?html`<span class="note-tx"${ruleCss(ruleFor(colKey(STATE.hdrs[c]), full))}>${pv}</span>`:'';
             const i=full?ic('comment-dots','text-[var(--theme-accent)] ml-1'):ic('pen','text-[var(--text-muted)] opacity-50');
-            const al=full?`${t('mN')}: ${full.length>120?full.substring(0,120)+'…':full}`:t('mN');
+            const al=full?`${t('mN')}: ${full.length>120?cutAt(full,120)+'…':full}`:t('mN');
             return html`<button data-a="n" data-r="${oi}" data-c="${c}" aria-label="${al}" class="note-btn outline-none hover:opacity-70 transition-opacity font-bold pointer-events-auto">${tx}${i}</button>`;
         }
         function buildRowHTML(r, oi, idx, q, sc, ctx){
@@ -3999,7 +4001,7 @@
             const lng=STATE.lang==='RO'?'ro-RO':'en-US';
             /* If the row already has an IMDB link, that id tells us for certain whether this is a
                film or a series - far more reliable than guessing from the tab name. */
-            let iM=STATE.sheet.toUpperCase().includes('MOVIE'), known=null;
+            let iM=isMovieCat(), known=null;
             const knownId=extractImdbId(cI);
             if(knownId){
                 const fd=await radarFetch(tmdbUrl(`find/${knownId}`,{external_source:'imdb_id'}), f);
@@ -4030,8 +4032,9 @@
                 /* the IMDB link names the title: that one is synced. The title search took the first result instead (The Office UK
                    written over a row linked to The Office US by "Sync whole table"), or asked you to pick */
                 if(known) return await applyPick(known);
-                const d=await tmdbGet(tmdbUrl(`search/${iM?'movie':'tv'}`,{query:n, language:lng}), 3, f); /* retries on 429 and times out, like the rest of the app */
+                let d=await tmdbGet(tmdbUrl(`search/${iM?'movie':'tv'}`,{query:n, language:lng}), 3, f); /* retries on 429 and times out, like the rest of the app */
                 if(!d){ if(!isB) sTst(tmFail(),"error"); return false; }
+                if(!d.results?.length){ const d2=await tmdbGet(tmdbUrl(`search/${iM?'tv':'movie'}`,{query:n, language:lng}), 3, f); if(d2?.results?.length && (!isB || d2.results.some(x=>normTitle(x.title||x.name)===normTitle(n)))){ iM=!iM; d=d2; } } /* a film in a series list (or a series in a film list): the other kind is tried before "found nothing" (Sync whole table takes it only for the exact title) */
                 if(!d.results||d.results.length===0){ if(!isB) sTst(t('tmNone').replace('{n}', n),"warning"); return false; } /* it said "Fail: <title>" in English */
                 if(isB||d.results.length===1){ return await applyPick(bestHit(d.results, n)); }
                 pickTmdbResult(d.results, applyPick); return false;
@@ -4959,7 +4962,7 @@
             if(!btn.isConnected) return;
             const v=String(STATE.data[+btn.dataset.r]?.[+btn.dataset.c]??'').trim(); if(!v) return hideNoteTip();
             if(!NT_EL){ NT_EL=document.createElement('div'); NT_EL.id='note-tip'; NT_EL.setAttribute('role','tooltip'); document.body.appendChild(NT_EL); }
-            NT_EL.textContent=v.length>600?v.substring(0,600)+'…':v;
+            NT_EL.textContent=v.length>600?cutAt(v,600)+'…':v;
             NT_EL.classList.add('show');
             const b=btn.getBoundingClientRect(), w=NT_EL.offsetWidth, h=NT_EL.offsetHeight;
             let top=b.top-h-8; if(top<8) top=b.bottom+8;

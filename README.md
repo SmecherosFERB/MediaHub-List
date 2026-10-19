@@ -80,7 +80,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 
 Add your free [TMDB](https://www.themoviedb.org/settings/api) API key in **Settings**. From then on:
 
-- **Adding a title** automatically fetches its poster, genres, IMDB link and length.
+- **Adding a title** automatically fetches its poster, genres, IMDB link and length. A category whose name has MOVIE or FILM in it (MOVIES, ANIME MOVIE, FILME) is searched as films, the others as series; a title that isn't found as one kind is looked up as the other.
 - **Sync this row / Sync whole table** refreshes the details, and asks you to choose when a title has several matches. A title that already has an IMDB link syncs exactly that title; otherwise the result with the same title is preferred over TMDB's first one.
 - Requests are rate-limit aware: they retry on "too many requests", time out instead of hanging, and cache results for 30 minutes.
 
