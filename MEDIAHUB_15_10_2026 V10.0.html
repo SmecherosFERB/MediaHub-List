@@ -983,6 +983,7 @@
         body.is-mobile.hdr-off #nav { -webkit-mask-image:none; mask-image:none; padding-right:0; }
         body.is-mobile.hdr-off #nav-extra { position:sticky; right:0; z-index:2; margin-left:auto; padding:0 var(--m-gut) 0 14px; background:linear-gradient(to right, transparent, var(--bg-color) 14px); }
         body.is-mobile #nav button[data-tab] { min-height:40px; padding:0 16px; font-size:13px; letter-spacing:.02em; border-radius:999px; background:var(--card-bg); border:1px solid color-mix(in srgb, var(--theme-accent) 22%, transparent); color:var(--text-muted); white-space:nowrap; }
+        body.is-mobile #nav .tab-nm { display:inline-block; max-width:62vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle; }
         body.is-mobile #nav button[data-tab].active-tab { background:var(--theme-accent); border-color:var(--theme-accent); color:#fff; box-shadow:0 4px 14px color-mix(in srgb, var(--theme-accent) 40%, transparent); }
 
         body.is-mobile #m-searchrow { gap:0 !important; margin-bottom:4px !important; }
@@ -2087,7 +2088,7 @@
         /* Navigating between the two screens must not throw the draft away. */
         function openFine(){ pullCstInputs(); oMod('fine'); }
         function backToCst(){ pullCstInputs(); oMod('cst'); }
-        function tabId(n){ return 't-'+String(n).replace(/\s+/g,'-'); }
+        function tabId(n){ return 't-'+String(n).replace(/[%\-\s]/g, c=>c===' '?'-':'%'+c.charCodeAt(0).toString(16).padStart(4,'0')); } /* one id per name: "SCI FI" and "SCI-FI" used to share one */
         /* The categories: the ones here stay (one the spreadsheet does not have yet keeps its titles reachable, and its first save
            creates the sheet), the five ready-made ones are always there (hide the ones you don't use), and sheets added in the
            spreadsheet join at the end. The spreadsheet's own untouched first sheet ("Sheet1", "Foaie1"...) is not a category. */
@@ -2106,7 +2107,7 @@
             DOM.nv.querySelectorAll('button[data-tab]').forEach(b=>b.remove());
             const extra=$('nav-extra');
             let f=null, buf='';
-            shownTabs().forEach(tb=>{ if(!f)f=tb; buf+=`<button type="button" data-tab="${esc(tb)}" id="${esc(tabId(tb))}" class="text-[var(--text-muted)] font-black uppercase transition-all">${esc(tb)}</button>`; });
+            shownTabs().forEach(tb=>{ if(!f)f=tb; buf+=`<button type="button" data-tab="${esc(tb)}" id="${esc(tabId(tb))}" class="text-[var(--text-muted)] font-black uppercase transition-all"><span class="tab-nm">${esc(tb)}</span></button>`; });
             if(extra) extra.insertAdjacentHTML('beforebegin', buf); else DOM.nv.insertAdjacentHTML('beforeend', buf);
             const tg=$(tabId(STATE.sheet)); tg?tg.classList.add('active-tab'):(f&&!noSwitch&&setTimeout(()=>eSw(f),0));
             if(kf!==null) ($(tabId(kf))||tg||DOM.nv.querySelector('button[data-tab]'))?.focus({preventScroll:true});
@@ -3513,6 +3514,12 @@
                 const dr=STATE.sD==='asc'?1:-1, c=STATE.sC, NUM=/^-?\d+([.,]\d+)?$/;
                 STATE.fDat.forEach(x=>{ const v=String(x.row[c]??'').trim(); x.k=v; x.n=NUM.test(v)?parseFloat(v.replace(',','.')):null; });
                 if(c===COL.IMDB_SCORE) STATE.fDat.sort((a,b)=>(a.n===null)-(b.n===null) || (a.n!==null ? (a.n-b.n)*dr : 0)); /* no score / N/A: always last */
+                else if(c===COL.EXTRA){
+                    /* Length sorts by the length itself: shows by episodes (only seasons known: by seasons), then films by minutes, then
+                       other text, empty last (as text, the rating in front decided the order, "R- 4 Seasons…" after "PG-13…", and "2h" came before "90 min") */
+                    STATE.fDat.forEach(x=>{ const o=x.k?parseOwned(splitRate(x.k).rest):{}; x.g=!x.k?4:(o.episodes!=null?0:(o.seasons!=null?1:(o.runtime!=null?2:3))); x.n=[o.episodes,o.seasons,o.runtime][x.g]??null; });
+                    STATE.fDat.sort((a,b)=>a.g-b.g || (a.g===4?0:(a.g<3 ? a.n-b.n : TXT_CMP(a.k,b.k))*dr));
+                }
                 else {
                     /* groups never flip with the direction: empty cells always last; on Score the numbers come first, then NEXT / HOLD / DROP in this order, then other text */
                     const gr=c===COL.GRADE, ST={NEXT:0,HOLD:1,DROP:2};
@@ -4229,7 +4236,7 @@
         /* Length words, also in Romanian ("3 sezoane | 30 episoade", "2 SEZ · 20 EP" as the app shows it, "2 ore 15 min", "90 de minute"):
            they were shown raw, left out of the stats and of Radar, and "2 ore 15 min" counted as 15 minutes */
         const LEN_SRC={ se:'(\\d+)\\s*(?:de\\s+)?[-\\s]?(?:seasons?|sezoane|sezon|sez)(?![a-zăâîșțş])', ep:'(\\d+)\\s*(?:de\\s+)?(?:episodes?|episoade|episod|eps?)(?![a-zăâîșțş])',
-            hr:'(\\d+)\\s*(?:h(?:ours?|rs?)?|or[ăae])(?![a-zăâîșțş])\\s*(?:(\\d{1,2})(?!\\s*m)(?![\\d:a-z]))?', mn:'(\\d+)\\s*(?:de\\s+)?m(?:in(?:ute)?s?|inut[ea]?)?\\.?(?![a-zăâîșțş])' };
+            hr:'(\\d+(?:[.,]\\d+)?)\\s*(?:h(?:ours?|rs?)?|or[ăae])(?![a-zăâîșțş])\\s*(?:(\\d{1,2})(?!\\s*m)(?![\\d:a-z]))?', mn:'(\\d+)\\s*(?:de\\s+)?m(?:in(?:ute)?s?|inut[ea]?)?\\.?(?![a-zăâîșțş])' };
         const LEN_RX={ se:g=>new RegExp(LEN_SRC.se, g?'ig':'i'), ep:g=>new RegExp(LEN_SRC.ep, g?'ig':'i'), hr:g=>new RegExp(LEN_SRC.hr, g?'ig':'i'), mn:g=>new RegExp(LEN_SRC.mn, g?'ig':'i') };
         function parseOwned(extra){
             const s=String(extra||'');
@@ -4237,7 +4244,7 @@
             const ep=s.match(LEN_RX.ep());
             /* a runtime in minutes, also written with hours: "2h 28min", "1h30", "2h", "45m" ("2h 28min" read as 28 minutes) */
             const hr=s.match(LEN_RX.hr()), mn=s.match(LEN_RX.mn());
-            const rt=(hr||mn) ? (hr?parseInt(hr[1],10)*60+(hr[2]&&!mn?parseInt(hr[2],10):0):0)+(mn?parseInt(mn[1],10):0) : null;
+            const rt=(hr||mn) ? (hr?Math.round(parseFloat(hr[1].replace(',','.'))*60)+(hr[2]&&!mn?parseInt(hr[2],10):0):0)+(mn?parseInt(mn[1],10):0) : null; /* "1.5h" is 90 min (it read as "5h") */
             return { seasons:se?parseInt(se[1],10):null, episodes:ep?parseInt(ep[1],10):null, runtime:rt };
         }
         /* the LOCAL calendar day: toISOString() is UTC, which made "today" read as yesterday between 00:00 and 03:00 in Romania */
@@ -4830,7 +4837,8 @@
                display-only break can never leak into the stored value */
             const raw=String(v??'').replace(/[\r\n]+/g,' ').replace(/\s{2,}/g,' ');
             const normG=x=>String(x??'').trim().toUpperCase().replace(/,/g,'.'), n=c===COL.GRADE?normG(raw):raw.trim();
-            if(row[c]===n)return;
+            const sq=x=>String(x??'').replace(/\s+/g,' ').trim();
+            if(row[c]===n || (c!==COL.GRADE && sq(row[c])===sq(n))) return; /* the text you see came back as it was: a cell you only went through keeps its line breaks and spaces (a Score is still written in its standard form) */
             /* a Score typed in the table must be 1-10 or NEXT / HOLD / DROP (empty is fine): anything else is put back, never saved */
             if(c===COL.GRADE && n!=='' && !GRADE_OK(n)){ if(normG(row[c])!==n) sTst(t('addBad'),'warning'); updateRow(r); return; }
             pushHist(c===COL.GRADE ? {t:'E',rowRef:row,c,v:row[c],...gradeNb(row)} : {t:'E',rowRef:row,c,v:row[c]});
@@ -4860,7 +4868,8 @@
             focusSoon(()=>$('i-lk'), a=>a?.id==='i-lk-sc');
             ['i-lk','i-lk-sc'].forEach(id=>{ const el=$(id); if(el) el.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); $('b-lk-sv')?.click(); } }; }); /* Enter saves, like the button */
             $('b-lk-sv').onclick=()=>{
-                const n=c===COL.IMDB?normImdbLink($('i-lk').value):$('i-lk').value.trim(), ns=sI!==undefined?normScore($('i-lk-sc').value):curS;
+                const n=c===COL.IMDB?normImdbLink($('i-lk').value):$('i-lk').value.trim(), typed=sI!==undefined?normScore($('i-lk-sc').value):curS;
+                const ns=(sI!==undefined && typed===curS && curS!=='' && extractImdbId(n)!==extractImdbId(cur)) ? '' : typed; /* a link to another title: the old title's IMDb score went with it (it stayed, shown as this one's) */
                 if(sI!==undefined && ns!==curS && !imdbScoreOk(ns)){ sTst(t('isBad'),'warning'); $('i-lk-sc')?.focus(); return; } /* the window stays open to fix it */
                 cMod();
                 if(!STATE.data.includes(row)){ sTst(t('mGone'),'warning'); return; } /* refreshed or removed while the dialog was open */
@@ -4870,7 +4879,7 @@
                 pushHist(edits.length===1?{t:'E', rowRef:row, c:edits[0].c, v:edits[0].v}:{t:'B', edits, dels:[]});
                 cmtSt(); setUns(true);
                 const sheet=STATE.sheet;
-                if(sI!==undefined && n!==cur && ns===curS && STATE.omdbKey) fillImdbScore(row, true).then(ch=>{ if(ch && commitTo(sheet) && STATE.data.includes(row)){ if(updateRow(STATE.data.indexOf(row))){ STATS=null; rHdr(); syncMTools(); } else rTab(); } omdbWarn(); }); /* a new link: fetch its score */
+                if(sI!==undefined && n!==cur && typed===curS && STATE.omdbKey) fillImdbScore(row, true).then(ch=>{ if(ch && commitTo(sheet) && STATE.data.includes(row)){ if(updateRow(STATE.data.indexOf(row))){ STATS=null; rHdr(); syncMTools(); } else rTab(); } omdbWarn(); }); /* a new link: fetch its score */
             };
         }
         function dRow(i){ const row=STATE.data[i]; if(!row)return; cfmM(t('dC'), ()=>{ i=STATE.data.indexOf(row); if(i<0){ sTst(t('mGone'),'warning'); return; } /* the list changed while the question was open: never delete the title now at that place */

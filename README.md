@@ -25,7 +25,7 @@ MEDIA HUB is a fast, good-looking list app. Your collection lives in **your own 
 ## 📚 Your collection
 
 ### Categories
-Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. A hidden category that has changes not saved to the cloud yet keeps its tab (with the dot) until you save them. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category. A sheet of your own without a Score column takes titles without a score (the Add window doesn't ask for one). The app always opens on the category you had open last time.
+Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can hide the ones you don't use (at least one always stays visible); their data is kept. A hidden category that has changes not saved to the cloud yet keeps its tab (with the dot) until you save them. With a cloud, a sheet you add to the spreadsheet shows up as a category too. A category the spreadsheet doesn't have yet stays in the app, and its first save creates the sheet. The spreadsheet's own empty first sheet (`Sheet1`) is not shown as a category. A sheet of your own without a Score column takes titles without a score (the Add window doesn't ask for one). The app always opens on the category you had open last time. Names that differ only by a dash or a space (`SCI-FI`, `SCI FI`) are separate tabs, and on the phone a very long name is shortened with … so its tab fits the screen.
 
 ### The table
 | Column | What it holds |
@@ -34,8 +34,8 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Title** | The name, editable in place |
 | **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP`. Only clean values count: something like `8abc`, `10/10` or `95` is left out of the average, the colours and the score order until Clean Report fixes it |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
-| **Length** | `4 Seasons \| 89 Episodes` or `148 min` (`2h 28min`, `1h30` or `45m` are understood too, and so is Romanian: `3 sezoane \| 30 episoade`, `2 SEZ · 20 EP`, `2 ore 15 min`), shown as a compact pill |
-| **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link |
+| **Length** | `4 Seasons \| 89 Episodes` or `148 min` (`2h 28min`, `1h30`, `1.5h` or `45m` are understood too, and so is Romanian: `3 sezoane \| 30 episoade`, `2 SEZ · 20 EP`, `2 ore 15 min`, `2,5 ore`), shown as a compact pill |
+| **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link. A link to another title clears the old IMDb score (with an OMDb key the new one is fetched) |
 | **IMDB_Score** | The IMDb score shown inside the IMDB button (not a column of its own); switch it off in *Visible columns* to hide the score |
 | **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
 | **Notes** | A short preview with "…"; hover (PC) to read the whole note |
@@ -57,7 +57,7 @@ Numeric scores always come first, then:
 
 Click any column header to sort it ascending, descending or back to off. Sorting handles numbers and accented text correctly. The sorted column stays highlighted in the accent colour, even when the mouse moves away.
 
-In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length and **Notes** by notes.
+In merged headers (**Genres · Length · IMDb**, **Rewatches · Notes**) every word sorts its own column and has its own arrow, so clicking **Length** sorts by length (shows by episodes, then films by minutes; a rating in front, like `R-`, doesn't change the order) and **Notes** by notes.
 
 As soon as you type, an **×** appears in the search box: click it (or press Esc) to clear the search and show all titles again. The search ignores accents, spaces and punctuation: `spiderman` or `spider man` finds *Spider-Man*, `pokemon the` finds *Pokémon: The Movie*. A search that is mostly symbols, like `c++`, is matched as typed. On the phone, Enter closes the keyboard.
 
@@ -66,7 +66,7 @@ Empty cells always stay at the end, in both directions. When sorting by **Score*
 **Sort by IMDb score:** click **IMDb** in the header of the cell that holds the IMDB button on PC, or pick **IMDb Score** in the sort menu on the phone. The highest score comes first, a second click puts the lowest first, and titles without a score always stay at the end.
 
 ### Editing
-- Click a cell to edit it. Arrow keys and Enter move between cells. **Esc** cancels the edit and puts the old text back.
+- Click a cell to edit it. Arrow keys and Enter move between cells. **Esc** cancels the edit and puts the old text back. A cell you only click into or move through keeps its text exactly as it was (line breaks and spaces included); only what you type is saved.
 - A **Score** typed in the table must be 1–10 (decimals allowed, `9,5` becomes `9.5`) or **NEXT**, **HOLD**, **DROP**; anything else is refused with a short message and the old score stays.
 - Pasting text with several lines into a cell joins the lines with spaces.
 - On the phone, editing Genres or Length shows one word per line, so the whole text stays in view (a space starts a new line; it is saved as normal text).
