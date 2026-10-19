@@ -120,7 +120,7 @@ The Clean Report shows the total number of problems at the top, plus a **Fix all
 | Invalid grades | Fixes clear cases (`10/10`, `9.5.`, `8+`) and lists the rest for you to edit. |
 | Length formats | Rewrites every length in one format, e.g. `R- 4 Seasons \| 89 Episodes` or `148 min` (`2h 28min` becomes `148 min`). |
 | Genres | Uses one spelling per genre (`sci-fi` → `Sci-Fi`) and removes repeats. |
-| Text cleanup | Removes stray spaces, turns Rewatches into a number, deletes empty rows and flags rows without a title. |
+| Text cleanup | Removes stray spaces, turns Rewatches into a number, deletes empty rows and flags rows without a title. Columns of your own keep their line breaks (like Notes). |
 
 **Show** on an item scrolls to that title (clearing the search or a NEXT / HOLD / DROP filter that hides it). **Fix all** runs the local fixes first, then the TMDB repairs, with progress shown and a **STOP** button. A whole run can be undone in one step, and the undo puts every title back exactly where it was. A fixed score moves the title to its place in the score order right away (for example `10/10` becomes `10` and goes to the top).
 
