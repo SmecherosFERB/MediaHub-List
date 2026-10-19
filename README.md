@@ -34,7 +34,7 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Title** | The name, editable in place |
 | **Score** | `1–10` (decimals allowed), or `NEXT`, `HOLD` or `DROP`. Only clean values count: something like `8abc`, `10/10` or `95` is left out of the average, the colours and the score order until Clean Report fixes it |
 | **Genres** | Shown as pills: two genres plus a `+N` chip, and the R+ / R- rating pills |
-| **Length** | `4 Seasons \| 89 Episodes` or `148 min` (`2h 28min`, `1h30` or `45m` are understood too), shown as a compact pill |
+| **Length** | `4 Seasons \| 89 Episodes` or `148 min` (`2h 28min`, `1h30` or `45m` are understood too, and so is Romanian: `3 sezoane \| 30 episoade`, `2 SEZ · 20 EP`, `2 ore 15 min`), shown as a compact pill |
 | **IMDB** | A yellow IMDB button with the IMDb score, e.g. **IMDB 7.7**, or *Add link* when it's missing. In the link window Enter saves, and a bare `tt0111161` or `www.imdb.com/…` becomes a full link |
 | **IMDB_Score** | The IMDb score shown inside the IMDB button (not a column of its own); switch it off in *Visible columns* to hide the score |
 | **Rewatches** | A counter with − / + buttons (on the phone, press and hold them, so a stray tap changes nothing) |
@@ -42,6 +42,8 @@ Five ready-made tabs: **MOVIES, SERIES, ANIME, ANIME MOVIE, CARTOONS**. You can 
 | **Image** | The poster, with a hover zoom on PC; a poster whose link no longer works shows the empty-poster icon (Clean Report can replace it) |
 
 Genres, Length and IMDB are merged into one cell, and so are Rewatches and Notes, so each row stays compact and easy to read.
+
+Column names in a sheet or CSV can also be the Romanian ones the app shows (`Titlu`, `Notă`, `Genuri`, `Durată`, `Revizionări`, `Notițe`, `Imagine`, `Notă IMDb`): they are recognised and kept as they are.
 
 On PC the **Image** header shows how many titles the category has. Point at the **Score** header for its stats: the average score first, then how many titles have each score (10 … 1; a 9.5 counts with the 9s), then DROP, HOLD and NEXT, then the total episodes and watch time.
 
@@ -169,7 +171,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
   - **Verified saves:** success is only reported when the sheet really shows what you sent.
   - **Automatic backups in the sheet:** before every write that changes data, the backend keeps the 10 most recent copies of each category, plus the last copy of each of the previous 7 days. You can list and restore them from the **MEDIA HUB** menu in the spreadsheet.
   - **No accidental wipes:** the backend refuses a save that would empty a category that has data, and handles only one save at a time, so saving from your phone and your PC together can't mix the two. If you empty a category on purpose, saving asks you first and then empties it (the sheet keeps a backup copy).
-- **Settings sync:** themes, colour rules and both display profiles travel with your sheet. A save sends only the settings you changed on this device, so a setting changed on another device (new colour rules, say) is never written back over with this device's older copy; the next load brings it here. Settings you changed and haven't saved yet keep the dot on, also after a restart: until you save them they win over the cloud copy.
+- **Settings sync:** themes, colour rules and both display profiles travel with your sheet. A save sends only the settings you changed on this device, so a setting changed on another device (new colour rules, say) is never written back over with this device's older copy; the next load brings it here. Settings you changed and haven't saved yet keep the dot on, also after a restart: until you save them they win over the cloud copy. The first time a device connects to a spreadsheet that already has settings (saved from another device), those settings are used, even if you changed the theme or language before connecting; a new spreadsheet gets this device's settings. The PC / MOBILE / AUTO view mode stays on each device.
 - **Import / Export:** the whole library as `.json`, or one category as `.csv` (opens in Excel or Google Sheets). CSV import accepts both `,` and `;` as the separator (Excel with Romanian or other European settings uses `;`). Importing a `.json` replaces only the categories in the file (the question names them); your other categories stay as they are. A category in an imported `.json` that isn't in your list yet gets its own tab. A CSV replaces the category on screen (the question says which one and how many titles). Blank lines in a CSV are skipped, and so are empty columns with no name (the trailing commas Excel adds). The exported file is named after the category, keeping letters with diacritics or from other alphabets.
 - **Privacy:** the TMDB and OMDb keys are never written to the sheet. The App Script URL, cloud password and both keys are hidden behind a show/hide eye in Settings.
 
@@ -184,7 +186,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
    3. Set your password on the `ACCESS_KEY` line, or add an `ACCESS_KEY` entry under *Project Settings → Script Properties*.
    4. **Deploy → New deployment → Web app**: *Execute as: Me*, *Who has access: Anyone*. Copy the web-app URL.
    5. In MEDIA HUB, open **Settings**, paste the URL and your password, then tap the 🔌 button to test the connection (on a brand-new spreadsheet it says the category isn't there yet: the first save creates it; a script older than v4 is flagged right there, so you update it before your first save; the editor's address or a /dev link gets a hint to copy the Web app URL ending in /exec).
-3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report.
+3. **Add a TMDB key** in Settings to enable auto-fill, sync, Radar and the TMDB repairs in the Clean Report. If TMDB rejects the key, the message says so.
 4. **Optional:** add an OMDb key for IMDb scores in the IMDB button (⋮ table menu → Sync external score).
 
 > **Help:** the **HELP** button in Settings opens this setup guide (the raw `script.google.com+HELP for MediaHub CONFIGURATION.txt`).
