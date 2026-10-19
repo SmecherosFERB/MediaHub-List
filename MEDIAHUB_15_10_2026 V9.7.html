@@ -1748,12 +1748,17 @@
         }
         /* JSON.parse that never throws: a broken value in the cloud CONFIG falls back instead of failing the load */
         const jp=(str, fb, obj=false)=>{ try{ const v=JSON.parse(str); if(obj) return (v&&typeof v==='object'&&!Array.isArray(v))?v:fb; return Array.isArray(v)?v:fb; }catch(e){ return fb; } };
+        /* a list of names: only non-empty strings (a damaged "allTabs" / "hiddenTabs" / hidden columns stopped the app at the start) */
+        const strArr=(v, fb)=>Array.isArray(v) ? v.filter(x=>typeof x==='string' && x.trim()!=='') : fb;
+        const plainObj=v=>v && typeof v==='object' && !Array.isArray(v) ? v : null;
+        STATE.aT=strArr(STATE.aT, []); if(!STATE.aT.length) STATE.aT=['MOVIES','SERIES','ANIME','ANIME MOVIE','CARTOONS'];
+        STATE.hT=strArr(STATE.hT, []); STATE.hC=strArr(STATE.hC, []); STATE.dPc=plainObj(STATE.dPc); STATE.dMb=plainObj(STATE.dMb); STATE.savedAt=plainObj(STATE.savedAt)||{};
         (function initDisp(){ const def={fs:STATE.fs, ha:STATE.ha, va:STATE.va, wr:STATE.wr, pad:9, poW:70, poH:70, twPx:1600, poFit:'fill', words:0, pills:0, note:5, hC:[...STATE.hC]};
             if(!STATE.dPc) STATE.dPc={...def, hC:[...def.hC]}; if(!STATE.dMb) STATE.dMb={...def, hC:[...def.hC]};
             /* fill in whatever an older profile does not have yet */
             [STATE.dPc, STATE.dMb].forEach(p=>{
                 if(p.poW==null) p.poW=70; if(p.poH==null) p.poH=70; if(p.pad==null) p.pad=9;
-                p.hC=(p.hC||[]).map(newColName);
+                p.hC=strArr(p.hC, []).map(newColName);
                 if(!p.poFit) p.poFit='fill'; if(p.words==null) p.words=0; if(p.pills==null) p.pills=0; if(p.note==null) p.note=5;
                 if(p.hfs==null) p.hfs=0; if(p.twPx==null) p.twPx=1600;
                 if(p.imK==null) p.imK=100; if(p.imFs==null) p.imFs=0; if(p.imSc==null) p.imSc=0; /* IMDb button, V6.1 */
@@ -1807,7 +1812,9 @@
         function tLng() { STATE.lang=STATE.lang==='EN'?'RO':'EN'; ls('lang',STATE.lang); appTr(); upLng(); markCfg(); setUns(true,false); }
         function upLng() { const m=$('lang-mini'); if(m) m.innerText=STATE.lang; }
 
-        function sVM(m) { const dev0=curDev(); STATE.vM=m; ls('vM',m); aVM(); applyDisp(); if(DRAFT.on && curDev()!==dev0){ const keep={ht:DRAFT.ht, rules:DRAFT.rules, accent:DRAFT.accent}; initCstDraft(); Object.assign(DRAFT, keep); rDispUI(); } /* the draft takes the other device's look; hidden tabs, colour rules and accent are not per device, so their unapplied edits stay */ rVMUI(); rHdrUI(); if($('c-depth')) rDispUI(); } /* this device only: nothing to save */
+        /* the draft takes the other device's look; hidden tabs, colour rules and accent are not per device, so their unapplied edits stay */
+        function draftToDev(){ if(!DRAFT.on) return; const keep={ht:DRAFT.ht, rules:DRAFT.rules, accent:DRAFT.accent}; initCstDraft(); Object.assign(DRAFT, keep); rDispUI(); }
+        function sVM(m) { const dev0=curDev(); STATE.vM=m; ls('vM',m); aVM(); applyDisp(); if(curDev()!==dev0) draftToDev(); rVMUI(); rHdrUI(); if($('c-depth')) rDispUI(); } /* this device only: nothing to save */
         function rVMUI() { ['auto','pc','mobile'].forEach(x=>{ const b=$('b-vm-'+x); if(b){ b.classList.toggle('on', STATE.vM===x); b.setAttribute('aria-pressed', STATE.vM===x?'true':'false'); } }); const c=$('vm-cur'); if(c) c.textContent=STATE.vM==='auto'?`AUTO · ${curDev()==='mobile'?'MOBILE':'PC'}`:STATE.vM.toUpperCase(); }
         function aVM() {
             const vp = $('vp-meta');
@@ -1820,7 +1827,7 @@
             else if(STATE.vM==='mobile') { vp.content=VP_FIT; isMob(); }
             else { vp.content=VP_FIT; if(phoneLike())isMob(); else isPc(); }
         }
-        window.addEventListener('resize', () => { if(!DOM.sr) return; /* a resize can fire before initApp has built DOM */ if(STATE.vM==='auto'){ const before=curDev(); aVM(); if(curDev()!==before) applyDisp(); } fitTbl(); });
+        window.addEventListener('resize', () => { if(!DOM.sr) return; /* a resize can fire before initApp has built DOM */ if(STATE.vM==='auto'){ const before=curDev(); aVM(); if(curDev()!==before){ applyDisp(); draftToDev(); } } fitTbl(); }); /* with Customization open, APPLY wrote the PC draft into the MOBILE profile */
 
         /* PC / MOBILE display profiles: font size, align, wrap and visible columns are kept separately per device and auto-applied based on the active view mode */
         function curDev(){ return document.body.classList.contains('is-mobile') ? 'mobile' : 'pc'; }
@@ -2020,7 +2027,7 @@
             Object.keys(COL_FOLLOW).filter(f=>byKey[f] && !list.some(x=>x[0]===f)).forEach(f=>list.push([f,'fol']));
             if(byKey.CONTROL) list.push(['CONTROL','pin']);
             bc.innerHTML=list.map(([k,kind,i])=>{ const x=byKey[k], on=!DRAFT.hc.some(y=>colKey(y)===k);
-                const mv=kind==='head' ? `<span class="cr-mv"><button type="button" data-fn="mvCol" data-fn-args='["${k}",-1]'${i===0?' disabled':''} aria-label="${esc(t('mvU'))}" title="${esc(t('mvU'))}">${ic('chevron-up')}</button><button type="button" data-fn="mvCol" data-fn-args='["${k}",1]'${i===ho.length-1?' disabled':''} aria-label="${esc(t('mvD'))}" title="${esc(t('mvD'))}">${ic('chevron-down')}</button></span>` : '<span class="cr-mv"></span>';
+                const mv=kind==='head' ? `<span class="cr-mv"><button type="button" data-fn="mvCol" data-fn-args="${esc(JSON.stringify([k,-1]))}"${i===0?' disabled':''} aria-label="${esc(t('mvU'))}" title="${esc(t('mvU'))}">${ic('chevron-up')}</button><button type="button" data-fn="mvCol" data-fn-args="${esc(JSON.stringify([k,1]))}"${i===ho.length-1?' disabled':''} aria-label="${esc(t('mvD'))}" title="${esc(t('mvD'))}">${ic('chevron-down')}</button></span>` : '<span class="cr-mv"></span>';
                 return `<div class="col-row ${kind}" data-col-k="${esc(k)}">${pillHTML('data-tmp-c', x, colLabel(x), on)}${mv}</div>`; }).join('');
             rDrwSum();
         }
@@ -2097,7 +2104,7 @@
             DOM.nv.querySelectorAll('button[data-tab]').forEach(b=>b.remove());
             const extra=$('nav-extra');
             let f=null, buf='';
-            shownTabs().forEach(tb=>{ if(!f)f=tb; buf+=`<button type="button" data-tab="${esc(tb)}" id="${tabId(tb)}" class="text-[var(--text-muted)] font-black uppercase transition-all">${esc(tb)}</button>`; });
+            shownTabs().forEach(tb=>{ if(!f)f=tb; buf+=`<button type="button" data-tab="${esc(tb)}" id="${esc(tabId(tb))}" class="text-[var(--text-muted)] font-black uppercase transition-all">${esc(tb)}</button>`; });
             if(extra) extra.insertAdjacentHTML('beforebegin', buf); else DOM.nv.insertAdjacentHTML('beforeend', buf);
             const tg=$(tabId(STATE.sheet)); tg?tg.classList.add('active-tab'):(f&&!noSwitch&&setTimeout(()=>eSw(f),0));
             if(kf!==null) ($(tabId(kf))||tg||DOM.nv.querySelector('button[data-tab]'))?.focus({preventScroll:true});
@@ -2516,8 +2523,8 @@
                 Object.keys(m).forEach(k=>{if(res.config[k]!==undefined){STATE[m[k][0]]=res.config[k]; ls(m[k][1],STATE[m[k][0]]);}});
                 if(res.config.LANG!==undefined){ const lv=String(res.config.LANG).toUpperCase(); if(DICT[lv]){ STATE.lang=lv; ls('lang',STATE.lang); } }
                 if(res.config.COLOR_FORMATTING!==undefined){STATE.cF=String(res.config.COLOR_FORMATTING).toLowerCase()==='true'; ls('colorFormatting',STATE.cF);}
-                if(res.config.HIDDEN_TABS) STATE.hT=jp(res.config.HIDDEN_TABS, STATE.hT);
-                if(res.config.ALL_TABS&&!res.tabs){STATE.aT=mergeTabs(STATE.aT, jp(res.config.ALL_TABS, [])); ls('allTabs',JSON.stringify(STATE.aT));}
+                if(res.config.HIDDEN_TABS) STATE.hT=strArr(jp(res.config.HIDDEN_TABS, STATE.hT), STATE.hT);
+                if(res.config.ALL_TABS&&!res.tabs){STATE.aT=mergeTabs(STATE.aT, strArr(jp(res.config.ALL_TABS, []), [])); ls('allTabs',JSON.stringify(STATE.aT));}
                 if(typeof STATE.track === 'string') STATE.track = STATE.track.toLowerCase()!=='false';
                 if(typeof STATE.reduceMotion === 'string') STATE.reduceMotion = STATE.reduceMotion.toLowerCase()==='true';
                 aRM();
@@ -2526,12 +2533,12 @@
                 if(res.config.H_ALIGN!==undefined) STATE.dPc.ha=res.config.H_ALIGN;
                 if(res.config.V_ALIGN!==undefined) STATE.dPc.va=res.config.V_ALIGN;
                 if(res.config.T_WRAP!==undefined) STATE.dPc.wr=res.config.T_WRAP;
-                if(res.config.HIDDEN_COLS) STATE.dPc.hC=jp(res.config.HIDDEN_COLS, STATE.dPc.hC).map(newColName);
+                if(res.config.HIDDEN_COLS) STATE.dPc.hC=strArr(jp(res.config.HIDDEN_COLS, STATE.dPc.hC), STATE.dPc.hC).map(newColName);
                 STATE.dMb.fs = res.config.FONT_SIZE_MOBILE!==undefined ? res.config.FONT_SIZE_MOBILE : STATE.dPc.fs;
                 STATE.dMb.ha = res.config.H_ALIGN_MOBILE!==undefined ? res.config.H_ALIGN_MOBILE : STATE.dPc.ha;
                 STATE.dMb.va = res.config.V_ALIGN_MOBILE!==undefined ? res.config.V_ALIGN_MOBILE : STATE.dPc.va;
                 STATE.dMb.wr = res.config.T_WRAP_MOBILE!==undefined ? res.config.T_WRAP_MOBILE : STATE.dPc.wr;
-                STATE.dMb.hC = res.config.HIDDEN_COLS_MOBILE ? jp(res.config.HIDDEN_COLS_MOBILE, STATE.dMb.hC).map(newColName) : [...STATE.dPc.hC];
+                STATE.dMb.hC = res.config.HIDDEN_COLS_MOBILE ? strArr(jp(res.config.HIDDEN_COLS_MOBILE, STATE.dMb.hC), STATE.dMb.hC).map(newColName) : [...STATE.dPc.hC];
                 /* Depth Customization, synced: only known keys with a sane value are taken */
                 if(res.config.DISPLAY_PC) mergeDisplay(STATE.dPc, jp(res.config.DISPLAY_PC, null, true));
                 if(res.config.DISPLAY_MOBILE) mergeDisplay(STATE.dMb, jp(res.config.DISPLAY_MOBILE, null, true));
@@ -2551,6 +2558,7 @@
         /* a cloud table with at least one title row (an empty sheet reads as [[""]], a new one as just the header) */
         const cloudHasRows = v => Array.isArray(v) && v.slice(1).some(r=>Array.isArray(r) && r.some(x=>String(x??'').trim()!==''));
         function useSheet(headers, rows){
+            if(!Array.isArray(headers)) headers=[]; if(!Array.isArray(rows)) rows=[]; else if(!rows.every(Array.isArray)) rows=rows.filter(Array.isArray); /* a damaged stored category (a row that is not a list) broke the whole table */
             const blank=x=>!(x||[]).some(v=>String(v??'').trim()!=='');
             if(blank(headers) && (rows||[]).every(blank)){ headers=[]; rows=[]; } /* an empty sheet is no table: not one column named "" */
             const rn=renameHdrs(headers||[]);
@@ -4683,7 +4691,7 @@
             set(COL.GRADE, 'NEXT');
             set(COL.THEME??COL.GENRE, (det?.genres?.length ? det.genres.map(g=>g.name) : r.genres).flatMap(g=>String(g).split(/\s*&\s*/)).join(', ')); /* "Action & Adventure" -> Action, Adventure, as the sync writes it */
             set(COL.EXTRA, r.type==='movie' ? (det?.runtime?`${det.runtime} min`:'') : ((det?.number_of_seasons||det?.number_of_episodes)?`${det.number_of_seasons||0} Seasons | ${det.number_of_episodes||0} Episodes`:''));
-            set(COL.POSTER, r.poster||'');
+            set(COL.POSTER, det?.poster_path ? tmdbImg(det.poster_path,'w500') : String(r.poster||'').replace('/t/p/w200/','/t/p/w500/')); /* the 200 px list thumbnail was stored: blurry when zoomed or with big posters */
             set(COL.REWATCH, '0');
             if(ext?.imdb_id) set(COL.IMDB, `https://www.imdb.com/title/${ext.imdb_id}`);
             if(ext?.imdb_id && COL.IMDB_SCORE!==undefined){ const sc=await omdbScore(ext.imdb_id); if(sc) set(COL.IMDB_SCORE, sc); omdbWarn(); }
