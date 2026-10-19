@@ -1911,7 +1911,7 @@
             C_RUL={GRADE:[], TEXT:{}}; let aT = '#e50914';
             if(!STATE.cR) { setAccent(aT); return; }
             STATE.cR.split('\n').forEach(l=>{
-                let p = l.trim().split(/\s+/); if(p.length>0 && p[0].toUpperCase()==='<MEDIAHUB>') { if(p.length>=2) aT=p[1]; return; }
+                let p = l.trim().split(/\s+/); if(p.length>0 && p[0].toUpperCase()==='<MEDIAHUB>') { if(p.length>=2 && okColor(p[1])) aT=p[1]; return; } /* "#e5091" (a digit short, typed in the CONFIG sheet) left the whole app without its accent colour */
                 if(p[0].toUpperCase()==='OFF' && p.length>3) return; /* switched-off rule */
                 if(p.length<3) return; let z=null, s=null;
                 if(!isNaN(p[p.length-1])) z=p.pop(); if(['BOLD','ITALIC','UNDERLINE'].includes(p[p.length-1].toUpperCase())) s=p.pop();
@@ -2025,7 +2025,7 @@
             rDrwSum();
         }
         function mvCol(k,d){ const o=headOrder(DRAFT.cOrd), i=o.indexOf(k), j=i+d; if(i<0||j<0||j>=o.length) return; [o[i],o[j]]=[o[j],o[i]]; DRAFT.cOrd=o; rTg();
-            document.querySelector(`#c-cl [data-col-k="${k}"] .cr-mv button:${d<0?'first-child':'last-child'}`)?.focus({preventScroll:true}); }
+            document.querySelector(`#c-cl [data-col-k="${CSS.escape(k)}"] .cr-mv button:${d<0?'first-child':'last-child'}`)?.focus({preventScroll:true}); } /* a column name with a quote threw here */
         function tTmp(tp,v){ if(tp==='t'){ if(DRAFT.ht.includes(v)) DRAFT.ht=DRAFT.ht.filter(x=>x!==v); else { if(STATE.aT.filter(x=>!DRAFT.ht.includes(x)).length<=1){ sTst(t('tabLast'),'warning'); return; } DRAFT.ht.push(v); } } else { const k=colKey(v); DRAFT.hc.some(x=>colKey(x)===k)?DRAFT.hc=DRAFT.hc.filter(x=>colKey(x)!==k):DRAFT.hc.push(newColName(v)); } rTg(); }
         
         function sDb(){
@@ -2839,20 +2839,21 @@
             r.readAsText(f); e.target.value='';
         }
         const dStamp = () => { const d=new Date(), p=x=>String(x).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; };
-        const csvEsc = v => { v=String(v??''); return /[",\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+        const csvEsc = v => { v=String(v??''); return /[",;\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }; /* ";" too: a header with more ";" than "," made the import split on ";" */
         const toCsv = (hdrs, data) => [hdrs, ...data].map(row=>row.map(csvEsc).join(',')).join('\r\n');
         function parseCsv(text){
             text=String(text).replace(/^\ufeff/,''); /* the BOM our own export writes (for Excel) is not part of the first header */
+            const hint=text.match(/^sep=(.)[ \t]*(\r\n|\r|\n)/i); if(hint) text=text.slice(hint[0].length); /* Excel's "sep=;" line names the separator; it became the header row */
             /* Excel with European settings (Romanian too) saves CSV with ";": use the separator the header line has most of */
-            let nC=0, nS=0; for(let i=0, q=false; i<text.length && text[i]!=='\n'; i++){ const ch=text[i]; if(ch==='"') q=!q; else if(!q){ if(ch===',') nC++; else if(ch===';') nS++; } }
-            const SEP=nS>nC?';':',';
+            let nC=0, nS=0; for(let i=0, q=false; i<text.length && text[i]!=='\n' && text[i]!=='\r'; i++){ const ch=text[i]; if(ch==='"') q=!q; else if(!q){ if(ch===',') nC++; else if(ch===';') nS++; } }
+            const SEP=hint ? hint[1] : (nS>nC?';':',');
             const rows=[]; let row=[], field='', inQ=false;
             for(let i=0;i<text.length;i++){
                 const c=text[i];
                 if(inQ){ if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else inQ=false; } else field+=c; }
                 else if(c==='"') inQ=true;
                 else if(c===SEP) { row.push(field); field=''; }
-                else if(c==='\r') { /* skip, \n closes the row */ }
+                else if(c==='\r') { if(text[i+1]!=='\n'){ row.push(field); rows.push(row); row=[]; field=''; } } /* \r\n: \n closes the row; a lone \r (Mac CSV) closes it too (the whole file was one row) */
                 else if(c==='\n') { row.push(field); rows.push(row); row=[]; field=''; }
                 else field+=c;
             }
@@ -3419,7 +3420,7 @@
                 if(r.bad) return html`<div class="cr-row cr-bad">${mv(i)}<span class="cr-warn">${ic('triangle-exclamation')}</span><code class="cr-raw">${r.raw}</code><button type="button" class="cr-del" data-fn="delRule" data-fn-args='[${i}]' aria-label="${t('del')}">${ic('xmark')}</button></div>`;
                 const isG=r.col==='GRADE' && /^\d+(?:[.,]\d+)?(?:-\d+(?:[.,]\d+)?)?$/.test(r.val);
                 return html`<div class="cr-row${r.off?' off':''}">
-                    ${mv(i)}<button type="button" class="cr-dot" style="background:${r.color}" data-fn="tglRule" data-fn-args='[${i}]' role="switch" aria-checked="${r.off?'false':'true'}" title="${t('crOn')}" aria-label="${t('crOn')}"></button>
+                    ${mv(i)}<button type="button" class="cr-dot" style="${okColor(r.color)?`background:${r.color}`:''}" data-fn="tglRule" data-fn-args='[${i}]' role="switch" aria-checked="${r.off?'false':'true'}" title="${t('crOn')}" aria-label="${t('crOn')}"></button>
                     <select class="cr-col" data-chg="editRule" data-chg-args='[${i},"col","$val"]' aria-label="${t('crCol')}">
                         ${(cols.includes(r.col)?cols:[...cols,r.col]).map(c=>html`<option value="${c}"${c===r.col?' selected':''}>${colLabel(c)}</option>`)}
                     </select>
@@ -3483,7 +3484,7 @@
             while((m=rx.exec(txt))!==null){
                 if(m[1]===''){ rx.lastIndex++; continue; }
                 const R=rules.find(r=>String(r.val||'').toUpperCase()===m[1].toUpperCase())||rules[0];
-                out+=esc(txt.slice(last,m.index))+`<span style="color:${esc(R.color)};${ruleStyle(R)}">${esc(m[1])}</span>`;
+                out+=esc(txt.slice(last,m.index))+`<span style="${okColor(R.color)?`color:${esc(R.color)};`:''}${ruleStyle(R)}">${esc(m[1])}</span>`;
                 last=m.index+m[1].length;
             }
             return out+esc(txt.slice(last));
@@ -3636,7 +3637,8 @@
             const s=String(v??'').trim().toUpperCase(); if(!s) return null;
             return rl.find(R=>{ const x=String(R.val||'').trim().toUpperCase(); return x && (exact ? s===x : s.includes(x)); })||null;
         }
-        const ruleCss=R=>R?html` style="color:${R.color}!important;${ruleStyle(R)}"`:'';
+        const okColor=c=>{ c=String(c??'').trim(); if(!c || /[;:{}<>"'\\]/.test(c)) return false; try{ return !window.CSS?.supports || CSS.supports('color', c); }catch(e){ return false; } };
+        const ruleCss=R=>R?html` style="${okColor(R.color)?`color:${R.color}!important;`:''}${ruleStyle(R)}"`:''; /* a colour is used only when it is one ("red;display:none" added its own CSS) */
         function genresGroupHTML(v, oi, c){
             const {genres,rate}=splitTheme(v), mx=pillMax(), k=colKey(STATE.hdrs[c]);
             const inner=[...genres.map((g,i)=>html`<span class="tp tp-gen${i>=mx?' xtra':''}"${ruleCss(ruleFor(k,g))}>${g}</span>`),
@@ -3685,10 +3687,10 @@
                 if(STATE.cF && v.trim()!==''){
                     if(c===COL.GRADE){
                         if(gradeOf(v).s==='NUM'){
-                            const gr=gradeRuleFor(v, C_RUL); if(gr?.color) sty=`color:${gr.color}!important;${ruleStyle({style:gr.style,size:gr.size})}`;
+                            const gr=gradeRuleFor(v, C_RUL); if(gr?.color && okColor(gr.color)) sty=`color:${gr.color}!important;${ruleStyle({style:gr.style,size:gr.size})}`;
                         } else {
                             const rl=C_RUL.TEXT.GRADE, R=rl&&rl.find(x=>String(x.val).toUpperCase()===v.trim().toUpperCase());
-                            if(R) sty=`color:${R.color}!important;${ruleStyle(R)}`;
+                            if(R) sty=`${okColor(R.color)?`color:${R.color}!important;`:''}${ruleStyle(R)}`;
                         }
                     } else {
                         const rl=C_RUL.TEXT[h]; if(rl&&rl.length>0) val=applyTextRules(v, rl);
@@ -4157,7 +4159,7 @@
              - caches every response, retries on HTTP 429 and surfaces real errors
              - can expand a card to pull the full episode list on demand
         */
-        function extractImdbId(v){ const m=String(v||'').match(/tt\d{6,9}/); return m?m[0]:null; }
+        function extractImdbId(v){ const m=String(v||'').match(/tt\d{6,9}/i); return m?m[0].toLowerCase():null; } /* "TT0903747" was not one */
 
         const RDR_CACHE=new Map();
         let TMDB_BADKEY=false; /* the last TMDB answer was 401 (key not valid): the messages say so instead of a bare "Failed!" */
