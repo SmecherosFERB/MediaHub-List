@@ -2472,6 +2472,10 @@
             if(CLN_ARM!==`del${i}`){ clArm(`del${i}`); return; }
             CLN_ARM=null; clCommit(clApply([{row:x.it.row, del:true}], clAcc()), false); sTst(t('mDl'),'success');
         }
+        /* a title just added that the search or a NEXT / HOLD / DROP filter hides is shown anyway ("Added", but nowhere to be seen) */
+        function revealRow(row){ const scE=$('s-col'), sc=scE&&scE.value?parseInt(scE.value):COL.NAME;
+            if(!STATE.data.includes(row) || calcFDat(srchQ(), sc).some(e=>e.row===row)) return false;
+            STATE.hlRef=row; if(DOM.sr.value){ DOM.sr.value=''; syncSrchX(); } if(STATE.gf) setGf(''); else rTab(); return true; }
         function clShowRow(b){ const x=CLN_ITEMS[+b.dataset.i]; if(!x) return; const row=x.it.row; STATE.hlRef=row; cMod();
             const scE=$('s-col'), sc=scE&&scE.value?parseInt(scE.value):COL.NAME;
             if(STATE.data.includes(row) && !calcFDat(srchQ(), sc).some(e=>e.row===row)){ if(DOM.sr.value){ DOM.sr.value=''; syncSrchX(); } if(STATE.gf){ setGf(''); return; } } /* hidden by the search or a NEXT / HOLD / DROP filter: shown anyway (nothing happened) */
@@ -3944,7 +3948,7 @@
             STATE.data.push(r);
             pushHist({t:'A',rowRef:r});   /* the + button add is undoable too */
             STATE.hlRef = r;
-            cMod(); cmtSt(`${t("mAd")}${n}`,true);
+            cMod(); cmtSt(`${t("mAd")}${n}`,true); revealRow(r);
             if(STATE.tmdbKey) syR(STATE.data.indexOf(r),false,true,{noHist:true}); /* no key: just add it, no error and no Settings popping up */
         }
         const tmdbUrl=(path, params={}) => {
@@ -4699,7 +4703,7 @@
             STATE.data.push(row);
             pushHist({t:'A',rowRef:row});
             STATE.hlRef=row;
-            cmtSt(t('mAd'), true);
+            cmtSt(t('mAd'), true); revealRow(row);
             setUns(true);
             SRCH_ADDED.add(r.id);
             renderSearch();
