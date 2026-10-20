@@ -1692,6 +1692,15 @@
                 srchAnimeMovie:"Filme anime", shkBtn:"SCURTĂTURI", shkTtl:"SCURTĂTURI TASTATURĂ", shkGen:"General", shkTbl:"Editare tabel", shkFocus:"Focus pe bara de căutare", shkAdd:"Adaugă element nou", shkUndo:"Anulează ultima modificare", shkSave:"Salvează în Cloud", shkEsc:"Închide fereastra / Golește căutarea", shkEnter:"Confirmă „Adaugă element nou”", shkRow:"Rândul anterior / următor", shkCol:"Coloana anterioară / următoare", shkMove:"Mută rândul sus / jos", mAll:"Toate", mSort:"Sortare", mTitles:"titluri", mDef:"Ordine implicită" }
         };
         const t = k => (DICT[STATE.lang]||DICT.EN)[k] ?? DICT.EN[k] ?? k;
+        /* a count in a sentence: Romanian says "25 de titluri" from 20 on (but "101 titluri") and "1 titlu"; English "1 title".
+           It read "cele 25 titluri", "1 titluri", "în 30 zile". */
+        const roDe = n => STATE.lang==='RO' && n>=20 && (n%100===0 || n%100>=20) ? 'de ' : '';
+        const ONE={titles:'title', categories:'category', titluri:'titlu', categorii:'categorie'};
+        function nTxt(s, n){
+            n=Number(n)||0; s=String(s).replace('{n}', n);
+            if(n===1) return s.replace(/(^|[^\d])1 (titles|categories|titluri|categorii)( citite)?/, (m,p,w,c)=>p+'1 '+ONE[w]+(c?' citită':'')).replace('cele 1 titlu','singurul titlu');
+            return roDe(n) ? s.replace(new RegExp('(^|[^\\d])'+n+' (titluri|categorii)'), (m,p,w)=>p+n+' de '+w) : s;
+        }
         /* Column label: t() hands back the KEY when a word is missing ("cYEAR"), so `t(..)||h` never fell
            back to the header. Look the key up first and use the header exactly as written otherwise. */
         const colLabel = h => { const D=DICT[STATE.lang]||DICT.EN, a='c'+String(h??'').toUpperCase().trim(), b='c'+colKey(h); const k=(a in D||a in DICT.EN)?a:((b in D||b in DICT.EN)?b:null); return k?t(k):h; };
@@ -2617,7 +2626,7 @@
                             /* an empty cloud sheet (made by hand before the first save, or cleared in the spreadsheet) never silently
                                wipes the titles kept here: never synced -> they are kept for the first save; synced before -> you're asked */
                             if(STATE.data.length && !cloudHasRows(res.values)){
-                                const mine = !known || await askYesNo(t('mCloudEmptyQ').replace('{s}', targetSheet).replace('{n}', STATE.data.length));
+                                const mine = !known || await askYesNo(nTxt(t('mCloudEmptyQ'), STATE.data.length).replace('{s}', targetSheet));
                                 if(STATE.sheet!==targetSheet) return;
                                 if(mine){ setUns(true); if(!known) sTst(t('mCloudEmpty').replace('{s}', targetSheet),'info'); if(cf.changed) drawSheet(); return setLd(false); }
                             }
@@ -2829,7 +2838,7 @@
                 const a=document.createElement('a'), url=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'})); a.href=url; a.download=`MHub_${dStamp()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
                 if(left.length) sTst(t('expMiss').replace('{list}', left.join(', ')),'warning');
                 else if(LIB_LOST && !STATE.url) sTst(t('expLost'),'warning');
-                else sTst(got?t('expGot').replace('{n}',got):t("mEx"), got?'success':'info');
+                else sTst(got?nTxt(t('expGot'),got):t("mEx"), got?'success':'info');
                 cMod();
             } finally { ELIB_BUSY=false; }
         }
@@ -2895,7 +2904,7 @@
                     /* a column with no name and nothing in it (Excel's trailing ",,") is not a column: it showed as a blank one, and went to the cloud */
                     const keep=hdrs.map((h,i)=>String(h??'').trim()!=='' || data.some(r=>String(r[i]??'').trim()!==''));
                     if(keep.includes(false)){ hdrs=hdrs.filter((_,i)=>keep[i]); data=data.map(r=>r.filter((_,i)=>keep[i])); }
-                    cfmM(t('impC').replace('{s}', STATE.sheet).replace('{n}', data.length), ()=>{
+                    cfmM(nTxt(t('impC'), data.length).replace('{s}', STATE.sheet), ()=>{
                         useSheet(hdrs, data); clearHist(); /* undo steps point at the old rows */ upLib(STATE.sheet, STATE.hdrs, STATE.data); drawSheet(); setUns(true); sTst(t("mIm"));
                     }, ()=>oMod('loc'));
                 }catch(err){ sTst(t("mIv"),"error"); }
@@ -2962,7 +2971,7 @@
             const sl=sorted?colLabel(STATE.hdrs[sc]):t('mSort'); $('m-sort-l').textContent=sl; $('m-sort').title=sl; $('m-sort').setAttribute('aria-label', sl); /* icon only on the phone: the label lives in the tooltip / screen reader */
             $('m-sort').classList.toggle('on', sorted);
             $('m-sort').firstElementChild.className='fas fa-'+(sorted&&STATE.sD==='asc'?'arrow-up-short-wide':'arrow-down-wide-short');
-            $('m-stats').innerHTML=html`<span>${pc.tot} ${t('mTitles')}</span>${pc.avg?html`<span>${ic('star')} ${pc.avg.toFixed(1)}</span>`:''}${pc.ep?html`<span>${pc.ep} ${t('abbrEp')}</span>`:''}${pc.time?html`<span>${pc.time}</span>`:''}${ic('chevron-down','m-st-chev')}`;
+            $('m-stats').innerHTML=html`<span>${nTxt('{n} '+t('mTitles'), pc.tot)}</span>${pc.avg?html`<span>${ic('star')} ${pc.avg.toFixed(1)}</span>`:''}${pc.ep?html`<span>${pc.ep} ${t('abbrEp')}</span>`:''}${pc.time?html`<span>${pc.time}</span>`:''}${ic('chevron-down','m-st-chev')}`;
             const gc=gHdrCnts(), mx=Math.max(1,...gc.dist.map(d=>d.count));
             $('m-dist').innerHTML=html`${gc.dist.map(d=>html`<div class="m-d"><span class="m-d-l">${d.label}</span><span class="m-d-bar"><i style="width:${Math.round(d.count/mx*100)}%"></i></span><span class="m-d-n">${d.count}</span></div>`)}`;
         }
@@ -4067,7 +4076,7 @@
             const has=r=>String(r[COL.IMDB_SCORE]??'').trim()!=='';
             const rows=STATE.data.filter(r=>extractImdbId(r[COL.IMDB])), list=[...rows.filter(r=>!has(r)), ...rows.filter(has)];
             if(!list.length) return sTst(t('extNone'),'info');
-            cfmM(t('extQ').replace('{n}',list.length), async ()=>{
+            cfmM(nTxt(t('extQ'),list.length), async ()=>{
                 setLd(true); lockNav(true); DOM.brs.style.width='0%'; OMDB_C.clear(); OMDB_ERR='';
                 const acc={edits:[], dels:[]}, changed=new Set(); let done=0, idx=0, lost=0;
                 async function worker(){ while(idx<list.length && !OMDB_ERR){ const r=list[idx++]; const v=await omdbScore(extractImdbId(r[COL.IMDB])); if(v===null) lost++;
@@ -4512,7 +4521,7 @@
         function rdrNextLine(r){
             if(r.type!=='tv'||!r.nextEp) return '';
             const d=daysUntil(r.nextEp.date);
-            const when=d===0?t('rdrToday'):(d===1?t('rdrTomorrow'):(d>0?`${t('rdrIn')} ${d} ${t('rdrDays')}`:''));
+            const when=d===0?t('rdrToday'):(d===1?t('rdrTomorrow'):(d>0?`${t('rdrIn')} ${d} ${roDe(d)}${t('rdrDays')}`:''));
             return `<div class="rdr-next">${ic('calendar-day')}<span><b>S${r.nextEp.s}E${r.nextEp.n}</b>${r.nextEp.name?' · '+esc(r.nextEp.name):''} — ${esc(fmtRadarDate(r.nextEp.date))}${when?` <em>(${esc(when)})</em>`:''}</span></div>`;
         }
         function rdrMovieList(r){
@@ -4792,7 +4801,7 @@
                 }
                 if(/would empty/i.test(srv.error||'') && !p.force){ /* emptied on purpose: the backend refuses unless asked to, and keeps a backup first */
                     const n=(String(srv.error).match(/\((\d+) rows?\)/)||[])[1]||'?';
-                    if(!(await askYesNo(t('mEmptyQ').replace('{s}', sheet).replace('{n}', n)))){ sTst(t('mSvBad'),'info'); return false; }
+                    if(!(await askYesNo(nTxt(t('mEmptyQ'), n).replace('{s}', sheet)))){ sTst(t('mSvBad'),'info'); return false; }
                     p.force=true; continue;
                 }
                 sTst(srvMsg(srv.error),'error'); return false; /* refused: nothing was written */
