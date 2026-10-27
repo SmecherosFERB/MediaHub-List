@@ -193,6 +193,17 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 > **Updating the backend:** after changing the script, use **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**. The URL stays the same. The app needs the v4 script: with an older one it does not save and asks you to update it.
 
+### 📱 Android app (APK)
+
+`MEDIAHUB_DD_MM_YYYY Vx.y.apk` is the same app for Android 7 or newer. The HTML file of that version is inside it, so it needs no hosting.
+
+1. Download the `.apk` on the phone and open it. Android asks once to allow installing apps from the browser or file manager you opened it with. Play Protect may warn that the app is unknown (it doesn't come from the Play Store): choose *Install anyway*.
+2. The app starts with an empty list. Open **Settings**, enter the script URL, your password and your TMDB / OMDb keys, and your categories load from the Google Sheet (or import a `.json` backup).
+
+- Export saves the `.json` backup and the `.csv` files to *Downloads/MediaHub* (Android 7–9 asks where). Import opens the phone's file picker.
+- IMDb, TMDB, the spreadsheet and Help open in the browser. The phone's Back key closes the window or menu that is open, like Esc.
+- A newer APK may need the old app uninstalled first. Save to the cloud before, and your titles come back from the sheet.
+
 ---
 
 ## ⌨️ Keyboard shortcuts
@@ -222,7 +233,7 @@ Settings → **CUSTOMIZATION** holds the theme, the view mode, Behaviour, the vi
 
 ## 🏷️ Versions
 
-Each release is a single file named `MEDIAHUB_DD_MM_YYYY Vx.y.html`, with the release date and a version number that goes up by 0.1 with every update. The newest file in the repository is always the current version.
+Each release is a single file named `MEDIAHUB_DD_MM_YYYY Vx.y.html`, with the release date and a version number that goes up by 0.1 with every update. The newest file in the repository is always the current version. The Android app has the same name with `.apk`, and its version is the one of the HTML file inside it.
 
 ---
 
